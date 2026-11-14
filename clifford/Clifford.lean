@@ -12,3 +12,5 @@ import Clifford.LocalFactor
 import Clifford.Assembly
 import Clifford.Irreducible
 import Clifford.Corollaries
+import Clifford.BaseChange
+import Clifford.MaasModel

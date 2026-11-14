@@ -23,3 +23,10 @@ open Pairing PerfectMatching
 #print axioms not_isNilpotent_ρW_threeCycle_sub_one
 #print axioms cliffordRep_surjective
 #print axioms cliffordRep_ι_ones
+#print axioms adjoin_ρK_eq_top
+#print axioms ρK_invariant_eq_bot_or_top
+#print axioms ρK_threeCycle_ne_smul_one
+#print axioms minpoly_ρK_threeCycle
+#print axioms maasGen_closed
+#print axioms toMatrix_ρW_adj
+#print axioms wBasis_equivFun_ρW
