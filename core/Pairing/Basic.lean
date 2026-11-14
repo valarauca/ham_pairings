@@ -17,7 +17,8 @@ import Mathlib.RepresentationTheory.Subrepresentation
 * `H`, the `𝔽₂` matrix of `Ham`. Its rows are the `r_P`.
 * `W V`, the span of the rows, and `ρ`, the action `(ρ σ f) Q = f (σ⁻¹ • Q)`.
 * `Wsub`, the subrepresentation carried by `W V`, and `ρW`, the restricted action.
-* `CKNUpperBound n`, the `[EXT: CKN]` hypothesis `rank H ≤ 2 ^ (n - 1)`.
+* `CKNUpperBound n`, the bound `rank H ≤ 2 ^ (n - 1)`. It is proved as `cknUpperBound` in
+  `Clifford.Dimension`, together with `rank H = 2 ^ (n - 1)`.
 -/
 
 namespace Pairing
@@ -102,6 +103,37 @@ def unionIso (σ : Equiv.Perm V) (P Q : PerfectMatching V) :
 theorem ham_smul (σ : Equiv.Perm V) (P Q : PerfectMatching V) :
     Ham (σ • P) (σ • Q) ↔ Ham P Q :=
   (unionIso σ P Q).connected_iff.symm
+
+/-- Swapping the two ends of an edge of `P` fixes `P`. -/
+theorem swap_mate_smul [DecidableEq V] (P : PerfectMatching V) (x : V) :
+    Equiv.swap x (P.mate x) • P = P := by
+  ext v
+  rw [smul_mate, Equiv.swap_inv]
+  by_cases hx : v = x
+  · subst hx
+    simp
+  by_cases hy : v = P.mate x
+  · subst hy
+    simp
+  have h1 : P.mate v ≠ x := fun h ↦ hy (by rw [← h, mate_mate])
+  have h2 : P.mate v ≠ P.mate x := fun h ↦ hx (P.mate.injective h)
+  rw [Equiv.swap_apply_of_ne_of_ne hx hy, Equiv.swap_apply_of_ne_of_ne h1 h2]
+
+/-- A vertex set closed under both matchings and missing some vertex blocks `Ham`. -/
+theorem not_ham_of_closed (X Y : PerfectMatching V) (B : Set V) (hX : ∀ v ∈ B, X.mate v ∈ B)
+    (hY : ∀ v ∈ B, Y.mate v ∈ B) {u w : V} (hu : u ∈ B) (hw : w ∉ B) : ¬Ham X Y := by
+  intro h
+  obtain ⟨p⟩ := h.preconnected u w
+  have key : ∀ {a b : V} (_ : (X.toGraph ⊔ Y.toGraph).Walk a b), a ∈ B → b ∈ B := by
+    intro a b q
+    induction q with
+    | nil => exact id
+    | cons hadj _ ih =>
+      intro ha
+      rcases (SimpleGraph.sup_adj _ _ _ _).mp hadj with h' | h'
+      · exact ih (h' ▸ hX _ ha)
+      · exact ih (h' ▸ hY _ ha)
+  exact hw (key p hu)
 
 section Congr
 
@@ -215,6 +247,15 @@ theorem card_eq_doubleFactorial {n : ℕ} [Fintype V] [DecidableEq V]
   rw [hfac, Nat.doubleFactorial_two_mul, mul_comm (2 ^ n),
     Nat.mul_div_cancel_left _ (by positivity)]
 
+/-- `S_V` acts transitively on perfect matchings. -/
+theorem exists_smul_eq {n : ℕ} [Fintype V] (hV : Fintype.card V = 2 * n)
+    (P Q : PerfectMatching V) : ∃ c : Equiv.Perm V, c • P = Q := by
+  classical
+  have h : IsConj P.mate Q.mate :=
+    Equiv.Perm.isConj_iff_cycleType_eq.mpr (by rw [cycleType_mate hV, cycleType_mate hV])
+  obtain ⟨c, hc⟩ := isConj_iff.mp h
+  exact ⟨c, PerfectMatching.ext hc⟩
+
 end PerfectMatching
 
 open PerfectMatching
@@ -289,7 +330,24 @@ def ρW : Representation F₂ (Equiv.Perm V) (W V) :=
 theorem ρW_apply_coe (σ : Equiv.Perm V) (f : W V) : (ρW σ f : PerfectMatching V → F₂) = ρ σ f :=
   rfl
 
-/-- `[EXT: CKN]` The upper half of the Cygan, Kratsch, Nederlof rank formula. -/
+/-- The row `r_P` as a point of `W`. -/
+def rowW (P : PerfectMatching V) : W V :=
+  ⟨H P, row_mem_W P⟩
+
+@[simp]
+theorem coe_rowW (P : PerfectMatching V) : (rowW P : PerfectMatching V → F₂) = H P :=
+  rfl
+
+theorem ρW_rowW (σ : Equiv.Perm V) (P : PerfectMatching V) : ρW σ (rowW P) = rowW (σ • P) :=
+  Subtype.ext (ρ_row σ P)
+
+/-- The rows span `W`. -/
+theorem span_rowW : Submodule.span F₂ (Set.range (rowW (V := V))) = ⊤ := by
+  apply Submodule.map_injective_of_injective (W V).injective_subtype
+  rw [Submodule.map_subtype_top, Submodule.map_span, ← Set.range_comp]
+  rfl
+
+/-- The upper half of the Cygan, Kratsch, Nederlof rank formula, proved as `cknUpperBound`. -/
 def CKNUpperBound (n : ℕ) : Prop :=
   (H (V := Fin (2 * n))).rank ≤ 2 ^ (n - 1)
 
