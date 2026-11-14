@@ -1,4 +1,5 @@
 import Clifford
+import Spin
 
 open Pairing PerfectMatching
 
@@ -30,3 +31,20 @@ open Pairing PerfectMatching
 #print axioms maasGen_closed
 #print axioms toMatrix_ρW_adj
 #print axioms wBasis_equivFun_ρW
+#print axioms exists_injective_intertwiner
+#print axioms exists_intertwining_equiv
+#print axioms cliffordRep_stildeCl
+#print axioms reduceHom_ι_adjU
+#print axioms schurHom_t
+#print axioms finrank_le_of_jSystem
+#print axioms schurQ_nondegenerate
+#print axioms finrank_le_of_simple
+#print axioms card_eq_of_lattice
+#print axioms finrank_eq_of_lattice
+#print axioms reduction_basicSpin
+#print axioms reduction_irreducible
+#print axioms T_mul_mem_monoSpan
+#print axioms exists_simple_submodule
+#print axioms exists_valuationSubring_two
+#print axioms exists_lattice
+#print axioms cod105

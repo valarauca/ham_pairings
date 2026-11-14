@@ -1,13 +1,13 @@
 # Basic spin identification of W_n (COD-105)
 
-**Claim.** For n ≥ 2, W_n ⊗ F̄₂ is the 2-modular basic spin module of S_{2n}. That module is
-D^(n+1,n-1), of dimension 2^(n-1).
+**Claim.** For n ≥ 1, W_n ⊗ k is the reduction mod 2 of the basic spin representation of
+S̃_{2n}, for every field k of characteristic 2. It is irreducible of dimension 2^(n-1). For
+n ≥ 2 the module is D^(n+1,n-1).
 
-**Status.** Conditional on the cited theorems below. Mathlib has no double cover S̃_n, no basic
-spin representation, no D^λ and no Brauer theory, so the identification itself cannot be stated
-in Lean. Every hypothesis that the cited theorems put on W_n is proved in Lean, in the `Clifford`
-library. Lean also proves an explicit isomorphism between W_n and Maas's GF(2) model of the basic
-spin representation.
+**Status.** Proved in Lean, in the `Spin` library, except for the D^λ label. The only definitional
+input is Schur's definition of a basic spin representation, as a simple module over the Clifford
+algebra of the A_{2n-1} root form. Wales 7.7 at p = 2, Wales 8.1 and Brauer's count are no longer
+used. Benson 5.1 is still cited, but only for the name D^(n+1,n-1).
 
 ## Cited statements
 
@@ -65,57 +65,85 @@ Morotti's [4] is Benson 1988.
 Table 1 build a basic spin representation of S̃_m over GF(2) by alternating his constructions S
 and S_I. Maas relies on Wales for that claim.
 
-## What Lean proves about W_n
+## What Lean proves
 
-In characteristic 2 the central element of S̃_{2n} acts trivially (Wales §1), so W_n ⊗ F̄₂ is a
-representation of S̃_{2n} in which T acts as ρ((123)).
+### Definitions
 
-| Hypothesis | Lean |
+- `schurQ K m` is Q(x) = -Σ x_j² + Σ x_j x_{j+1} on K^m, the negated A_m root form. Its Gram
+  matrix `schurG` has integer entries.
+- `Stilde m` is S̃_m, presented on z and t_j by Maas's relations. `Stilde.toPerm` sends t_j to the
+  transposition (j, j+1).
+- `schurHom` sends t_j to ι(b_j) and z to -1 in `CliffordAlgebra (schurQ K (m-1))`. This is
+  Schur's realization of S̃_m.
+- A basic spin representation of S̃_{2n} over an algebraically closed field K of characteristic 0
+  is a simple `CliffordAlgebra (schurQ K (2n-1))`-module Y, viewed as a representation through
+  `schurHom`. Both associates are such modules.
+- A lattice is a K-basis of Y in which every ι(b_j) has its matrix entries in a subring R ⊆ K. A
+  reduction is a ring hom ψ from R to a field k of characteristic 2. `redMat` applies ψ entrywise.
+
+### Results
+
+| Statement | Lean |
 |---|---|
-| W_n ⊗ K is irreducible for every field K of characteristic 2, in particular F̄₂ | `adjoin_ρK_eq_top`, `ρK_invariant_eq_bot_or_top` |
-| Over K a 3-cycle has quadratic minimal polynomial, namely x² + x + 1 | `minpoly_ρK_threeCycle` |
-| A 3-cycle is not a scalar over K. This uses that a 3-cycle is conjugate to its inverse. | `ρK_threeCycle_ne_smul_one` |
+| Every Cl(U_n, q)-module over a field of characteristic 2 contains k ⊗ W_n | `exists_injective_intertwiner` |
+| A Cl(U_n, q)-module of dimension 2^(n-1) is isomorphic to k ⊗ W_n | `exists_intertwining_equiv` |
+| Schur's form is nondegenerate in characteristic 0 | `schurQ_nondegenerate` |
+| A simple Cl_K(schurQ)-module has dimension at most 2^(n-1) | `finrank_le_of_simple` |
+| A basic spin representation with a lattice has dimension 2^(n-1) | `finrank_eq_of_lattice` |
+| Its reduction is isomorphic to k ⊗ W_n as a kS̃_{2n}-module, with S̃_{2n} acting on k ⊗ W_n through S_{2n} | `reduction_basicSpin` |
+| Its reduction is irreducible | `reduction_irreducible` |
+| A basic spin representation and a lattice exist, with R a valuation subring of K and k its residue field | `cod105` |
+
+`reduction_basicSpin` holds for every basic spin representation, every lattice and every reduction
+map. So both associates reduce to the same module, which is Wales's X̄ = X̄* at p = 2, and the
+result does not depend on the lattice.
+
+### How the proof goes
+
+- **Characteristic 2** (`Char2Modules.lean`). The elements ι(v_{2a,2a+1}) + 1 square to zero and
+  commute, so every nonzero module has a vector m₀ that they all kill. Sending w_S to the product
+  of the ι(v_{2g+1,2g+2}) over g ∈ S, applied to m₀, intertwines the Clifford action. The map is
+  injective because k ⊗ W_n is simple (`ρK_invariant_eq_bot_or_top`).
+- **Reduction** (`Reduce.lean`, `Reduction.lean`). The relation t_j t_{j+1} + t_{j+1} t_j = 1 is
+  linear. It holds for the integral matrices because R ⊆ K is injective, and so it survives ψ.
+  The group relations of S̃_{2n} alone would not give this, since the trivial representation
+  satisfies them mod 2. Mod 2, b_j maps to v_{j,j+1} and the Gram matrix of `schurQ` becomes the
+  polar form of q, so the reduced matrices define a Cl(U_n, q)-module (`reduceHom`).
+- **Characteristic 0** (`JSystem.lean`, `BasicSpin.lean`). An orthonormal basis of `schurQ` gives
+  2n-1 anticommuting involutions J_j. With E_k = J_{2k} + iJ_{2k+1} and F_k = J_{2k} - iJ_{2k+1}, a
+  vacuum vector and the tower A_{j+1} = A_j + F_j A_j give dim Y ≤ 2^(n-1). The lower bound comes
+  from the characteristic 2 side, because the reduction contains k ⊗ W_n.
+- **Existence** (`Monomials.lean`, `Existence.lean`, `Witness.lean`). Ordered monomials in the
+  t_j span Cl_K(schurQ), so it is finite over K and has a simple left ideal. A valuation subring V
+  of K with 2 in its maximal ideal exists. The V-span of the ordered monomials applied to a basis
+  is a finitely generated, torsion-free V-module, hence free, and a V-basis of it is a K-basis of
+  Y with V-integral matrices.
+
+Benson's basis u_I of Δ_K is integral for the e_j. When j and k lie in different pairs,
+[jk] = ½√2(e_j - e_k) has entries ±½√2 in it, which is why the lattice is built abstractly rather
+than from the u_I.
+
+### Facts about W_n used above
+
+| Fact | Lean |
+|---|---|
+| W_n ⊗ K is irreducible for every field K of characteristic 2 | `adjoin_ρK_eq_top`, `ρK_invariant_eq_bot_or_top` |
+| The Clifford action on W_n is onto End(W_n) | `cliffordRep_surjective` |
 | dim W_n = 2^(n−1) | `finrank_W_eq` |
-| W_n is isomorphic to Maas's GF(2) model, by the coordinate map of `wBasis` | `toMatrix_ρW_adj`, `wBasis_equivFun_ρW`, `maasGen_closed` |
+| The basis w_S and the frame operators | `lower_w`, `frameF_w`, `B_rowW_P0` |
+| W_n is isomorphic to Maas's GF(2) model | `toMatrix_ρW_adj`, `wBasis_equivFun_ρW`, `maasGen_closed` |
 
-The same facts over F₂ are `adjoin_ρW_eq_top` and `minpoly_ρW_threeCycle`.
-
-## By case
-
-- **2n ≥ 6.** Wales 8.1 applies to Y = W_n ⊗ F̄₂, so Y is a basic representation. For 2n even
-  and p = 2, Wales 7.7 makes the reduction X̄_{2n} irreducible with X̄_{2n} = X̄_{2n}*, so there is
-  one basic module. Benson 5.1 identifies it with D^(n+1,n−1), of dimension 2^(n−1), which
-  matches `finrank_W_eq`. Maas's Proposition 3 is not needed.
-- **2n = 4.** Wales 8.1 needs at least 5 letters, so this case uses a direct argument.
-  - Benson 5.1 with n = 4, or Wales 7.7, gives an irreducible D^(3,1) of dimension 2.
-  - The 2-regular classes of S_4 are the identity and the 3-cycles. By Brauer, F̄₂S_4 therefore has
-    exactly two simple modules, the trivial module and D^(3,1).
-  - W_2 ⊗ F̄₂ is irreducible of dimension 2, so it is D^(3,1).
-- **Explicit model.** `toMatrix_ρW_adj` shows that the matrix of ρ((t t+1)) in the basis w_S is
-  Maas's generator T_{t+1}. Here S, a set of gaps, is read as a bit vector, and the construction is
-  his GF(2) recursion of Table 1. The identification is therefore realized by an explicit linear
-  isomorphism, though calling the model basic spin still rests on Wales through Maas.
-
-Benson's proof of Theorem 5.1 uses the same structure as `Dimension.lean`. He builds the module
-from the isotropic span of x₁₂, x₃₄, …, checks that 1 + (2j−1, 2j) kills the generator, and
-checks Garnir relations on {2j−1, 2j, 2j+1}.
+With `reduction_basicSpin`, the last row also proves Maas's claim that his model is basic spin.
 
 ## The four COD-105 items
 
-1. **Primary source.** Wales covers p = 2, as the quotes above show. Theorem 8.1 needs at least 5
-   letters, and Theorem 7.7 gives one irreducible basic module for 2n even and p = 2.
-2. **Minimal polynomial on every composition factor.** W_n ⊗ F̄₂ is irreducible, so it is its own
-   only composition factor. On it the minimal polynomial is x² + x + 1, proved over any field of
-   characteristic 2 (`minpoly_ρK_threeCycle`).
-3. **2n = 4.** Settled by the direct argument above, without reading "ordinary" in Maas Theorem 1
-   (3).
-4. **Dimension 2^(n−1).** This comes from Benson Theorem 5.1 and Lemma 5.3 (primary), and the
-   label D^(n+1,n−1) comes from Benson through Morotti. On the W_n side it is `finrank_W_eq`.
+1. **Primary source.** Wales was checked, and covers p = 2. The result no longer depends on it.
+2. **Minimal polynomial on every composition factor.** No longer needed, since the identification
+   no longer goes through Wales 8.1. `minpoly_ρK_threeCycle` still holds.
+3. **2n = 4.** Covered by `reduction_basicSpin` with n = 2, without Brauer's count.
+4. **Dimension 2^(n−1).** Proved, by `finrank_eq_of_lattice` and `finrank_W_eq`. The label
+   D^(n+1,n−1) comes from Benson 5.1 through Morotti.
 
 ## Not formalized
 
-These remain citations.
-- Wales 7.7 and 8.1.
-- Benson 5.1.
-- Brauer's count of simple modules.
-- Maas's claim that his model is basic spin.
+- The label D^(n+1,n−1). Mathlib has no Specht modules or D^λ, so Benson 5.1 remains a citation.
