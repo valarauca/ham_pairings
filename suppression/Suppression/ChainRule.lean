@@ -8,7 +8,7 @@ import Suppression.HamCount
 /-!
 # Chain-rule reductions for `q = U(no A_t)` (COD-190, COD-196)
 
-Let `P` be a probability weight on a finite set `Ω` (`IsProb P`), with law `U`, and let
+Let `P` be a probability weight on a finite set `Ω` (`IsProb P`, `Prob.lean`), with law `U`, and let
 `A : ι → Set Ω` be events indexed by a finite set `ι` with `n = |ι|`. For `T ⊆ ι` put
 `Z_T = ⋂_{s ∈ T} A_sᶜ` (`avoid A T`), `f_t(T) = U(A_t | Z_T)` (`condProb`),
 `g_T(s, t) = U(A_s A_t | Z_T) / (f_s(T) f_t(T))` (`pairRatio`, set to `1` when
@@ -62,7 +62,7 @@ From `cod-196-averaged-pinning.md` (COD-196):
   (Theorem 7) : the same under (B) `J_T ≤ J`, through Lemma 3 (`sum_abs_condCov_le`).
 
 For the round-robin events (`hamEvent m t = {P | P ∪ F_t is one cycle}` under the uniform law
-`unifWeight m`): `isProb_unifWeight`, `prob_hamEvent` (the common probability `p`) and
+`unifWeight m` of `HamCount.lean`): `prob_hamEvent` (the common probability `p`) and
 `prob_avoid_hamEvent` (`q = hamLaw m 0 = q_m`).
 -/
 
@@ -73,15 +73,6 @@ namespace ChainRule
 open Finset
 
 variable {Ω ι : Type*}
-
-/-- `P` is a probability weight on the finite set `Ω`. -/
-structure IsProb [Fintype Ω] (P : Ω → ℝ) : Prop where
-  nonneg : ∀ ω, 0 ≤ P ω
-  sum_eq_one : ∑ ω, P ω = 1
-
-/-- `U(S) = ∑_{ω ∈ S} P ω`. -/
-noncomputable def prob [Fintype Ω] (P : Ω → ℝ) (S : Set Ω) : ℝ :=
-  ∑ ω, S.indicator P ω
 
 /-- `Z_T = ⋂_{s ∈ T} A_sᶜ`, the event that no `A_s` with `s ∈ T` occurs. -/
 def avoid (A : ι → Set Ω) (T : Finset ι) : Set Ω :=
@@ -170,34 +161,6 @@ theorem pre_succ {n : ℕ} (σ : Fin n ≃ ι) {k : ℕ} (hk : k < n) :
 end DecidableEq
 
 variable [Fintype Ω] {P : Ω → ℝ} {A : ι → Set Ω}
-
-/-- `U(S) ≥ 0`. -/
-theorem prob_nonneg (hP : IsProb P) (S : Set Ω) : 0 ≤ prob P S :=
-  sum_nonneg fun ω _ ↦ Set.indicator_nonneg (fun ω _ ↦ hP.nonneg ω) ω
-
-/-- `U` is monotone. -/
-theorem prob_mono (hP : IsProb P) {S S' : Set Ω} (h : S ⊆ S') : prob P S ≤ prob P S' :=
-  sum_le_sum fun ω _ ↦ Set.indicator_le_indicator_of_subset h (fun ω ↦ hP.nonneg ω) ω
-
-/-- `U(Ω) = 1`. -/
-theorem prob_univ (hP : IsProb P) : prob P Set.univ = 1 := by
-  simp [prob, hP.sum_eq_one]
-
-/-- `U(S) ≤ 1`. -/
-theorem prob_le_one (hP : IsProb P) (S : Set Ω) : prob P S ≤ 1 :=
-  (prob_mono hP (Set.subset_univ S)).trans_eq (prob_univ hP)
-
-/-- `U(S) = U(B ∩ S) + U(S ∖ B)`. -/
-theorem prob_eq_inter_add_diff (P : Ω → ℝ) (S B : Set Ω) :
-    prob P S = prob P (B ∩ S) + prob P (S \ B) := by
-  rw [prob, prob, prob, ← sum_add_distrib]
-  refine sum_congr rfl fun ω _ ↦ ?_
-  by_cases hS : ω ∈ S <;> by_cases hB : ω ∈ B <;> simp [Set.indicator, hS, hB]
-
-/-- A subset of a null event is null. -/
-theorem prob_eq_zero_of_subset (hP : IsProb P) {S S' : Set Ω} (h : S ⊆ S')
-    (h' : prob P S' = 0) : prob P S = 0 :=
-  le_antisymm (h' ▸ prob_mono hP h) (prob_nonneg hP S)
 
 /-- `f_t(T) ≥ 0`. -/
 theorem condProb_nonneg (hP : IsProb P) (T : Finset ι) (t : ι) : 0 ≤ condProb P A T t :=
@@ -2078,31 +2041,9 @@ namespace RoundRobin.Canonical
 
 open Finset ChainRule PerfectMatching
 
-/-- The uniform weight on the perfect matchings of `V_m`, the law `U`. -/
-noncomputable def unifWeight (m : ℕ) [NeZero m] (_ : PerfectMatching (Vertex m)) : ℝ :=
-  1 / Fintype.card (PerfectMatching (Vertex m))
-
 /-- The round-robin event `A_t = {P | P ∪ F_t is one cycle}`. -/
 def hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) : Set (PerfectMatching (Vertex m)) :=
   {P | Ham P (factor m t)}
-
-/-- The uniform law on the perfect matchings of `V_m` is a probability weight. -/
-theorem isProb_unifWeight (m : ℕ) [NeZero m] : IsProb (unifWeight m) where
-  nonneg _ := by
-    unfold unifWeight
-    positivity
-  sum_eq_one := by
-    have hT : (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 := by
-      exact_mod_cast (card_perfectMatching_pos m).ne'
-    simp [unifWeight, hT]
-
-/-- `U(S) = |S| / (2m - 1)!!` under the uniform law. -/
-theorem prob_unifWeight (m : ℕ) [NeZero m] (S : Set (PerfectMatching (Vertex m)))
-    [DecidablePred (· ∈ S)] :
-    prob (unifWeight m) S =
-      (univ.filter (· ∈ S)).card / Fintype.card (PerfectMatching (Vertex m)) := by
-  rw [prob, sum_congr rfl fun P _ ↦ Set.indicator_apply S (unifWeight m) P, ← sum_filter]
-  simp only [unifWeight, sum_const, nsmul_eq_mul, mul_one_div]
 
 /-- The round-robin instance: `U(A_t) = U(A_0)` for every `t`, the common probability `p`. -/
 theorem prob_hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) :
@@ -2118,11 +2059,10 @@ theorem prob_hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) :
 `prob P (avoid A univ)` in this file are bounds on `q_m = hamLaw m 0`. -/
 theorem prob_avoid_hamEvent (m : ℕ) [NeZero m] :
     prob (unifWeight m) (avoid (hamEvent m) univ) = hamLaw m 0 := by
-  classical
-  rw [prob_unifWeight, hamLaw]
-  congr 3
-  exact filter_congr fun P _ ↦ by
-    simp [avoid, hamEvent, hamCount, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+  rw [hamLaw_eq_lawOf, lawOf]
+  congr 1
+  ext P
+  simp [avoid, hamEvent, hamCount, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
 
 end RoundRobin.Canonical
 

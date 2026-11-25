@@ -1,6 +1,7 @@
 import Mathlib.Algebra.BigOperators.Field
 import Pairing.RoundRobin
 import Suppression.SizeBias
+import Suppression.Prob
 
 /-!
 # The size-bias identity for the round-robin count (COD-183)
@@ -15,9 +16,13 @@ For a perfect matching `P` of `V_m`, `hamCount m P = X(P)` is the number of cano
   pairs `(P, t)` with `A_t`.
 * `card_ham_and_eq_mul` (C) : `n · #{P | A_0 ∧ X P = k} = k · #{P | X P = k}`.
 * `card_ham_and_le` : `n · #{P | A_0 ∧ X P ≤ j} = ∑_{k ≤ j} k · #{P | X P = k}`.
-* `hamLaw m`, the law of `X` under the uniform perfect matching. `isLaw_hamLaw` : it is a law
-  on `[0, n]`, and `hamLaw_zero` : `P(X = 0) = Z_m / (2m - 1)!! = q_m`.
+* `hamLaw m`, the law of `X` under the uniform perfect matching. `hamLaw_zero` :
+  `P(X = 0) = Z_m / (2m - 1)!! = q_m`.
 * `card_perfectMatching_pos` : `V_m` has a perfect matching.
+* `unifWeight m`, the uniform weight on the perfect matchings of `V_m`. `isProb_unifWeight` : it is
+  a probability weight (`Prob.lean`), and `prob_unifWeight` : `U(S) = |S| / (2m - 1)!!`.
+* `hamLaw_eq_lawOf` : `hamLaw m` is the pushforward of `unifWeight m` along `X`, so
+  `isLaw_hamLaw` (it is a law on `[0, n]`) is an instance of `ChainRule.isLaw_lawOf`.
 * `ham_factor_one` : `F_1 ∪ F_0` is one cycle, so `exists_ham_factor_zero` : `A_0` is nonempty,
   and `exists_pos_hamLaw` : `P(X = k) > 0` for some `k ≥ 1`. These hold for every `m ≥ 1`.
 * `partialMean_hamLaw` : `∑_{k ≤ j} k P(X = k) = n P(A_0 ∧ X ≤ j)`.
@@ -147,6 +152,39 @@ theorem card_perfectMatching_pos (m : ℕ) [NeZero m] :
     0 < Fintype.card (PerfectMatching (Vertex m)) :=
   Fintype.card_pos_iff.mpr ⟨factor m 0⟩
 
+/-- `|PM(V_m)| ≠ 0` in `ℝ`. -/
+theorem cast_card_perfectMatching_ne_zero (m : ℕ) [NeZero m] :
+    (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 :=
+  Nat.cast_ne_zero.mpr (card_perfectMatching_pos m).ne'
+
+/-- The uniform weight on the perfect matchings of `V_m`, the law `U`. -/
+noncomputable def unifWeight (m : ℕ) [NeZero m] (_ : PerfectMatching (Vertex m)) : ℝ :=
+  1 / Fintype.card (PerfectMatching (Vertex m))
+
+/-- The uniform law on the perfect matchings of `V_m` is a probability weight. -/
+theorem isProb_unifWeight (m : ℕ) [NeZero m] : ChainRule.IsProb (unifWeight m) where
+  nonneg _ := by
+    unfold unifWeight
+    positivity
+  sum_eq_one := by
+    simp [unifWeight, cast_card_perfectMatching_ne_zero m]
+
+/-- `U(S) = |S| / (2m - 1)!!` under the uniform law. -/
+theorem prob_unifWeight (m : ℕ) [NeZero m] (S : Set (PerfectMatching (Vertex m)))
+    [DecidablePred (· ∈ S)] :
+    ChainRule.prob (unifWeight m) S =
+      (Finset.univ.filter (· ∈ S)).card / Fintype.card (PerfectMatching (Vertex m)) := by
+  rw [ChainRule.prob, Finset.sum_congr rfl fun P _ ↦ Set.indicator_apply S (unifWeight m) P,
+    ← Finset.sum_filter]
+  simp only [unifWeight, Finset.sum_const, nsmul_eq_mul, mul_one_div]
+
+/-- `hamLaw m` is the law of `X` under the uniform weight. -/
+theorem hamLaw_eq_lawOf (m : ℕ) [NeZero m] :
+    hamLaw m = ChainRule.lawOf (unifWeight m) (hamCount m) := by
+  funext k
+  rw [ChainRule.lawOf, prob_unifWeight, hamLaw]
+  rfl
+
 /-- `F_1 ∪ F_0` is one cycle on `V_m`. Off `{0, -1}` the composite `F_1 F_0` is `x ↦ x + 2`, and
 `2` generates `ℤ/(2m - 1)`. For `m = 1` the two factors agree and their doubled edge is the
 cycle. -/
@@ -197,21 +235,9 @@ theorem exists_ham_factor_zero (m : ℕ) [NeZero m] : ∃ P, Ham P (factor m 0) 
   ⟨factor m 1, ham_factor_one m⟩
 
 /-- The law of `X` is a probability law on `[0, n]`. -/
-theorem isLaw_hamLaw (m : ℕ) [NeZero m] : SizeBias.IsLaw (hamLaw m) (2 * m - 1) where
-  nonneg k := by
-    unfold hamLaw
-    positivity
-  eq_zero k hk := by
-    rw [hamLaw, div_eq_zero_iff, Nat.cast_eq_zero, Finset.card_eq_zero,
-      Finset.filter_eq_empty_iff]
-    exact Or.inl fun P _ h ↦ absurd (h ▸ hamCount_le m P) (by omega)
-  sum_eq_one := by
-    have hT : (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 := by
-      exact_mod_cast (card_perfectMatching_pos m).ne'
-    simp only [hamLaw, ← Finset.sum_div]
-    rw [div_eq_one_iff_eq hT, ← Finset.card_univ]
-    exact_mod_cast (Finset.card_eq_sum_card_fiberwise fun P _ ↦
-      Finset.mem_range.mpr (Nat.lt_succ_of_le (hamCount_le m P))).symm
+theorem isLaw_hamLaw (m : ℕ) [NeZero m] : SizeBias.IsLaw (hamLaw m) (2 * m - 1) := by
+  rw [hamLaw_eq_lawOf]
+  exact ChainRule.isLaw_lawOf (isProb_unifWeight m) (hamCount_le m)
 
 /-- `P(X = k) > 0` for some `k ≥ 1`, with `k = X(F_1)`. This is the hypothesis `hk` of the
 tilted-law reductions for `p = hamLaw m`. -/
@@ -244,13 +270,9 @@ theorem cond_hamLaw (m : ℕ) [NeZero m] (j : ℕ) :
     ((Finset.univ.filter fun P ↦ Ham P (factor m 0) ∧ hamCount m P - 1 ≤ j).card : ℝ) /
         (Finset.univ.filter fun P ↦ Ham P (factor m 0)).card =
       SizeBias.partialMean (hamLaw m) (j + 1) / SizeBias.partialMean (hamLaw m) (2 * m - 1) := by
-  have hn : ((2 * m - 1 : ℕ) : ℝ) ≠ 0 := by
-    have := NeZero.pos m
-    exact_mod_cast (by omega : 2 * m - 1 ≠ 0)
-  have hT : (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 := by
-    exact_mod_cast (card_perfectMatching_pos m).ne'
-  rw [partialMean_hamLaw, partialMean_hamLaw, div_div_div_cancel_right₀ hT,
-    mul_div_mul_left _ _ hn]
+  rw [partialMean_hamLaw, partialMean_hamLaw,
+    div_div_div_cancel_right₀ (cast_card_perfectMatching_ne_zero m),
+    mul_div_mul_left _ _ (Nat.cast_ne_zero.mpr (NeZero.ne _))]
   congr 3
   · exact Finset.filter_congr fun P _ ↦ and_congr_right' Nat.sub_le_iff_le_add
   · exact Finset.filter_congr fun P _ ↦ (and_iff_left (hamCount_le m P)).symm

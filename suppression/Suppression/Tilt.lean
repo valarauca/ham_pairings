@@ -735,10 +735,8 @@ theorem tiltMean_hamLaw (m : ℕ) [NeZero m] (w : ℝ) :
     tiltMean (hamLaw m) (2 * m - 1) w =
       ((2 * m - 1 : ℕ) : ℝ) * (∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0), w ^ hamCount m P) /
         ∑ P : PerfectMatching (Vertex m), w ^ hamCount m P := by
-  have hT : (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 := by
-    exact_mod_cast (card_perfectMatching_pos m).ne'
-  rw [tiltMean, genFun_eq_tiltSum, tiltSum_hamLaw, tiltSum_hamLaw, div_div_div_cancel_right₀ hT,
-    ← sum_pow_mul_hamCount]
+  rw [tiltMean, genFun_eq_tiltSum, tiltSum_hamLaw, tiltSum_hamLaw,
+    div_div_div_cancel_right₀ (cast_card_perfectMatching_ne_zero m), ← sum_pow_mul_hamCount]
   simp only [pow_one, pow_zero, one_mul, mul_comm]
 
 /-- Lemma 2(2), `Δ(w) = E_w X - E_w[X' | A_0]` for `w > 0`, where `X' = X - 1` and
@@ -749,11 +747,8 @@ theorem fano_hamLaw' (m : ℕ) [NeZero m] {w : ℝ} (hw : 0 < w) :
       (∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0),
           ((hamCount m P - 1 : ℕ) : ℝ) * w ^ (hamCount m P - 1)) /
         ∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0), w ^ (hamCount m P - 1) := by
-  have hT : (Fintype.card (PerfectMatching (Vertex m)) : ℝ) ≠ 0 := by
-    exact_mod_cast (card_perfectMatching_pos m).ne'
-  have hn : ((2 * m - 1 : ℕ) : ℝ) ≠ 0 := by
-    have := NeZero.pos m
-    exact_mod_cast (by omega : 2 * m - 1 ≠ 0)
+  have hT := cast_card_perfectMatching_ne_zero m
+  have hn : ((2 * m - 1 : ℕ) : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne _)
   have hX : ∀ P ∈ univ.filter fun P ↦ Ham P (factor m 0), ∃ j, hamCount m P = j + 1 :=
     fun P hP ↦ ⟨hamCount m P - 1, by
       have : 0 < hamCount m P := Finset.card_pos.mpr ⟨0, by simpa using (mem_filter.mp hP).2⟩
