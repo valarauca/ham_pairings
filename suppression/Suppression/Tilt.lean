@@ -38,6 +38,7 @@ For the round-robin count `X = hamCount m` and its law `hamLaw m`:
 * `tiltMean_hamLaw` (Lemma 2(2)) : `E_w X = n U_w(A_0)`.
 * `fano_hamLaw` (Lemma 2(2)) : `Δ(w) = E_w X - E_w[X' | A_0]` with `X' = X - 1`, when `A_0` is
   nonempty.
+* `fano_hamLaw'` : the same for every `m ≥ 1`, since `A_0` is nonempty (`exists_ham_factor_zero`).
 -/
 
 namespace Pairing
@@ -710,6 +711,15 @@ theorem fano_hamLaw (m : ℕ) [NeZero m] (hA : ∃ P, Ham P (factor m 0)) {w : �
         w ^ hamCount m P * (hamCount m P : ℝ) by ring,
     sum_pow_mul_hamCount_pair, sum_pow_mul_hamCount, hS1, hS0, mul_div_mul_left _ _ hn,
     mul_div_mul_left _ _ hw.ne']
+
+/-- Lemma 2(2) for every `m ≥ 1`, `Δ(w) = E_w X - E_w[X' | A_0]` for `w > 0` with `X' = X - 1`.
+`A_0` is nonempty by `exists_ham_factor_zero`. -/
+theorem fano_hamLaw' (m : ℕ) [NeZero m] {w : ℝ} (hw : 0 < w) :
+    fano (hamLaw m) (2 * m - 1) w = tiltMean (hamLaw m) (2 * m - 1) w -
+      (∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0),
+          ((hamCount m P - 1 : ℕ) : ℝ) * w ^ (hamCount m P - 1)) /
+        ∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0), w ^ (hamCount m P - 1) :=
+  fano_hamLaw m (exists_ham_factor_zero m) hw
 
 end RoundRobin.Canonical
 

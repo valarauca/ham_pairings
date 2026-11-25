@@ -142,7 +142,10 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.card_ham_and
 #print axioms RoundRobin.Canonical.card_ham_and_eq_mul
 #print axioms RoundRobin.Canonical.card_ham_and_le
+#print axioms RoundRobin.Canonical.ham_factor_one
+#print axioms RoundRobin.Canonical.exists_ham_factor_zero
 #print axioms RoundRobin.Canonical.isLaw_hamLaw
+#print axioms RoundRobin.Canonical.exists_pos_hamLaw
 #print axioms RoundRobin.Canonical.hamLaw_zero
 #print axioms RoundRobin.Canonical.cond_hamLaw
 #print axioms Tilt.tiltMean_eq_deriv
@@ -172,3 +175,4 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.sum_pow_mul_hamCount_pair
 #print axioms RoundRobin.Canonical.tiltMean_hamLaw
 #print axioms RoundRobin.Canonical.fano_hamLaw
+#print axioms RoundRobin.Canonical.fano_hamLaw'

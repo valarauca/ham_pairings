@@ -18,6 +18,8 @@ For a perfect matching `P` of `V_m`, `hamCount m P = X(P)` is the number of cano
 * `hamLaw m`, the law of `X` under the uniform perfect matching. `isLaw_hamLaw` : it is a law
   on `[0, n]`, and `hamLaw_zero` : `P(X = 0) = Z_m / (2m - 1)!! = q_m`.
 * `card_perfectMatching_pos` : `V_m` has a perfect matching.
+* `ham_factor_one` : `F_1 ∪ F_0` is one cycle, so `exists_ham_factor_zero` : `A_0` is nonempty,
+  and `exists_pos_hamLaw` : `P(X = k) > 0` for some `k ≥ 1`. These hold for every `m ≥ 1`.
 * `partialMean_hamLaw` : `∑_{k ≤ j} k P(X = k) = n P(A_0 ∧ X ≤ j)`.
 * `cond_hamLaw` : `P(X - 1 ≤ j | A_0) = (∑_{k ≤ j + 1} k P(X = k)) / μ`, the corrected formula
   of COD-183. So `ρ_j = P(X - 1 ≤ j | A_0) / P(X ≤ j)` depends on the law of `X` alone.
@@ -145,6 +147,55 @@ theorem card_perfectMatching_pos (m : ℕ) [NeZero m] :
     0 < Fintype.card (PerfectMatching (Vertex m)) :=
   Fintype.card_pos_iff.mpr ⟨factor m 0⟩
 
+/-- `F_1 ∪ F_0` is one cycle on `V_m`. Off `{0, -1}` the composite `F_1 F_0` is `x ↦ x + 2`, and
+`2` generates `ℤ/(2m - 1)`. For `m = 1` the two factors agree and their doubled edge is the
+cycle. -/
+theorem ham_factor_one (m : ℕ) [NeZero m] : Ham (factor m 1) (factor m 0) := by
+  let G := (factor m 1).toGraph ⊔ (factor m 0).toGraph
+  have h1 : ∀ v, G.Reachable v (mateFn 1 v) :=
+    fun v ↦ SimpleGraph.Adj.reachable (G := G) (Or.inl rfl)
+  have h0 : ∀ v, G.Reachable v (mateFn 0 v) :=
+    fun v ↦ SimpleGraph.Adj.reachable (G := G) (Or.inr rfl)
+  have h2 : ∀ x : ZMod (2 * m - 1), G.Reachable (some x) (some (x + 2)) := by
+    intro x
+    rcases subsingleton_or_nontrivial (ZMod (2 * m - 1)) with hs | hs
+    · rw [Subsingleton.elim (x + 2) x]
+    rcases eq_or_ne x 0 with rfl | hx0
+    · have h := h1 (some 0)
+      rw [mateFn_of_ne 1 0 zero_ne_one] at h
+      convert h using 2
+      ring
+    rcases eq_or_ne x (-1) with rfl | hx1
+    · have h := h0 (some (-1))
+      rw [mateFn_of_ne 0 (-1) (neg_ne_zero.mpr one_ne_zero)] at h
+      convert h using 2
+      ring
+    have h := h0 (some x)
+    rw [mateFn_of_ne 0 x hx0] at h
+    have h' := h1 (some (2 * 0 - x))
+    rw [mateFn_of_ne 1 _ fun h ↦ hx1 (by linear_combination -h)] at h'
+    convert h.trans h' using 2
+    ring
+  have hk : ∀ k : ℕ, G.Reachable (some 0) (some (2 * k)) := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      convert ih.trans (h2 _) using 2
+      push_cast
+      ring
+  have hr : ∀ v, G.Reachable none v := by
+    rintro (_ | y)
+    · exact SimpleGraph.Reachable.refl _
+    obtain ⟨u, hu⟩ := (RoundRobin.isUnit_two (modulus_odd m)).exists_right_inv
+    convert (h0 none).trans (hk (u * y).val) using 2
+    rw [ZMod.natCast_zmod_val, ← mul_assoc, hu, one_mul]
+  exact (⟨fun v w ↦ (hr v).symm.trans (hr w)⟩ : G.Connected)
+
+/-- `A_0` is nonempty for every `m ≥ 1`, since `F_1 ∪ F_0` is one cycle. -/
+theorem exists_ham_factor_zero (m : ℕ) [NeZero m] : ∃ P, Ham P (factor m 0) :=
+  ⟨factor m 1, ham_factor_one m⟩
+
 /-- The law of `X` is a probability law on `[0, n]`. -/
 theorem isLaw_hamLaw (m : ℕ) [NeZero m] : SizeBias.IsLaw (hamLaw m) (2 * m - 1) where
   nonneg k := by
@@ -161,6 +212,13 @@ theorem isLaw_hamLaw (m : ℕ) [NeZero m] : SizeBias.IsLaw (hamLaw m) (2 * m - 1
     rw [div_eq_one_iff_eq hT, ← Finset.card_univ]
     exact_mod_cast (Finset.card_eq_sum_card_fiberwise fun P _ ↦
       Finset.mem_range.mpr (Nat.lt_succ_of_le (hamCount_le m P))).symm
+
+/-- `P(X = k) > 0` for some `k ≥ 1`, with `k = X(F_1)`. This is the hypothesis `hk` of the
+tilted-law reductions for `p = hamLaw m`. -/
+theorem exists_pos_hamLaw (m : ℕ) [NeZero m] : ∃ k, 0 < k ∧ 0 < hamLaw m k :=
+  ⟨hamCount m (factor m 1), Finset.card_pos.mpr ⟨0, by simpa using ham_factor_one m⟩,
+    div_pos (Nat.cast_pos.mpr (Finset.card_pos.mpr ⟨factor m 1, by simp⟩))
+      (Nat.cast_pos.mpr (card_perfectMatching_pos m))⟩
 
 /-- `P(X = 0) = Z_m / (2m - 1)!! = q_m`. -/
 theorem hamLaw_zero (m : ℕ) [NeZero m] :
