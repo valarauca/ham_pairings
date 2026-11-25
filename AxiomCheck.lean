@@ -69,3 +69,12 @@ open Pairing PerfectMatching
 #print axioms nonempty_of_even_card
 #print axioms exists_edgesOff_eq
 #print axioms RoundRobin.Canonical.suppression_of_isPartialMatching
+#print axioms card_le_card_mul_of_cover
+#print axioms sum_choose_mul_doubleFactorial_le
+#print axioms card_defect_le
+#print axioms two_mul_tailDist
+#print axioms card_tailDist_le
+#print axioms RoundRobin.Canonical.card_tail
+#print axioms RoundRobin.Canonical.repair_count
+#print axioms RoundRobin.Canonical.doubleFactorial_le_zeroCount_mul
+#print axioms RoundRobin.Canonical.density_ge
