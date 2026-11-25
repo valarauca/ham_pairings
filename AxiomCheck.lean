@@ -136,8 +136,8 @@ open Pairing PerfectMatching
 #print axioms SizeBias.upper_reduction_of_lt
 #print axioms SizeBias.upper_reduction
 #print axioms SizeBias.upper_reduction_sqrt
-#print axioms SizeBias.upper_reduction'
-#print axioms SizeBias.upper_reduction_sqrt'
+#print axioms SizeBias.upper_reduction_of_le_add_two
+#print axioms SizeBias.upper_reduction_sqrt_of_le_add_two
 #print axioms SizeBias.lower_reduction
 #print axioms ChainRule.lawOf
 #print axioms ChainRule.lawOf_eq_sum
@@ -184,11 +184,11 @@ open Pairing PerfectMatching
 #print axioms Tilt.exp_sub_le_of_tiltMean_div_le
 #print axioms Tilt.le_exp_sub_of_le_tiltMean_div
 #print axioms Tilt.mul_rpow_le_tiltMean
-#print axioms Tilt.fano_criterion'
+#print axioms Tilt.exp_neg_div_le_of_fano_le
 #print axioms Tilt.le_exp_neg_div_of_le_fano
-#print axioms Tilt.sbRatio_le'
-#print axioms Tilt.pair_criterion'
-#print axioms Tilt.pair_criterion_weak'
+#print axioms Tilt.sbRatio_le_of_pairDeficit_le
+#print axioms Tilt.exp_neg_mul_log_le_of_pairDeficit_le
+#print axioms Tilt.exp_neg_div_le_of_pairDeficit_le
 #print axioms RoundRobin.Canonical.sum_hamCount_mul
 #print axioms RoundRobin.Canonical.sum_pow_mul_hamCount
 #print axioms RoundRobin.Canonical.sum_pow_mul_hamCount_pair
@@ -218,7 +218,7 @@ open Pairing PerfectMatching
 #print axioms ChainRule.mul_le_condProb_pre
 #print axioms ChainRule.prob_avoid_le_pow_of_pre
 #print axioms ChainRule.mul_le_condProb_of_le
-#print axioms ChainRule.mul_pow_le_of_star
+#print axioms ChainRule.mul_pow_le_of_log_le
 #print axioms ChainRule.one_sub_div_mem_Icc
 #print axioms ChainRule.mul_pow_le_condProb_of_mem_Icc
 #print axioms ChainRule.pow_mul_le_condProb_of_mem_Icc

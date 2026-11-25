@@ -39,7 +39,7 @@ From `conditional-pair-bound-attempt.md`:
   `one_sub_sum_le_prob_avoid`.
 * `mul_le_condProb_pre_of_mem_Icc`, `prob_avoid_le_pow_of_pre_of_mem_Icc` (Proposition 4(2)) :
   the lower bound for `p' ≤ U(A_t) ≤ p`, with the Bonferroni start `sub_sum_le_prob_inter_avoid`
-  (through `mul_le_condProb_of_le`, which needs only `U(A_t) ≥ p'`) and any `R` with
+  (through `mul_le_condProb_of_le`, which needs only a lower bound on `U(A_t)`) and any `R` with
   `U(A_x A_y) ≤ R p'²`. `mul_le_condProb_pre` and `prob_avoid_le_pow_of_pre` are the case
   `p' = p`.
 
@@ -431,17 +431,16 @@ theorem one_add_pow_le {x b : ℝ} {k n : ℕ} (hx : 0 ≤ x) (hk : k ≤ n) (hb
 
 /-- `p β^k ≤ b p` for `k ≤ n` under `(★) n ε b p / (1 - b p) ≤ log b`, with
 `β = 1 + ε b p / (1 - b p)`, `p, ε ≥ 0`, `b > 1` and `b p < 1`. -/
-theorem mul_pow_le_of_star {p ε b : ℝ} {k n : ℕ} (hp : 0 ≤ p) (hε : 0 ≤ ε) (hb : 1 < b)
+theorem mul_pow_le_of_log_le {p ε b : ℝ} {k n : ℕ} (hp : 0 ≤ p) (hε : 0 ≤ ε) (hb : 1 < b)
     (hbp : b * p < 1) (hk : k ≤ n) (hstar : n * ε * b * p / (1 - b * p) ≤ Real.log b) :
     p * (1 + ε * b * p / (1 - b * p)) ^ k ≤ b * p :=
   (mul_le_mul_of_nonneg_left (one_add_pow_le (div_nonneg (by positivity) (by linarith)) hk
     (by linarith) ((le_of_eq (by ring)).trans hstar)) hp).trans_eq (mul_comm p b)
 
-/-- `γ = 1 - ε' b p / (1 - b p) ∈ [0, 1]` for `ε', b, p ≥ 0`, `b p < 1` and `ε' b p < 1 - b p`. -/
+/-- `γ = 1 - ε' b p / (1 - b p) ∈ [0, 1]` for `ε', b, p ≥ 0` and `ε' b p < 1 - b p`. -/
 theorem one_sub_div_mem_Icc {ε' b p : ℝ} (hε' : 0 ≤ ε') (hb : 0 ≤ b) (hp : 0 ≤ p)
-    (hbp : b * p < 1) (hε'b : ε' * b * p < 1 - b * p) :
-    1 - ε' * b * p / (1 - b * p) ∈ Set.Icc (0 : ℝ) 1 := by
-  have hc : 0 < 1 - b * p := by linarith
+    (hε'b : ε' * b * p < 1 - b * p) : 1 - ε' * b * p / (1 - b * p) ∈ Set.Icc (0 : ℝ) 1 := by
+  have hc : 0 < 1 - b * p := by nlinarith [mul_nonneg (mul_nonneg hε' hb) hp]
   refine ⟨?_, sub_le_self _ (div_nonneg (by positivity) hc.le)⟩
   rw [sub_nonneg, div_le_one hc]
   linarith
@@ -466,7 +465,7 @@ theorem condProb_le_mul_pow (hP : IsProb P) (hp : ∀ t, prob P (A t) ≤ p) (h�
   have hc : 0 < 1 - b * p := by linarith
   have hx : 0 ≤ ε * b * p / (1 - b * p) := div_nonneg (by positivity) hc.le
   have hpow : ∀ S : Finset ι, p * (1 + ε * b * p / (1 - b * p)) ^ S.card ≤ b * p := fun S ↦
-    mul_pow_le_of_star hp0 hε hb hbp (card_le_univ S) hstar
+    mul_pow_le_of_log_le hp0 hε hb hbp (card_le_univ S) hstar
   induction T using Finset.induction_on generalizing t with
   | empty => simpa [condProb_empty hP] using hp t
   | insert v T hv ih =>
@@ -497,7 +496,7 @@ theorem condProb_le_mul (hP : IsProb P) (hp : ∀ t, prob P (A t) ≤ p) (hε : 
   · rw [condProb_of_mem ht]
     positivity
   exact (condProb_le_mul_pow hP hp hε hb hbp hstar hg T ht).trans
-    (mul_pow_le_of_star hp0 hε hb hbp (card_le_univ T) hstar)
+    (mul_pow_le_of_log_le hp0 hε hb hbp (card_le_univ T) hstar)
 
 omit [DecidableEq ι] in
 /-- Proposition 3(1) of COD-190 (`cod-190-delta-proof-attempt.md`), the bound on `q`. Under the
@@ -552,10 +551,10 @@ variable {ε' p' : ℝ}
 
 omit [DecidableEq ι] in
 /-- Proposition 3(2) of COD-190 (`cod-190-delta-proof-attempt.md`), the refined bound, for
-`p' ≤ U(A_t) ≤ p`. Assume the hypotheses of `condProb_le_mul_pow`. If moreover `U(A_t) ≥ p'` for
-all `t`, and `g_T(s, t) ≤ 1 + ε'` for every `T` and every pair `s ≠ t` outside `T`, with
-`ε' ≥ 0` and `ε' b p < 1 - b p`, then `f_t(T) ≥ p' γ^|T|` for `t ∉ T`, with
-`γ = 1 - ε' b p / (1 - b p)`. -/
+`p' ≤ U(A_t) ≤ p`. Assume the hypotheses of `condProb_le_mul_pow`, which include `U(A_t) ≤ p`,
+and `U(A_t) ≥ p'` for all `t`. If moreover `g_T(s, t) ≤ 1 + ε'` for every `T` and every pair
+`s ≠ t` outside `T`, with `ε' ≥ 0` and `ε' b p < 1 - b p`, then `f_t(T) ≥ p' γ^|T|` for `t ∉ T`,
+with `γ = 1 - ε' b p / (1 - b p)`. -/
 theorem mul_pow_le_condProb_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t) ∈ Set.Icc p' p)
     (hε : 0 ≤ ε) (hb : 1 < b) (hbp : b * p < 1)
     (hstar : Fintype.card ι * ε * b * p / (1 - b * p) ≤ Real.log b)
@@ -566,10 +565,7 @@ theorem mul_pow_le_condProb_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t)
     p' * (1 - ε' * b * p / (1 - b * p)) ^ T.card ≤ condProb P A T t := by
   classical
   have hp' : ∀ t, prob P (A t) ≤ p := fun t ↦ (hp t).2
-  have hc : 0 < 1 - b * p := by linarith
-  have hγ : 0 ≤ 1 - ε' * b * p / (1 - b * p) := by
-    rw [sub_nonneg, div_le_one hc]
-    linarith
+  have hγ := (one_sub_div_mem_Icc hε' (by linarith) ((prob_nonneg hP _).trans (hp' t)) hε'b).1
   induction T using Finset.induction_on generalizing t with
   | empty => simpa [condProb_empty hP] using (hp t).1
   | insert v T hv ih =>
@@ -619,13 +615,13 @@ theorem pow_mul_le_condProb_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t)
     (T : Finset ι) {t : ι} (ht : t ∉ T) :
     (1 - ε' * b * p / (1 - b * p)) ^ (Fintype.card ι - 1) * p' ≤ condProb P A T t := by
   classical
-  have hγ := one_sub_div_mem_Icc hε' (by linarith) ((prob_nonneg hP _).trans (hp t).2) hbp hε'b
-  rcases lt_or_ge p' 0 with hp0 | hp0
-  · exact (mul_nonpos_of_nonneg_of_nonpos (pow_nonneg hγ.1 _) hp0.le).trans
+  have hγ := one_sub_div_mem_Icc hε' (by linarith) ((prob_nonneg hP _).trans (hp t).2) hε'b
+  rcases lt_or_ge p' 0 with hp'0 | hp'0
+  · exact (mul_nonpos_of_nonneg_of_nonpos (pow_nonneg hγ.1 _) hp'0.le).trans
       (condProb_nonneg hP T t)
   have hT := card_lt_univ_of_notMem ht
   rw [mul_comm]
-  exact (mul_le_mul_of_nonneg_left (pow_le_pow_of_le_one hγ.1 hγ.2 (by omega)) hp0).trans
+  exact (mul_le_mul_of_nonneg_left (pow_le_pow_of_le_one hγ.1 hγ.2 (by omega)) hp'0).trans
     (mul_pow_le_condProb_of_mem_Icc hP hp hε hb hbp hstar hg hε' hε'b hg' T ht)
 
 omit [DecidableEq ι] in
@@ -698,14 +694,14 @@ theorem prob_avoid_le_exp_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t) �
   rcases isEmpty_or_nonempty ι with hι | ⟨⟨t⟩⟩
   · simp
   have hp0 : 0 ≤ p := (prob_nonneg hP _).trans (hp t).2
-  have hγ := one_sub_div_mem_Icc hε' (by linarith) hp0 hbp hε'b
+  have hγ := one_sub_div_mem_Icc hε' (by linarith) hp0 hε'b
   have hα0 : 0 ≤ α := pow_nonneg hγ.1 _
   have hα1 : α ≤ 1 := pow_le_one₀ hγ.1 hγ.2
   have hpp : p' ≤ p := (hp t).1.trans (hp t).2
   have hαp : α * p' ≤ 1 := by
     rcases le_or_gt 0 p' with hp'0 | hp'0
-    · nlinarith
-    · nlinarith
+    · nlinarith [mul_le_of_le_one_left hp'0 hα1]
+    · nlinarith [mul_nonneg hα0 (neg_nonneg.mpr hp'0.le)]
   calc (1 - α * p') ^ Fintype.card ι ≤ Real.exp (-(α * p')) ^ Fintype.card ι :=
         pow_le_pow_left₀ (by linarith) (Real.one_sub_le_exp_neg _) _
     _ = _ := by
@@ -848,16 +844,16 @@ theorem mul_le_condProb_pre_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t)
   have hpl : ∀ t, p' ≤ prob P (A t) := fun t ↦ (hp t).1
   set γ := 1 - ε' * b * p / (1 - b * p) with hγ_def
   obtain ⟨hγ, hγ1⟩ := one_sub_div_mem_Icc hε' (by linarith) ((prob_nonneg hP _).trans (hp' (σ k)))
-    hbp hε'b
+    hε'b
   have hf0 := condProb_nonneg hP (A := A) (pre σ k) (σ k)
-  rcases lt_or_ge p' 0 with hp0 | hp0
-  · refine le_trans (mul_nonpos_of_nonneg_of_nonpos (mul_nonneg ?_ (pow_nonneg hγ _)) hp0.le) hf0
+  rcases lt_or_ge p' 0 with hp'0 | hp'0
+  · refine le_trans (mul_nonpos_of_nonneg_of_nonpos (mul_nonneg ?_ (pow_nonneg hγ _)) hp'0.le) hf0
     nlinarith [mul_nonneg (Nat.cast_nonneg (α := ℝ) J) hR0]
   by_cases hc0 : 1 - J * p' * R < 0
   · exact le_trans (mul_nonpos_of_nonpos_of_nonneg (mul_nonpos_of_nonpos_of_nonneg hc0.le
-      (pow_nonneg hγ _)) hp0) hf0
+      (pow_nonneg hγ _)) hp'0) hf0
   rw [not_lt] at hc0
-  have hpR : 0 ≤ p' * R := mul_nonneg hp0 hR0
+  have hpR : 0 ≤ p' * R := mul_nonneg hp'0 hR0
   by_cases hkJ : (k : ℕ) ≤ J
   · have hkJ' : ((k : ℕ) : ℝ) ≤ J := by exact_mod_cast hkJ
     have h := mul_le_condProb_of_le hP hpl hR (notMem_pre σ (k := k) le_rfl)
@@ -865,8 +861,8 @@ theorem mul_le_condProb_pre_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t)
     refine le_trans ?_ h
     have h1 : (1 - J * p' * R) * γ ^ (n - 1) ≤ 1 - J * p' * R :=
       mul_le_of_le_one_right hc0 (pow_le_one₀ hγ hγ1)
-    have h2 := mul_le_mul_of_nonneg_right h1 hp0
-    have h3 := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hkJ' hpR) hp0
+    have h2 := mul_le_mul_of_nonneg_right h1 hp'0
+    have h3 := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hkJ' hpR) hp'0
     linarith
   rw [not_le] at hkJ
   have hinner : ∀ d, J + d ≤ k →
@@ -903,7 +899,7 @@ theorem mul_le_condProb_pre_of_mem_Icc (hP : IsProb P) (hp : ∀ t, prob P (A t)
   refine le_trans ?_ h1
   rw [mul_right_comm]
   exact mul_le_mul_of_nonneg_left (pow_le_pow_of_le_one hγ hγ1 (by omega))
-    (mul_nonneg hc0 hp0)
+    (mul_nonneg hc0 hp'0)
 
 omit [DecidableEq ι] in
 /-- Proposition 4(2) of the conditional pair bound attempt (`conditional-pair-bound-attempt.md`).

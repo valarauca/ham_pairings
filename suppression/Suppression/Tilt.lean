@@ -25,23 +25,26 @@ Write `E_w X`, `Var_w X` and `E_w[X(X - 1)]` for its mean, variance and second f
   and `Δ ≥ δ` gives `E_w X ≥ μ w^(1 - δ)`.
 * `exp_sub_le_of_tiltMean_div_le`, `le_exp_sub_of_le_tiltMean_div` : the comparison that every
   reduction to `p 0` below goes through. Since `(log G)' = E_w X / w` and `G(1) = 1`, a bound
-  `E_x X / x ≤ h'(x)` on `(0, 1)` gives `p 0 ≥ exp(h(0) - h(1))`, and the reverse bound gives
-  `p 0 ≤ exp(h(0) - h(1))`. Neither needs `p 0 > 0`.
+  `E_x X / x ≤ φ'(x)` on `(0, 1)` gives `p 0 ≥ exp(φ(0) - φ(1))`, and the reverse bound gives
+  `p 0 ≤ exp(φ(0) - φ(1))`. Neither needs `p 0 > 0`.
 * `eq_one_and_partialMean_eq_zero` : without the standing assumption, `p` is the point mass at
-  `0`. The criteria below are stated for every law on `[0, N]` and treat that case directly.
-* `fano_criterion'` (Proposition 4) : if `δ < 1` and `Δ(w) ≤ δ` wherever `E_w X ≥ δ`, then
-  `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0` is not needed, and neither are `p 0 > 0` and the
-  standing assumption. `fano_criterion` is the form with both.
+  `0`. The Proposition 4 and 5(1), 5(3) bounds below that are named by their conclusion hold for
+  every law on `[0, N]` and treat that case directly.
+* `fano_criterion` (Proposition 4) : if `δ < 1` and `Δ(w) ≤ δ` wherever `E_w X ≥ δ`, then
+  `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0` is not needed. `exp_neg_div_le_of_fano_le`
+  drops `p 0 > 0` and the standing assumption as well.
 * `le_exp_neg_div_of_le_fano` : if `δ < 1` and `Δ ≥ δ` on `(0, 1]`, then
   `p 0 ≤ exp(-μ / (1 - δ))`. At `δ = 0` it is `le_exp_neg_of_fano_nonneg` (Section 4),
   `p 0 ≤ exp(-μ)`.
 * `fano_le_mul_tiltMean`, `fano_le_of_pairDeficit_le` (Proposition 5(2)) : if `D ≤ c` on
   `(0, 1]`, then `Δ(w) ≤ c E_w X / μ`, and `Δ(w) ≤ c` when `c ≥ 0`.
-* `sbRatio_le'`, `partialMean_one_le` (Proposition 5(1)) : if also `c < 1`, then
+* `sbRatio_le`, `partialMean_one_le` (Proposition 5(1)) : if also `c < 1`, then
   `R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]` and `ρ_0 ≤ 1 / (1 - c)`.
-* `pair_criterion'`, `pair_criterion_weak'` (Proposition 5(3)) : for `0 < c < 1`,
-  `p 0 ≥ exp(-(μ / c) log(1 / (1 - c))) ≥ exp(-μ / (1 - c))`, without `p 0 > 0` or the standing
-  assumption. `sbRatio_le`, `pair_criterion` and `pair_criterion_weak` are the forms with both.
+  `sbRatio_le_of_pairDeficit_le` drops `p 0 > 0` and the standing assumption.
+* `pair_criterion`, `pair_criterion_weak` (Proposition 5(3)) : for `0 < c < 1`,
+  `p 0 ≥ exp(-(μ / c) log(1 / (1 - c))) ≥ exp(-μ / (1 - c))`.
+  `exp_neg_mul_log_le_of_pairDeficit_le` and `exp_neg_div_le_of_pairDeficit_le` drop `p 0 > 0`
+  and the standing assumption.
 
 For the round-robin count `X = hamCount m` and its law `hamLaw m`:
 
@@ -309,56 +312,48 @@ theorem integral_tiltMean_div (hp : IsLaw p N) (hp0 : 0 < p 0) :
     simp only [genDeriv_eq p N hw.1.ne', tiltMean]
     ring
 
-/-- A function whose derivative is nonnegative on `(0, 1)` is monotone on `(0, 1]`. -/
-theorem monotoneOn_Ioc_of_hasDerivAt {f f' : ℝ → ℝ}
-    (hf : ∀ x ∈ Set.Ioc (0 : ℝ) 1, HasDerivAt f (f' x) x)
-    (h : ∀ x ∈ Set.Ioo (0 : ℝ) 1, 0 ≤ f' x) : MonotoneOn f (Set.Ioc 0 1) :=
-  monotoneOn_of_deriv_nonneg (convex_Ioc 0 1)
-    (fun x hx ↦ (hf x hx).continuousAt.continuousWithinAt)
-    (fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      exact (hf x (Set.Ioo_subset_Ioc_self hx)).differentiableAt.differentiableWithinAt)
-    fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      rw [(hf x (Set.Ioo_subset_Ioc_self hx)).deriv]
-      exact h x hx
-
-/-- A function whose derivative is nonpositive on `(0, 1)` is antitone on `(0, 1]`. -/
-theorem antitoneOn_Ioc_of_hasDerivAt {f f' : ℝ → ℝ}
-    (hf : ∀ x ∈ Set.Ioc (0 : ℝ) 1, HasDerivAt f (f' x) x)
-    (h : ∀ x ∈ Set.Ioo (0 : ℝ) 1, f' x ≤ 0) : AntitoneOn f (Set.Ioc 0 1) :=
-  antitoneOn_of_deriv_nonpos (convex_Ioc 0 1)
-    (fun x hx ↦ (hf x hx).continuousAt.continuousWithinAt)
-    (fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      exact (hf x (Set.Ioo_subset_Ioc_self hx)).differentiableAt.differentiableWithinAt)
-    fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      rw [(hf x (Set.Ioo_subset_Ioc_self hx)).deriv]
-      exact h x hx
-
-/-- The comparison behind the lower reductions for `p 0`. Let `h` be continuous on `[0, 1]` with
-derivative `h'` on `(0, 1)`. If `E_x X / x ≤ h'(x)` on `(0, 1)`, then `p 0 ≥ exp(h(0) - h(1))`.
-Since `log G - h` is antitone on `(0, 1]`, `G(x) ≥ exp(h(x) - h(1))` there, and `x → 0` gives the
-bound. It does not assume `p 0 > 0`. -/
-theorem exp_sub_le_of_tiltMean_div_le (hp : IsLaw p N) {h h' : ℝ → ℝ}
-    (hc : ContinuousOn h (Set.Icc 0 1)) (hd : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt h (h' x) x)
-    (hle : ∀ x ∈ Set.Ioo (0 : ℝ) 1, tiltMean p N x / x ≤ h' x) :
-    Real.exp (h 0 - h 1) ≤ p 0 := by
-  have hf : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt (fun x ↦ Real.log (genFun p N x) - h x)
-      (tiltMean p N x / x - h' x) x := fun x hx ↦ (hasDerivAt_log_genFun hp hx.1).sub (hd x hx)
-  have hanti := antitoneOn_of_deriv_nonpos (convex_Ioc (0 : ℝ) 1)
-    (f := fun x ↦ Real.log (genFun p N x) - h x)
-    (((continuous_genFun p N).continuousOn.log fun _ hx ↦ (genFun_pos_of_pos hp hx.1).ne').sub
-      (hc.mono Set.Ioc_subset_Icc_self))
+/-- A function that is continuous on `(a, b]` and has a nonnegative derivative on `(a, b)` is
+monotone on `(a, b]`. -/
+theorem monotoneOn_Ioc_of_hasDerivAt {f f' : ℝ → ℝ} {a b : ℝ} (hc : ContinuousOn f (Set.Ioc a b))
+    (hf : ∀ x ∈ Set.Ioo a b, HasDerivAt f (f' x) x) (h : ∀ x ∈ Set.Ioo a b, 0 ≤ f' x) :
+    MonotoneOn f (Set.Ioc a b) :=
+  monotoneOn_of_deriv_nonneg (convex_Ioc a b) hc
     (fun x hx ↦ by
       rw [interior_Ioc] at hx
       exact (hf x hx).differentiableAt.differentiableWithinAt)
-    (fun x hx ↦ by
+    fun x hx ↦ by
       rw [interior_Ioc] at hx
       rw [(hf x hx).deriv]
-      linarith [hle x hx])
-  have hIoc : ∀ x ∈ Set.Ioc (0 : ℝ) 1, Real.exp (h x - h 1) ≤ genFun p N x := fun x hx ↦ by
+      exact h x hx
+
+/-- A function that is continuous on `(a, b]` and has a nonpositive derivative on `(a, b)` is
+antitone on `(a, b]`. -/
+theorem antitoneOn_Ioc_of_hasDerivAt {f f' : ℝ → ℝ} {a b : ℝ} (hc : ContinuousOn f (Set.Ioc a b))
+    (hf : ∀ x ∈ Set.Ioo a b, HasDerivAt f (f' x) x) (h : ∀ x ∈ Set.Ioo a b, f' x ≤ 0) :
+    AntitoneOn f (Set.Ioc a b) :=
+  antitoneOn_of_deriv_nonpos (convex_Ioc a b) hc
+    (fun x hx ↦ by
+      rw [interior_Ioc] at hx
+      exact (hf x hx).differentiableAt.differentiableWithinAt)
+    fun x hx ↦ by
+      rw [interior_Ioc] at hx
+      rw [(hf x hx).deriv]
+      exact h x hx
+
+/-- The comparison behind the lower reductions for `p 0`. Let `φ` be continuous on `[0, 1]` with
+derivative `φ'` on `(0, 1)`. If `E_x X / x ≤ φ'(x)` on `(0, 1)`, then `p 0 ≥ exp(φ(0) - φ(1))`.
+Since `(log G)' = E_x X / x`, `log G - φ` is antitone on `(0, 1]`, so `G(x) ≥ exp(φ(x) - φ(1))`
+there, and `x → 0` gives the bound. It does not assume `p 0 > 0`. -/
+theorem exp_sub_le_of_tiltMean_div_le (hp : IsLaw p N) {φ φ' : ℝ → ℝ}
+    (hc : ContinuousOn φ (Set.Icc 0 1)) (hd : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt φ (φ' x) x)
+    (hle : ∀ x ∈ Set.Ioo (0 : ℝ) 1, tiltMean p N x / x ≤ φ' x) :
+    Real.exp (φ 0 - φ 1) ≤ p 0 := by
+  have hanti := antitoneOn_Ioc_of_hasDerivAt (f := fun x ↦ Real.log (genFun p N x) - φ x)
+    (((continuous_genFun p N).continuousOn.log fun _ hx ↦ (genFun_pos_of_pos hp hx.1).ne').sub
+      (hc.mono Set.Ioc_subset_Icc_self))
+    (fun x hx ↦ (hasDerivAt_log_genFun hp hx.1).sub (hd x hx))
+    (fun x hx ↦ sub_nonpos.mpr (hle x hx))
+  have hIoc : ∀ x ∈ Set.Ioc (0 : ℝ) 1, Real.exp (φ x - φ 1) ≤ genFun p N x := fun x hx ↦ by
     have h1 := hanti hx ⟨one_pos, le_rfl⟩ hx.2
     simp only [genFun_one hp, Real.log_one, zero_sub] at h1
     rw [← Real.exp_log (genFun_pos_of_pos hp hx.1)]
@@ -368,27 +363,19 @@ theorem exp_sub_le_of_tiltMean_div_le (hp : IsLaw p N) {h h' : ℝ → ℝ}
     (((hc 0 ⟨le_rfl, zero_le_one⟩).mono Set.Ioc_subset_Icc_self).sub continuousWithinAt_const).rexp
     (continuous_genFun p N).continuousWithinAt hIoc
 
-/-- The mirror comparison, behind the upper reductions for `p 0`. Let `h` be continuous on
-`[0, 1]` with derivative `h'` on `(0, 1)`. If `h'(x) ≤ E_x X / x` on `(0, 1)`, then
-`p 0 ≤ exp(h(0) - h(1))`. It does not assume `p 0 > 0`. -/
-theorem le_exp_sub_of_le_tiltMean_div (hp : IsLaw p N) {h h' : ℝ → ℝ}
-    (hc : ContinuousOn h (Set.Icc 0 1)) (hd : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt h (h' x) x)
-    (hle : ∀ x ∈ Set.Ioo (0 : ℝ) 1, h' x ≤ tiltMean p N x / x) :
-    p 0 ≤ Real.exp (h 0 - h 1) := by
-  have hf : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt (fun x ↦ Real.log (genFun p N x) - h x)
-      (tiltMean p N x / x - h' x) x := fun x hx ↦ (hasDerivAt_log_genFun hp hx.1).sub (hd x hx)
-  have hmono := monotoneOn_of_deriv_nonneg (convex_Ioc (0 : ℝ) 1)
-    (f := fun x ↦ Real.log (genFun p N x) - h x)
+/-- The mirror comparison, behind the upper reductions for `p 0`. Let `φ` be continuous on
+`[0, 1]` with derivative `φ'` on `(0, 1)`. If `φ'(x) ≤ E_x X / x` on `(0, 1)`, then
+`p 0 ≤ exp(φ(0) - φ(1))`. It does not assume `p 0 > 0`. -/
+theorem le_exp_sub_of_le_tiltMean_div (hp : IsLaw p N) {φ φ' : ℝ → ℝ}
+    (hc : ContinuousOn φ (Set.Icc 0 1)) (hd : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt φ (φ' x) x)
+    (hle : ∀ x ∈ Set.Ioo (0 : ℝ) 1, φ' x ≤ tiltMean p N x / x) :
+    p 0 ≤ Real.exp (φ 0 - φ 1) := by
+  have hmono := monotoneOn_Ioc_of_hasDerivAt (f := fun x ↦ Real.log (genFun p N x) - φ x)
     (((continuous_genFun p N).continuousOn.log fun _ hx ↦ (genFun_pos_of_pos hp hx.1).ne').sub
       (hc.mono Set.Ioc_subset_Icc_self))
-    (fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      exact (hf x hx).differentiableAt.differentiableWithinAt)
-    (fun x hx ↦ by
-      rw [interior_Ioc] at hx
-      rw [(hf x hx).deriv]
-      linarith [hle x hx])
-  have hIoc : ∀ x ∈ Set.Ioc (0 : ℝ) 1, genFun p N x ≤ Real.exp (h x - h 1) := fun x hx ↦ by
+    (fun x hx ↦ (hasDerivAt_log_genFun hp hx.1).sub (hd x hx))
+    (fun x hx ↦ sub_nonneg.mpr (hle x hx))
+  have hIoc : ∀ x ∈ Set.Ioc (0 : ℝ) 1, genFun p N x ≤ Real.exp (φ x - φ 1) := fun x hx ↦ by
     have h1 := hmono hx ⟨one_pos, le_rfl⟩ hx.2
     simp only [genFun_one hp, Real.log_one, zero_sub] at h1
     rw [← Real.exp_log (genFun_pos_of_pos hp hx.1)]
@@ -403,17 +390,22 @@ theorem le_exp_sub_of_le_tiltMean_div (hp : IsLaw p N) {h h' : ℝ → ℝ}
 theorem tiltMean_le (hp : IsLaw p N) {w : ℝ} (hw : w ∈ Set.Ioc (0 : ℝ) 1) :
     tiltMean p N w ≤ partialMean p N := by
   rw [← tiltMean_one hp]
-  exact monotoneOn_Ioc_of_hasDerivAt (fun x hx ↦ hasDerivAt_tiltMean hp hx.1)
+  exact monotoneOn_Ioc_of_hasDerivAt
+    (fun x hx ↦ (hasDerivAt_tiltMean hp hx.1).continuousAt.continuousWithinAt)
+    (fun x hx ↦ hasDerivAt_tiltMean hp hx.1)
     (fun x hx ↦ div_nonneg (tiltVar_nonneg hp hx.1) hx.1.le) hw ⟨one_pos, le_rfl⟩ hw.2
 
 /-- If `Δ ≤ δ` on `(0, 1]`, then `E_w X ≤ μ w^(1 - δ)` on `(0, 1]`. -/
 theorem tiltMean_le_rpow (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
     (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, fano p N w ≤ δ) {w : ℝ} (hw : w ∈ Set.Ioc (0 : ℝ) 1) :
     tiltMean p N w ≤ partialMean p N * w ^ (1 - δ) := by
+  have hd : ∀ x ∈ Set.Ioc (0 : ℝ) 1,
+      HasDerivAt (fun x ↦ Real.log (tiltMean p N x) - (1 - δ) * Real.log x)
+        ((1 - fano p N x) / x - (1 - δ) * x⁻¹) x := fun x hx ↦
+    (hasDerivAt_log_tiltMean hp hk hx.1).sub ((Real.hasDerivAt_log hx.1.ne').const_mul (1 - δ))
   have hmono := monotoneOn_Ioc_of_hasDerivAt
-    (f := fun x ↦ Real.log (tiltMean p N x) - (1 - δ) * Real.log x)
-    (fun x hx ↦ (hasDerivAt_log_tiltMean hp hk hx.1).sub
-      ((Real.hasDerivAt_log hx.1.ne').const_mul (1 - δ)))
+    (fun x hx ↦ (hd x hx).continuousAt.continuousWithinAt)
+    (fun x hx ↦ hd x (Set.Ioo_subset_Ioc_self hx))
     (fun x hx ↦ by
       rw [show (1 - fano p N x) / x - (1 - δ) * x⁻¹ = (δ - fano p N x) / x by ring]
       exact div_nonneg (sub_nonneg.mpr (hΔ x (Set.Ioo_subset_Ioc_self hx))) hx.1.le)
@@ -429,10 +421,13 @@ theorem tiltMean_le_rpow (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : 
 theorem mul_rpow_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
     (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ fano p N w) {w : ℝ} (hw : w ∈ Set.Ioc (0 : ℝ) 1) :
     partialMean p N * w ^ (1 - δ) ≤ tiltMean p N w := by
+  have hd : ∀ x ∈ Set.Ioc (0 : ℝ) 1,
+      HasDerivAt (fun x ↦ Real.log (tiltMean p N x) - (1 - δ) * Real.log x)
+        ((1 - fano p N x) / x - (1 - δ) * x⁻¹) x := fun x hx ↦
+    (hasDerivAt_log_tiltMean hp hk hx.1).sub ((Real.hasDerivAt_log hx.1.ne').const_mul (1 - δ))
   have hanti := antitoneOn_Ioc_of_hasDerivAt
-    (f := fun x ↦ Real.log (tiltMean p N x) - (1 - δ) * Real.log x)
-    (fun x hx ↦ (hasDerivAt_log_tiltMean hp hk hx.1).sub
-      ((Real.hasDerivAt_log hx.1.ne').const_mul (1 - δ)))
+    (fun x hx ↦ (hd x hx).continuousAt.continuousWithinAt)
+    (fun x hx ↦ hd x (Set.Ioo_subset_Ioc_self hx))
     (fun x hx ↦ by
       rw [show (1 - fano p N x) / x - (1 - δ) * x⁻¹ = (δ - fano p N x) / x by ring]
       exact div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr (hΔ x (Set.Ioo_subset_Ioc_self hx)))
@@ -446,7 +441,7 @@ theorem mul_rpow_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {�
 
 /-- Proposition 4, the Fano criterion, for every law on `[0, N]`. If `δ < 1` and `Δ(w) ≤ δ` for
 every `w ∈ (0, 1]` with `E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. -/
-theorem fano_criterion' (hp : IsLaw p N) {δ : ℝ}
+theorem exp_neg_div_le_of_fano_le (hp : IsLaw p N) {δ : ℝ}
     (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ tiltMean p N w → fano p N w ≤ δ) :
     Real.exp (-(partialMean p N / (1 - δ))) ≤ p 0 := by
   by_cases hk : ∃ k, 0 < k ∧ 0 < p k
@@ -459,9 +454,10 @@ theorem fano_criterion' (hp : IsLaw p N) {δ : ℝ}
     · exact (fano_le_tiltMean hp hk hw.1).trans (not_le.mp h).le
   have hpos : 0 < 1 - δ := by linarith
   set μ := partialMean p N
-  have h := exp_sub_le_of_tiltMean_div_le hp (h := fun x ↦ μ / (1 - δ) * x ^ (1 - δ))
+  have h := exp_sub_le_of_tiltMean_div_le hp (φ := fun x ↦ μ / (1 - δ) * x ^ (1 - δ))
     (continuousOn_const.mul (Real.continuous_rpow_const hpos.le).continuousOn)
     (fun x hx ↦ (Real.hasDerivAt_rpow_const (Or.inl hx.1.ne')).const_mul _) fun x hx ↦ by
+      change tiltMean p N x / x ≤ μ / (1 - δ) * ((1 - δ) * x ^ (1 - δ - 1))
       have h := tiltMean_le_rpow hp hk hΔ' (Set.Ioo_subset_Ioc_self hx)
       rw [Real.rpow_sub_one hx.1.ne',
         show μ / (1 - δ) * ((1 - δ) * (x ^ (1 - δ) / x)) = μ * x ^ (1 - δ) / x by field_simp]
@@ -470,11 +466,11 @@ theorem fano_criterion' (hp : IsLaw p N) {δ : ℝ}
 
 /-- Proposition 4, the Fano criterion. If `δ < 1` and `Δ(w) ≤ δ` for every `w ∈ (0, 1]` with
 `E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. The hypotheses `p 0 > 0` and `p k > 0` for some
-`k ≥ 1` are not needed (`fano_criterion'`). -/
+`k ≥ 1` are not needed (`exp_neg_div_le_of_fano_le`). -/
 theorem fano_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
     (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ tiltMean p N w → fano p N w ≤ δ) :
     Real.exp (-(partialMean p N / (1 - δ))) ≤ p 0 :=
-  fano_criterion' hp hδ hΔ
+  exp_neg_div_le_of_fano_le hp hδ hΔ
 
 /-- If `Δ ≥ 0` on `(0, 1]`, then `E_w X ≥ μ w` on `(0, 1]`. -/
 theorem mul_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k)
@@ -493,9 +489,10 @@ theorem le_exp_neg_div_of_le_fano (hp : IsLaw p N) {δ : ℝ}
     simp [h0, hμ]
   have hpos : 0 < 1 - δ := by linarith
   set μ := partialMean p N
-  have h := le_exp_sub_of_le_tiltMean_div hp (h := fun x ↦ μ / (1 - δ) * x ^ (1 - δ))
+  have h := le_exp_sub_of_le_tiltMean_div hp (φ := fun x ↦ μ / (1 - δ) * x ^ (1 - δ))
     (continuousOn_const.mul (Real.continuous_rpow_const hpos.le).continuousOn)
     (fun x hx ↦ (Real.hasDerivAt_rpow_const (Or.inl hx.1.ne')).const_mul _) fun x hx ↦ by
+      change μ / (1 - δ) * ((1 - δ) * x ^ (1 - δ - 1)) ≤ tiltMean p N x / x
       have h := mul_rpow_le_tiltMean hp hk hΔ (Set.Ioo_subset_Ioc_self hx)
       rw [Real.rpow_sub_one hx.1.ne',
         show μ / (1 - δ) * ((1 - δ) * (x ^ (1 - δ) / x)) = μ * x ^ (1 - δ) / x by field_simp]
@@ -581,8 +578,12 @@ theorem one_sub_mul_pos {c z : ℝ} (hc1 : c < 1) (hz : z ∈ Set.Icc (0 : ℝ) 
 theorem genDeriv_mul_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
     (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ} (hz : z ∈ Set.Icc (0 : ℝ) 1) :
     genDeriv p N z * (1 - c * (1 - z)) ≤ partialMean p N * genFun p N z := by
-  have hanti := antitoneOn_Ioc_of_hasDerivAt (f := fun x ↦ 1 / sbRatio p N x - c * x)
-    (fun x hx ↦ (hasDerivAt_inv_sbRatio hp hk hx.1).sub ((hasDerivAt_id x).const_mul c))
+  have hd : ∀ x ∈ Set.Ioc (0 : ℝ) 1,
+      HasDerivAt (fun x ↦ 1 / sbRatio p N x - c * x) (pairDeficit p N x - c * 1) x :=
+    fun x hx ↦ (hasDerivAt_inv_sbRatio hp hk hx.1).sub ((hasDerivAt_id x).const_mul c)
+  have hanti := antitoneOn_Ioc_of_hasDerivAt
+    (fun x hx ↦ (hd x hx).continuousAt.continuousWithinAt)
+    (fun x hx ↦ hd x (Set.Ioo_subset_Ioc_self hx))
     (fun x hx ↦ by
       rw [mul_one, sub_nonpos]
       exact hc x (Set.Ioo_subset_Ioc_self hx))
@@ -608,7 +609,7 @@ theorem genDeriv_mul_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : �
 
 /-- Proposition 5(1), for every law on `[0, N]`. If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then
 `R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]`. Where `μ G(z) = 0` the ratio is `0` by convention. -/
-theorem sbRatio_le' (hp : IsLaw p N) {c : ℝ}
+theorem sbRatio_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
     (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ}
     (hz : z ∈ Set.Icc (0 : ℝ) 1) : sbRatio p N z ≤ 1 / (1 - c * (1 - z)) := by
   by_cases hk : ∃ k, 0 < k ∧ 0 < p k
@@ -624,11 +625,11 @@ theorem sbRatio_le' (hp : IsLaw p N) {c : ℝ}
 
 /-- Proposition 5(1). If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then `R(z) ≤ 1 / (1 - c (1 - z))`
 on `[0, 1]`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not needed
-(`sbRatio_le'`). -/
+(`sbRatio_le_of_pairDeficit_le`). -/
 theorem sbRatio_le (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
     (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ}
     (hz : z ∈ Set.Icc (0 : ℝ) 1) : sbRatio p N z ≤ 1 / (1 - c * (1 - z)) :=
-  sbRatio_le' hp hc1 hc hz
+  sbRatio_le_of_pairDeficit_le hp hc1 hc hz
 
 /-- Proposition 5(1) at `z = 0`, `ρ_0 ≤ 1 / (1 - c)`, in the multiplied-out form
 `G(1) ≤ (1 - c)⁻¹ μ F(0)` used by `SizeBias.lower_reduction`. -/
@@ -644,7 +645,7 @@ theorem partialMean_one_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c :
 
 /-- Proposition 5(3), for every law on `[0, N]`. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
 `p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. -/
-theorem pair_criterion' (hp : IsLaw p N) {c : ℝ}
+theorem exp_neg_mul_log_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / c * Real.log (1 / (1 - c)))) ≤ p 0 := by
   by_cases hk : ∃ k, 0 < k ∧ 0 < p k
@@ -652,7 +653,7 @@ theorem pair_criterion' (hp : IsLaw p N) {c : ℝ}
   · obtain ⟨h0, hμ⟩ := eq_one_and_partialMean_eq_zero hp hk
     simp [h0, hμ]
   set μ := partialMean p N
-  have h := exp_sub_le_of_tiltMean_div_le hp (h := fun x ↦ μ / c * Real.log (1 - c * (1 - x)))
+  have h := exp_sub_le_of_tiltMean_div_le hp (φ := fun x ↦ μ / c * Real.log (1 - c * (1 - x)))
     (continuousOn_const.mul (ContinuousOn.log (continuousOn_const.sub (continuousOn_const.mul
       (continuousOn_const.sub continuousOn_id))) fun x hx ↦ (one_sub_mul_pos hc1 hx).ne'))
     (fun x hx ↦ ((((hasDerivAt_const x 1).sub (((hasDerivAt_const x 1).sub
@@ -673,18 +674,18 @@ theorem pair_criterion' (hp : IsLaw p N) {c : ℝ}
 
 /-- Proposition 5(3). If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
 `p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. The hypotheses `p 0 > 0` and `p k > 0` for some
-`k ≥ 1` are not needed (`pair_criterion'`). -/
+`k ≥ 1` are not needed (`exp_neg_mul_log_le_of_pairDeficit_le`). -/
 theorem pair_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / c * Real.log (1 / (1 - c)))) ≤ p 0 :=
-  pair_criterion' hp hc0 hc1 hc
+  exp_neg_mul_log_le_of_pairDeficit_le hp hc0 hc1 hc
 
 /-- Proposition 5(3), weak form, for every law on `[0, N]`. If `0 < c < 1` and `D(w) ≤ c` on
 `(0, 1]`, then `p 0 ≥ exp(-μ / (1 - c))`. -/
-theorem pair_criterion_weak' (hp : IsLaw p N) {c : ℝ}
+theorem exp_neg_div_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / (1 - c))) ≤ p 0 := by
-  refine le_trans (Real.exp_le_exp.mpr ?_) (pair_criterion' hp hc0 hc1 hc)
+  refine le_trans (Real.exp_le_exp.mpr ?_) (exp_neg_mul_log_le_of_pairDeficit_le hp hc0 hc1 hc)
   have hc' : 1 - c ≠ 0 := (sub_pos.mpr hc1).ne'
   have hl : Real.log (1 / (1 - c)) ≤ c / (1 - c) := by
     have h := Real.log_le_sub_one_of_pos (one_div_pos.mpr (sub_pos.mpr hc1))
@@ -696,11 +697,11 @@ theorem pair_criterion_weak' (hp : IsLaw p N) {c : ℝ}
 
 /-- Proposition 5(3), weak form. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
 `p 0 ≥ exp(-μ / (1 - c))`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not
-needed (`pair_criterion_weak'`). -/
+needed (`exp_neg_div_le_of_pairDeficit_le`). -/
 theorem pair_criterion_weak (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k)
     {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / (1 - c))) ≤ p 0 :=
-  pair_criterion_weak' hp hc0 hc1 hc
+  exp_neg_div_le_of_pairDeficit_le hp hc0 hc1 hc
 
 end Tilt
 
@@ -709,15 +710,12 @@ namespace RoundRobin.Canonical
 open Finset PerfectMatching Tilt
 
 /-- A sum over perfect matchings of a function of `X` splits by the value of `X`,
-`∑_P g(X P) = ∑_{k ≤ n} #{P | X P = k} g(k)`. -/
+`∑_P g(X P) = ∑_{k ≤ n} #{P | X P = k} g(k)`. It is `ChainRule.sum_mul_lawOf` for the weight
+`1`. -/
 theorem sum_hamCount_eq (m : ℕ) [NeZero m] (g : ℕ → ℝ) :
     ∑ P : PerfectMatching (Vertex m), g (hamCount m P) =
       ∑ k ∈ range (2 * m - 1 + 1), ((univ.filter fun P ↦ hamCount m P = k).card : ℝ) * g k := by
-  rw [← sum_fiberwise_of_maps_to (s := univ) (t := range (2 * m - 1 + 1)) (g := hamCount m)
-    fun P _ ↦ mem_range.mpr (Nat.lt_succ_of_le (hamCount_le m P))]
-  refine sum_congr rfl fun k _ ↦ ?_
-  rw [sum_congr rfl (g := fun _ ↦ g k) fun P hP ↦ congrArg g (mem_filter.mp hP).2, sum_const,
-    nsmul_eq_mul]
+  simpa [ChainRule.lawOf_eq_sum] using ChainRule.sum_mul_lawOf (fun _ ↦ (1 : ℝ)) (hamCount_le m) g
 
 /-- The size-bias identity against a weight `f`, `∑_P X(P) f(X P) = n ∑_{P | A_0} f(X P)`.
 It is `card_ham_and_eq_mul` summed against `f` over `k`. -/

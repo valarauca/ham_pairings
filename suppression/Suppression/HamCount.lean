@@ -22,7 +22,7 @@ For a perfect matching `P` of `V_m`, `hamCount m P = X(P)` is the number of cano
 * `unifWeight m`, the uniform weight on the perfect matchings of `V_m`. `isProb_unifWeight` : it is
   a probability weight (`Prob.lean`), and `prob_unifWeight` : `U(S) = |S| / (2m - 1)!!`.
 * `hamLaw_eq_lawOf` : `hamLaw m` is the pushforward of `unifWeight m` along `X`, so
-  `isLaw_hamLaw` (it is a law on `[0, n]`) is an instance of `ChainRule.isLaw_lawOf`.
+  `isLaw_hamLaw` (it is a law on `[0, n]`) is a special case of `ChainRule.isLaw_lawOf`.
 * `ham_factor_one` : `F_1 ∪ F_0` is one cycle, so `exists_ham_factor_zero` : `A_0` is nonempty,
   and `exists_pos_hamLaw` : `P(X = k) > 0` for some `k ≥ 1`. These hold for every `m ≥ 1`.
 * `partialMean_hamLaw` : `∑_{k ≤ j} k P(X = k) = n P(A_0 ∧ X ≤ j)`.
