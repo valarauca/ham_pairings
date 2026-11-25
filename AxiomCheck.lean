@@ -230,6 +230,7 @@ open Pairing PerfectMatching
 #print axioms ChainRule.levelAvg_succ_sub
 #print axioms ChainRule.condProb_insert_sub
 #print axioms ChainRule.condMean_insert
+#print axioms ChainRule.condMean_nonneg
 #print axioms ChainRule.levelAvg_outAvg_succ
 #print axioms ChainRule.sum_range_of_rec
 #print axioms ChainRule.chainAvg_condProb

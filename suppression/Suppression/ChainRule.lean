@@ -1004,6 +1004,10 @@ theorem card_compl_of_mem_powersetCard {T : Finset ι} {i : ℕ} (hT : T ∈ pow
   have hi : i ≤ Fintype.card ι := h ▸ card_le_univ T
   rw [card_compl, h, Nat.cast_sub hi]
 
+/-- `M_T ≥ 0`. -/
+theorem condMean_nonneg (hP : IsProb P) (T : Finset ι) : 0 ≤ condMean P A T :=
+  sum_nonneg fun t _ ↦ condProb_nonneg hP T t
+
 omit [DecidableEq ι] in
 /-- `C(n, i) > 0` for `i ≤ n`. -/
 theorem choose_pos_real {i : ℕ} (hi : i ≤ Fintype.card ι) :
@@ -1452,7 +1456,7 @@ theorem abs_chainAvg_sub_le (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤
               hNpos.le
         _ = _ := by rw [← sum_div, div_div]
     have hM : 0 ≤ outAvg (condProb P A) T :=
-      div_nonneg (sum_nonneg fun t _ ↦ condProb_nonneg hP T t) (Nat.cast_nonneg _)
+      div_nonneg (condMean_nonneg hP T) (Nat.cast_nonneg _)
     rw [← hN]
     by_cases hK : K + 2 ≤ Tᶜ.card
     · have hite : 0 ≤ if Tᶜ.card ≤ K + 1 then ((Tᶜ.card : ℝ) - 1) * φ else 0 := by
@@ -1515,8 +1519,8 @@ theorem abs_chainAvg_sub_le (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤
         refine add_le_add (mul_le_mul_of_nonneg_left ?_ hθ)
           (div_le_div_of_nonneg_right (sum_corr_le _ _ hJ hφ0) h1φ.le)
         exact sum_le_sum_of_subset_of_nonneg (range_subset_range.mpr (Nat.sub_le _ 1))
-          fun i _ _ ↦ levelAvg_nonneg (fun T ↦ div_nonneg
-            (sum_nonneg fun t _ ↦ condProb_nonneg hP T t) (Nat.cast_nonneg _)) i
+          fun i _ _ ↦ levelAvg_nonneg
+            (fun T ↦ div_nonneg (condMean_nonneg hP T) (Nat.cast_nonneg _)) i
 
 /-- Theorem 7(i) of COD-196 (`cod-196-averaged-pinning.md`) under hypothesis (B′) of
 `abs_chainAvg_sub_le`: `-log q ≥ (μ - η) / (1 + θ)`. -/
@@ -1813,7 +1817,7 @@ theorem sum_abs_condCov_le (hP : IsProb P) (T : Finset ι) :
     (fun x ↦ condProb P A T x.1) (fun x ↦ condProb P A T x.2)
     (fun x ↦ condPair P A T x.1 x.2) fun x _ ↦ isBinLaw_cond hP T x.1 x.2
   simp only [sum_sigma] at h
-  have hM0 : 0 ≤ condMean P A T := sum_nonneg fun t _ ↦ condProb_nonneg hP T t
+  have hM0 := condMean_nonneg hP (A := A) T
   have hM : ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, condProb P A T s * condProb P A T t ≤
       condMean P A T ^ 2 := by
     calc ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, condProb P A T s * condProb P A T t =
@@ -1838,7 +1842,7 @@ theorem hB'_of_pairInfo (hP : IsProb P) {J : ℝ} {K : ℕ}
     (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card → pairInfo P A T ≤ J) (T : Finset ι)
     (hT : K + 2 ≤ Tᶜ.card) :
     ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, |condCov P A T s t| ≤ 2 * √J * condMean P A T + 4 * J := by
-  have hM0 : 0 ≤ condMean P A T := sum_nonneg fun t _ ↦ condProb_nonneg hP T t
+  have hM0 := condMean_nonneg hP (A := A) T
   have h1 := Real.sqrt_le_sqrt (hB T hT)
   refine (sum_abs_condCov_le hP T).trans ?_
   nlinarith [hB T hT]
