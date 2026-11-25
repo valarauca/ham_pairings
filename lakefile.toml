@@ -1,7 +1,7 @@
 name = "prefect-pairing"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["Pairing", "Clifford", "Spin", "Suppression"]
+defaultTargets = ["Pairing", "Clifford", "Spin", "Suppression", "Repair"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -29,3 +29,7 @@ srcDir = "spin"
 [[lean_lib]]
 name = "Suppression"
 srcDir = "suppression"
+
+[[lean_lib]]
+name = "Repair"
+srcDir = "repair"

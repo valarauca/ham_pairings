@@ -1,6 +1,7 @@
 import Clifford
 import Spin
 import Suppression
+import Repair
 
 open Pairing PerfectMatching
 
@@ -78,3 +79,20 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.repair_count
 #print axioms RoundRobin.Canonical.doubleFactorial_le_zeroCount_mul
 #print axioms RoundRobin.Canonical.density_ge
+#print axioms isZeroForcing_of_blocks
+#print axioms exists_greedy
+#print axioms exists_repair
+#print axioms exists_zeroState_repair
+#print axioms RoundRobin.Canonical.blocks_stdMatching
+#print axioms RoundRobin.Canonical.blocks_sixMatching
+#print axioms RoundRobin.Canonical.exists_zeroForcing
+#print axioms RoundRobin.Canonical.nonempty_zeroState
+#print axioms RoundRobin.Canonical.SumCover.no_conflict
+#print axioms RoundRobin.Canonical.SumCover.isPartialMatching_baseCore
+#print axioms RoundRobin.Canonical.SumCover.blocks_baseCore
+#print axioms RoundRobin.Canonical.SumCover.mem_openFactors_or
+#print axioms RoundRobin.Canonical.SumCover.card_baseCore_add_le
+#print axioms RoundRobin.Canonical.SumCover.exists_sumCover_core
+#print axioms RoundRobin.Canonical.L_eq_ceil_sqrt
+#print axioms RoundRobin.Canonical.exists_zeroForcing_core
+#print axioms RoundRobin.Canonical.repair_bound
