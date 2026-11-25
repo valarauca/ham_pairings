@@ -96,3 +96,16 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.L_eq_ceil_sqrt
 #print axioms RoundRobin.Canonical.exists_zeroForcing_core
 #print axioms RoundRobin.Canonical.repair_bound
+#print axioms card_avoiding
+#print axioms card_closed_subset
+#print axioms card_tailDist_le_eq_ballCount
+#print axioms two_mul_layer
+#print axioms card_tailDist_le_eq_ballCount_layer
+#print axioms ballCount_succ_le
+#print axioms ballCount_le_zero
+#print axioms ballCount_antitone
+#print axioms card_le_sum_of_cover
+#print axioms RoundRobin.Canonical.card_ball_eq
+#print axioms RoundRobin.Canonical.doubleFactorial_le_sum_ballCount
+#print axioms RoundRobin.Canonical.layered_count
+#print axioms RoundRobin.Canonical.doubleFactorial_le_zeroCount_mul_ballCount
