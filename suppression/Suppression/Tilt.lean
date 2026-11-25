@@ -7,11 +7,12 @@ import Suppression.HamCount
 /-!
 # Tilted-law reductions (COD-177)
 
-Let `p` be a law on `ℕ` supported on `[0, N]` (`SizeBias.IsLaw p N`) with some `p k > 0` for
-`k ≥ 1`, and put `μ = partialMean p N`. For `w ∈ (0, 1]` the `w^X`-tilted law is
-`P_w(X = k) = p k w^k / G(w)` with `G(w) = ∑ p k w^k`. Write `E_w X`, `Var_w X` and
-`E_w[X(X - 1)]` for its mean, variance and second factorial moment, `Δ(w) = 1 - Var_w X / E_w X`,
-`R(z) = G'(z) / (μ G(z))` and `D(w) = μ (1 - E_w[X(X - 1)] / (E_w X)²)`.
+Let `p` be a law on `ℕ` supported on `[0, N]` (`SizeBias.IsLaw p N`), usually with some
+`p k > 0` for `k ≥ 1` (the standing assumption `hk`), and put `μ = partialMean p N`. For
+`w ∈ (0, 1]` the `w^X`-tilted law is `P_w(X = k) = p k w^k / G(w)` with `G(w) = ∑ p k w^k`.
+Write `E_w X`, `Var_w X` and `E_w[X(X - 1)]` for its mean, variance and second factorial moment,
+`Δ(w) = 1 - Var_w X / E_w X`, `R(z) = G'(z) / (μ G(z))` and
+`D(w) = μ (1 - E_w[X(X - 1)] / (E_w X)²)`.
 
 * `tiltMean_eq_deriv` : `E_w X = w G'(w) / G(w)`.
 * `hasDerivAt_log_tiltMean` (Lemma 1(2)) : `(log E_w X)' = (1 - Δ(w)) / w`.
@@ -26,9 +27,11 @@ Let `p` be a law on `ℕ` supported on `[0, N]` (`SizeBias.IsLaw p N`) with some
   reduction to `p 0` below goes through. Since `(log G)' = E_w X / w` and `G(1) = 1`, a bound
   `E_x X / x ≤ h'(x)` on `(0, 1)` gives `p 0 ≥ exp(h(0) - h(1))`, and the reverse bound gives
   `p 0 ≤ exp(h(0) - h(1))`. Neither needs `p 0 > 0`.
+* `eq_one_and_partialMean_eq_zero` : without the standing assumption, `p` is the point mass at
+  `0`. The criteria below are stated for every law on `[0, N]` and treat that case directly.
 * `fano_criterion'` (Proposition 4) : if `δ < 1` and `Δ(w) ≤ δ` wherever `E_w X ≥ δ`, then
-  `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0` is not needed, and neither is `p 0 > 0`.
-  `fano_criterion` is the form with `p 0 > 0`.
+  `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0` is not needed, and neither are `p 0 > 0` and the
+  standing assumption. `fano_criterion` is the form with both.
 * `le_exp_neg_div_of_le_fano` : if `δ < 1` and `Δ ≥ δ` on `(0, 1]`, then
   `p 0 ≤ exp(-μ / (1 - δ))`. At `δ = 0` it is `le_exp_neg_of_fano_nonneg` (Section 4),
   `p 0 ≤ exp(-μ)`.
@@ -37,8 +40,8 @@ Let `p` be a law on `ℕ` supported on `[0, N]` (`SizeBias.IsLaw p N`) with some
 * `sbRatio_le'`, `partialMean_one_le` (Proposition 5(1)) : if also `c < 1`, then
   `R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]` and `ρ_0 ≤ 1 / (1 - c)`.
 * `pair_criterion'`, `pair_criterion_weak'` (Proposition 5(3)) : for `0 < c < 1`,
-  `p 0 ≥ exp(-(μ / c) log(1 / (1 - c))) ≥ exp(-μ / (1 - c))`, without `p 0 > 0`.
-  `sbRatio_le`, `pair_criterion` and `pair_criterion_weak` are the forms with `p 0 > 0`.
+  `p 0 ≥ exp(-(μ / c) log(1 / (1 - c))) ≥ exp(-μ / (1 - c))`, without `p 0 > 0` or the standing
+  assumption. `sbRatio_le`, `pair_criterion` and `pair_criterion_weak` are the forms with both.
 
 For the round-robin count `X = hamCount m` and its law `hamLaw m`:
 
@@ -194,6 +197,18 @@ theorem tiltSum_pos (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) (r : ℕ) {
 /-- `μ > 0` when some `p k` with `k ≥ 1` is positive. -/
 theorem partialMean_pos (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) : 0 < partialMean p N := by
   simpa [tiltSum_one_one] using tiltSum_pos hp hk 1 one_pos
+
+/-- If no `p k` with `k ≥ 1` is positive, then the law is the point mass at `0`, so `p 0 = 1` and
+`μ = 0`. -/
+theorem eq_one_and_partialMean_eq_zero (hp : IsLaw p N) (hk : ¬∃ k, 0 < k ∧ 0 < p k) :
+    p 0 = 1 ∧ partialMean p N = 0 := by
+  have h0 : ∀ k, 0 < k → p k = 0 := fun k hk0 ↦
+    le_antisymm (not_lt.mp fun h ↦ hk ⟨k, hk0, h⟩) (hp.nonneg k)
+  refine ⟨?_, sum_eq_zero fun k _ ↦ ?_⟩
+  · rw [← hp.sum_eq_one, sum_range_succ', sum_eq_zero fun k _ ↦ h0 (k + 1) k.succ_pos, zero_add]
+  · rcases Nat.eq_zero_or_pos k with rfl | hk0
+    · simp
+    · rw [h0 k hk0, mul_zero]
 
 /-- `E_w X > 0` for `w > 0`. -/
 theorem tiltMean_pos (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {w : ℝ} (hw : 0 < w) :
@@ -429,11 +444,15 @@ theorem mul_rpow_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {�
     Real.log_mul hμ.ne' (Real.rpow_pos_of_pos hw.1 _).ne', Real.log_rpow hw.1]
   linarith
 
-/-- Proposition 4, the Fano criterion, without `p 0 > 0`. If `δ < 1` and `Δ(w) ≤ δ` for every
-`w ∈ (0, 1]` with `E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. -/
-theorem fano_criterion' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
+/-- Proposition 4, the Fano criterion, for every law on `[0, N]`. If `δ < 1` and `Δ(w) ≤ δ` for
+every `w ∈ (0, 1]` with `E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. -/
+theorem fano_criterion' (hp : IsLaw p N) {δ : ℝ}
     (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ tiltMean p N w → fano p N w ≤ δ) :
     Real.exp (-(partialMean p N / (1 - δ))) ≤ p 0 := by
+  by_cases hk : ∃ k, 0 < k ∧ 0 < p k
+  swap
+  · obtain ⟨h0, hμ⟩ := eq_one_and_partialMean_eq_zero hp hk
+    simp [h0, hμ]
   have hΔ' : ∀ w ∈ Set.Ioc (0 : ℝ) 1, fano p N w ≤ δ := fun w hw ↦ by
     by_cases h : δ ≤ tiltMean p N w
     · exact hΔ w hw h
@@ -450,12 +469,12 @@ theorem fano_criterion' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : �
   simpa only [Real.zero_rpow hpos.ne', Real.one_rpow, mul_zero, mul_one, zero_sub] using h
 
 /-- Proposition 4, the Fano criterion. If `δ < 1` and `Δ(w) ≤ δ` for every `w ∈ (0, 1]` with
-`E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. The hypothesis `p 0 > 0` is not needed
-(`fano_criterion'`). -/
-theorem fano_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
+`E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. The hypotheses `p 0 > 0` and `p k > 0` for some
+`k ≥ 1` are not needed (`fano_criterion'`). -/
+theorem fano_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
     (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ tiltMean p N w → fano p N w ≤ δ) :
     Real.exp (-(partialMean p N / (1 - δ))) ≤ p 0 :=
-  fano_criterion' hp hk hδ hΔ
+  fano_criterion' hp hδ hΔ
 
 /-- If `Δ ≥ 0` on `(0, 1]`, then `E_w X ≥ μ w` on `(0, 1]`. -/
 theorem mul_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k)
@@ -463,11 +482,15 @@ theorem mul_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k)
     partialMean p N * w ≤ tiltMean p N w := by
   simpa only [sub_zero, Real.rpow_one] using mul_rpow_le_tiltMean hp hk hΔ hw
 
-/-- The mirror of the Fano criterion. If `δ < 1` and `Δ(w) ≥ δ` for every `w ∈ (0, 1]`, then
-`p 0 ≤ exp(-μ / (1 - δ))`. -/
-theorem le_exp_neg_div_of_le_fano (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
+/-- The mirror of the Fano criterion, for every law on `[0, N]`. If `δ < 1` and `Δ(w) ≥ δ` for
+every `w ∈ (0, 1]`, then `p 0 ≤ exp(-μ / (1 - δ))`. -/
+theorem le_exp_neg_div_of_le_fano (hp : IsLaw p N) {δ : ℝ}
     (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ fano p N w) :
     p 0 ≤ Real.exp (-(partialMean p N / (1 - δ))) := by
+  by_cases hk : ∃ k, 0 < k ∧ 0 < p k
+  swap
+  · obtain ⟨h0, hμ⟩ := eq_one_and_partialMean_eq_zero hp hk
+    simp [h0, hμ]
   have hpos : 0 < 1 - δ := by linarith
   set μ := partialMean p N
   have h := le_exp_sub_of_le_tiltMean_div hp (h := fun x ↦ μ / (1 - δ) * x ^ (1 - δ))
@@ -480,10 +503,11 @@ theorem le_exp_neg_div_of_le_fano (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p 
   simpa only [Real.zero_rpow hpos.ne', Real.one_rpow, mul_zero, mul_one, zero_sub] using h
 
 /-- The Section 4 mirror. If `Δ(w) ≥ 0` for every `w ∈ (0, 1]`, then `p 0 ≤ exp(-μ)`. It is
-`le_exp_neg_div_of_le_fano` at `δ = 0`, which does not need `p 0 > 0`. -/
-theorem le_exp_neg_of_fano_nonneg (hp : IsLaw p N) (_hp0 : 0 < p 0) (hk : ∃ k, 0 < k ∧ 0 < p k)
+`le_exp_neg_div_of_le_fano` at `δ = 0`, which needs neither `p 0 > 0` nor `p k > 0` for some
+`k ≥ 1`. -/
+theorem le_exp_neg_of_fano_nonneg (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k)
     (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, 0 ≤ fano p N w) : p 0 ≤ Real.exp (-partialMean p N) := by
-  simpa only [sub_zero, div_one] using le_exp_neg_div_of_le_fano hp hk zero_lt_one hΔ
+  simpa only [sub_zero, div_one] using le_exp_neg_div_of_le_fano hp zero_lt_one hΔ
 
 /-- `R(z) = G'(z) / (μ G(z))`, the ratio `E z^Y / E z^X` for the size-biased shift `Y`. -/
 noncomputable def sbRatio (p : ℕ → ℝ) (N : ℕ) (z : ℝ) : ℝ :=
@@ -582,11 +606,15 @@ theorem genDeriv_mul_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : �
   rw [← closure_Ioc (zero_ne_one' ℝ)] at hz
   exact closure_minimal hIoc hcl hz
 
-/-- Proposition 5(1), without `p 0 > 0`. If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then
-`R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]`. Where `G(z) = 0` the ratio is `0` by convention. -/
-theorem sbRatio_le' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
+/-- Proposition 5(1), for every law on `[0, N]`. If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then
+`R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]`. Where `μ G(z) = 0` the ratio is `0` by convention. -/
+theorem sbRatio_le' (hp : IsLaw p N) {c : ℝ}
     (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ}
     (hz : z ∈ Set.Icc (0 : ℝ) 1) : sbRatio p N z ≤ 1 / (1 - c * (1 - z)) := by
+  by_cases hk : ∃ k, 0 < k ∧ 0 < p k
+  swap
+  · rw [sbRatio, (eq_one_and_partialMean_eq_zero hp hk).2, zero_mul, div_zero]
+    exact (one_div_pos.mpr (one_sub_mul_pos hc1 hz)).le
   rcases ((hp.nonneg 0).trans (le_genFun hp hz.1)).eq_or_lt with hG | hG
   · rw [sbRatio, ← hG, mul_zero, div_zero]
     exact (one_div_pos.mpr (one_sub_mul_pos hc1 hz)).le
@@ -595,11 +623,12 @@ theorem sbRatio_le' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
   exact genDeriv_mul_le hp hk hc hz
 
 /-- Proposition 5(1). If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then `R(z) ≤ 1 / (1 - c (1 - z))`
-on `[0, 1]`. The hypothesis `p 0 > 0` is not needed (`sbRatio_le'`). -/
-theorem sbRatio_le (hp : IsLaw p N) (_hp0 : 0 < p 0) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
+on `[0, 1]`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not needed
+(`sbRatio_le'`). -/
+theorem sbRatio_le (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
     (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ}
     (hz : z ∈ Set.Icc (0 : ℝ) 1) : sbRatio p N z ≤ 1 / (1 - c * (1 - z)) :=
-  sbRatio_le' hp hk hc1 hc hz
+  sbRatio_le' hp hc1 hc hz
 
 /-- Proposition 5(1) at `z = 0`, `ρ_0 ≤ 1 / (1 - c)`, in the multiplied-out form
 `G(1) ≤ (1 - c)⁻¹ μ F(0)` used by `SizeBias.lower_reduction`. -/
@@ -613,11 +642,15 @@ theorem partialMean_one_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c :
   rw [hp1, hc0, mul_assoc, inv_mul_eq_div, le_div_iff₀ (sub_pos.mpr hc1)]
   linarith
 
-/-- Proposition 5(3), without `p 0 > 0`. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
+/-- Proposition 5(3), for every law on `[0, N]`. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
 `p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. -/
-theorem pair_criterion' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
+theorem pair_criterion' (hp : IsLaw p N) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / c * Real.log (1 / (1 - c)))) ≤ p 0 := by
+  by_cases hk : ∃ k, 0 < k ∧ 0 < p k
+  swap
+  · obtain ⟨h0, hμ⟩ := eq_one_and_partialMean_eq_zero hp hk
+    simp [h0, hμ]
   set μ := partialMean p N
   have h := exp_sub_le_of_tiltMean_div_le hp (h := fun x ↦ μ / c * Real.log (1 - c * (1 - x)))
     (continuousOn_const.mul (ContinuousOn.log (continuousOn_const.sub (continuousOn_const.mul
@@ -639,34 +672,35 @@ theorem pair_criterion' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : �
   simpa only [sub_zero, mul_one, sub_self, mul_zero, Real.log_one, mul_neg, neg_neg] using h
 
 /-- Proposition 5(3). If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
-`p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. The hypothesis `p 0 > 0` is not needed
-(`pair_criterion'`). -/
-theorem pair_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
+`p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. The hypotheses `p 0 > 0` and `p k > 0` for some
+`k ≥ 1` are not needed (`pair_criterion'`). -/
+theorem pair_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / c * Real.log (1 / (1 - c)))) ≤ p 0 :=
-  pair_criterion' hp hk hc0 hc1 hc
+  pair_criterion' hp hc0 hc1 hc
 
-/-- Proposition 5(3), weak form, without `p 0 > 0`. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`,
-then `p 0 ≥ exp(-μ / (1 - c))`. -/
-theorem pair_criterion_weak' (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
+/-- Proposition 5(3), weak form, for every law on `[0, N]`. If `0 < c < 1` and `D(w) ≤ c` on
+`(0, 1]`, then `p 0 ≥ exp(-μ / (1 - c))`. -/
+theorem pair_criterion_weak' (hp : IsLaw p N) {c : ℝ}
     (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / (1 - c))) ≤ p 0 := by
-  refine le_trans (Real.exp_le_exp.mpr ?_) (pair_criterion' hp hk hc0 hc1 hc)
+  refine le_trans (Real.exp_le_exp.mpr ?_) (pair_criterion' hp hc0 hc1 hc)
   have hc' : 1 - c ≠ 0 := (sub_pos.mpr hc1).ne'
   have hl : Real.log (1 / (1 - c)) ≤ c / (1 - c) := by
     have h := Real.log_le_sub_one_of_pos (one_div_pos.mpr (sub_pos.mpr hc1))
     rwa [div_sub_one hc', sub_sub_cancel] at h
-  have h := mul_le_mul_of_nonneg_left hl (div_nonneg (partialMean_pos hp hk).le hc0.le)
+  have h := mul_le_mul_of_nonneg_left hl (div_nonneg (hp.partialMean_nonneg N) hc0.le)
   have e : partialMean p N / c * (c / (1 - c)) = partialMean p N / (1 - c) := by
     field_simp
   linarith
 
 /-- Proposition 5(3), weak form. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
-`p 0 ≥ exp(-μ / (1 - c))`. The hypothesis `p 0 > 0` is not needed (`pair_criterion_weak'`). -/
-theorem pair_criterion_weak (hp : IsLaw p N) (_hp0 : 0 < p 0) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
-    (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
+`p 0 ≥ exp(-μ / (1 - c))`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not
+needed (`pair_criterion_weak'`). -/
+theorem pair_criterion_weak (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k)
+    {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
     Real.exp (-(partialMean p N / (1 - c))) ≤ p 0 :=
-  pair_criterion_weak' hp hk hc0 hc1 hc
+  pair_criterion_weak' hp hc0 hc1 hc
 
 end Tilt
 
