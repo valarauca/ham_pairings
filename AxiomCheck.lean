@@ -1,5 +1,6 @@
 import Clifford
 import Spin
+import Suppression
 
 open Pairing PerfectMatching
 
@@ -48,3 +49,23 @@ open Pairing PerfectMatching
 #print axioms exists_valuationSubring_two
 #print axioms exists_lattice
 #print axioms cod105
+#print axioms RoundRobin.factor_injective
+#print axioms RoundRobin.distinct_factors_edge_disjoint
+#print axioms RoundRobin.card_block
+#print axioms RoundRobin.Canonical.card_vertex
+#print axioms RoundRobin.Canonical.card_block
+#print axioms RoundRobin.Canonical.distinct_factors_edge_disjoint
+#print axioms restrict_glue
+#print axioms glueEquiv
+#print axioms edgesOff_subset_iff
+#print axioms card_boundary
+#print axioms isZeroState_glue_iff
+#print axioms zeroStateEquiv
+#print axioms card_zeroStates_eq
+#print axioms RoundRobin.Canonical.isZeroState_glue_iff
+#print axioms RoundRobin.Canonical.suppression
+#print axioms isPartialMatching_edgesOff
+#print axioms uncovered_edgesOff
+#print axioms nonempty_of_even_card
+#print axioms exists_edgesOff_eq
+#print axioms RoundRobin.Canonical.suppression_of_isPartialMatching
