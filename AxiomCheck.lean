@@ -570,3 +570,7 @@ open Pairing PerfectMatching
 #print axioms HybridConditional.prob_le_of_hji'
 #print axioms HybridConditional.prob_zero_le_exp_of_tiltVar_le
 #print axioms HybridConditional.prob_le_of_tilt
+#print axioms HybridConditional.le_radius_add_one
+#print axioms HybridConditional.tail_product_le
+#print axioms HybridConditional.exists_tail_le
+#print axioms HybridConditional.hybrid_theorem1

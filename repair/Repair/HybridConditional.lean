@@ -333,6 +333,249 @@ theorem prob_le_of_tilt {P : ∀ a b, Ω a b → ℝ} {X : ∀ a b, Ω a b → �
 
 end Tilted
 
+section Asymptotic
+
+/-- `d' = ⌈ε√m⌉`, the size of the defect set in Theorem 1 of `hybrid-assembly.md`. -/
+noncomputable def defectSize (ε : ℝ) (m : ℕ) : ℕ :=
+  ⌈ε * Real.sqrt m⌉₊
+
+/-- `K = ⌊(1 - δ)d'⌋`, the repair radius in Theorem 1 of `hybrid-assembly.md`. -/
+noncomputable def radius (ε δ : ℝ) (m : ℕ) : ℕ :=
+  ⌊(1 - δ) * defectSize ε m⌋₊
+
+/-- `k = ⌈4(1 + η)K⌉`, the half order of the moments in Theorem 1 of `hybrid-assembly.md`. -/
+noncomputable def halfOrder (ε δ η : ℝ) (m : ℕ) : ℕ :=
+  ⌈4 * (1 + η) * radius ε δ m⌉₊
+
+/-- `(1 - δ)ε√m ≤ K + 1`, the last line of the proof of Theorem 1 of `hybrid-assembly.md`. -/
+theorem le_radius_add_one {ε δ : ℝ} (hδ1 : δ ≤ 1) (m : ℕ) :
+    (1 - δ) * ε * Real.sqrt m ≤ radius ε δ m + 1 := by
+  have h1 := Nat.le_ceil (ε * Real.sqrt m)
+  have h2 := Nat.lt_floor_add_one ((1 - δ) * defectSize ε m)
+  have h3 : (1 - δ) * (ε * Real.sqrt m) ≤ (1 - δ) * defectSize ε m :=
+    mul_le_mul_of_nonneg_left h1 (by linarith)
+  rw [radius]
+  linarith
+
+/-- The arithmetic of the proof of Theorem 1 of `hybrid-assembly.md`. If `K ≥ 1`, `0 < x ≤ 1`,
+`(1 + η)K ≤ βk`, `0 < Y ≤ 4m`, `log x ≤ c - β log m`, and
+`19 + log 4 + (1 + η)c / β ≤ (η / 2) log m`, then `(K + 1)(2K + 5)³ Y^K x^k ≤ m^(-ηK/2)`. -/
+theorem tail_product_le {K k : ℕ} {η β x Y c m : ℝ} (hη : 0 < η) (hβ : 0 < β) (hK : 1 ≤ K)
+    (hm : 0 < m) (hY : 0 < Y) (hYm : Y ≤ 4 * m) (hx : 0 < x) (hx1 : x ≤ 1)
+    (hk : (1 + η) * K ≤ β * k) (hlog : Real.log x ≤ c - β * Real.log m)
+    (hm0 : 19 + Real.log 4 + (1 + η) * c / β ≤ η / 2 * Real.log m) :
+    (K + 1) * (2 * K + 5) ^ 3 * Y ^ K * x ^ k ≤ m ^ (-(η * K / 2)) := by
+  have hK' : (1 : ℝ) ≤ K := by exact_mod_cast hK
+  have hpos : 0 < (K + 1 : ℝ) * (2 * K + 5) ^ 3 * Y ^ K * x ^ k := by positivity
+  rw [Real.rpow_def_of_pos hm, ← Real.exp_log hpos, Real.exp_le_exp,
+    Real.log_mul (by positivity) (by positivity), Real.log_mul (by positivity) (by positivity),
+    Real.log_mul (by positivity) (by positivity), Real.log_pow, Real.log_pow, Real.log_pow]
+  have h1 : Real.log (K + 1) ≤ K := by
+    linarith [Real.log_le_sub_one_of_pos (show (0 : ℝ) < K + 1 by positivity)]
+  have h2 : Real.log (2 * K + 5) ≤ 2 * K + 4 := by
+    linarith [Real.log_le_sub_one_of_pos (show (0 : ℝ) < 2 * K + 5 by positivity)]
+  have h3 : Real.log Y ≤ Real.log 4 + Real.log m := by
+    rw [← Real.log_mul (by norm_num) hm.ne']
+    exact Real.log_le_log hY hYm
+  have hlx : Real.log x ≤ 0 := Real.log_nonpos hx.le hx1
+  have h4 : (k : ℝ) * Real.log x ≤ (1 + η) * K / β * Real.log x := by
+    refine mul_le_mul_of_nonpos_right ?_ hlx
+    rw [div_le_iff₀ hβ]
+    linarith
+  have h5 : (1 + η) * K / β * Real.log x ≤ (1 + η) * K / β * (c - β * Real.log m) :=
+    mul_le_mul_of_nonneg_left hlog (by positivity)
+  have h6 : (1 + η) * K / β * (c - β * Real.log m) =
+      K * ((1 + η) * c / β) - (1 + η) * K * Real.log m := by
+    field_simp
+  have h7 := mul_le_mul_of_nonneg_left hm0 (by positivity : (0 : ℝ) ≤ K)
+  have h8 := mul_le_mul_of_nonneg_left h3 (by positivity : (0 : ℝ) ≤ K)
+  nlinarith
+
+/-- Theorem 1 of `hybrid-assembly.md`, the arithmetic. Fix `ε, η > 0`, `δ ∈ (0, 1)` and `H ≥ 1`,
+and put `d' = ⌈ε√m⌉`, `K = ⌊(1 - δ)d'⌋`, `k = ⌈4(1 + η)K⌉`, `M = m - 3`, `n - 1 = 2m - 2` and
+`μ_* = πδ(n - 1) / (80√d')`. There is `m₀` such that every `m ≥ m₀` has `m ≥ 3`,
+`d', K, k ≥ 1`, `(K + 1)(2K + 5)³ (2(M + d'))^K (4e H k / μ_*)^k ≤ m^(-ηK/2)` and
+`πδ / (80√d') + m^(-ηK/2) < 1`. -/
+theorem exists_tail_le {ε δ η H : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hδ1 : δ < 1) (hη : 0 < η)
+    (hH : 1 ≤ H) : ∃ m₀ : ℕ, ∀ m ≥ m₀,
+      3 ≤ m ∧ 1 ≤ defectSize ε m ∧ 1 ≤ radius ε δ m ∧ 1 ≤ halfOrder ε δ η m ∧
+      (radius ε δ m + 1) * (2 * radius ε δ m + 5) ^ 3 *
+          (2 * ((m - 3 : ℕ) + defectSize ε m)) ^ radius ε δ m *
+          (4 * Real.exp 1 * H * halfOrder ε δ η m /
+            (Real.pi * δ * (2 * m - 2 : ℕ) / (80 * Real.sqrt (defectSize ε m)))) ^
+            halfOrder ε δ η m ≤ (m : ℝ) ^ (-(η * radius ε δ m / 2)) ∧
+      Real.pi * δ / (80 * Real.sqrt (defectSize ε m)) +
+        (m : ℝ) ^ (-(η * radius ε δ m / 2)) < 1 := by
+  set C1 : ℝ := 3200 * Real.exp 1 * H * (1 + η) * ε * Real.sqrt (2 * ε) / (Real.pi * δ) with hC1
+  have hC1pos : 0 < C1 := by positivity
+  set c : ℝ := |Real.log C1| with hcdef
+  have hc : 0 ≤ c := abs_nonneg _
+  set L : ℝ := 2 * (19 + Real.log 4 + (1 + η) * c / (1 / 4)) / η with hLdef
+  set S0 : ℝ := max (max (1 / ε) (1 / ((1 - δ) * ε))) (max (2 * ε) (C1 ^ 2)) with hS0def
+  refine ⟨⌈max (max (S0 ^ 2) 3) (Real.exp L)⌉₊, fun m hm ↦ ?_⟩
+  have hmT : max (max (S0 ^ 2) 3) (Real.exp L) ≤ (m : ℝ) :=
+    (Nat.le_ceil _).trans (by exact_mod_cast hm)
+  have hS0m : S0 ^ 2 ≤ (m : ℝ) := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hmT
+  have h3m : (3 : ℝ) ≤ m := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hmT
+  have hLm : Real.exp L ≤ m := le_trans (le_max_right _ _) hmT
+  have hm3 : 3 ≤ m := by exact_mod_cast h3m
+  have hmpos : (0 : ℝ) < m := by linarith
+  have h1ε : 0 ≤ 1 / ε := by positivity
+  have hS0 : 0 ≤ S0 := h1ε.trans ((le_max_left _ _).trans (le_max_left _ _))
+  set s := Real.sqrt m with hsdef
+  have hs : S0 ≤ s := (Real.le_sqrt hS0 hmpos.le).mpr hS0m
+  have hspos : 0 < s := Real.sqrt_pos.mpr hmpos
+  have hss : s ^ 2 = m := Real.sq_sqrt hmpos.le
+  have hεs : 1 ≤ ε * s := by
+    have h : 1 / ε ≤ s := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hs
+    rw [div_le_iff₀ hε] at h
+    linarith
+  have hδε : 0 < (1 - δ) * ε := mul_pos (by linarith) hε
+  have hδεs : 1 ≤ (1 - δ) * ε * s := by
+    have h : 1 / ((1 - δ) * ε) ≤ s := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hs
+    rw [div_le_iff₀ hδε] at h
+    linarith
+  have h2ε : 2 * ε ≤ s := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hs
+  have hC1s : C1 ^ 2 ≤ s := le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hs
+  set t := Real.sqrt s with htdef
+  have htpos : 0 < t := Real.sqrt_pos.mpr hspos
+  have htt : t ^ 2 = s := Real.sq_sqrt hspos.le
+  have hC1t : C1 ≤ t := (Real.le_sqrt hC1pos.le hspos.le).mpr hC1s
+  set d := defectSize ε m with hddef
+  have hd1 : ε * s ≤ d := Nat.le_ceil _
+  have hd2 : (d : ℝ) < ε * s + 1 := Nat.ceil_lt_add_one (by positivity)
+  have hd : 1 ≤ d := by exact_mod_cast hεs.trans hd1
+  have hd2' : (d : ℝ) ≤ 2 * ε * s := by linarith
+  have hdpos : (0 : ℝ) < d := by exact_mod_cast hd
+  have hdm : (d : ℝ) ≤ m :=
+    calc (d : ℝ) ≤ 2 * ε * s := hd2'
+      _ ≤ s * s := mul_le_mul_of_nonneg_right h2ε hspos.le
+      _ = m := by rw [← hss]; ring
+  set K := radius ε δ m with hKdef
+  have hK1 : (K : ℝ) ≤ (1 - δ) * d := Nat.floor_le (by positivity)
+  have hδd : (1 : ℝ) ≤ (1 - δ) * d := by
+    have h := mul_le_mul_of_nonneg_left hd1 (by linarith : (0 : ℝ) ≤ 1 - δ)
+    linarith
+  have hK : 1 ≤ K := Nat.le_floor (by push_cast; exact hδd)
+  have hK' : (1 : ℝ) ≤ K := by exact_mod_cast hK
+  have hKd : (K : ℝ) ≤ d := hK1.trans (by linarith [mul_nonneg hδ.le hdpos.le])
+  have hηK : 0 ≤ η * K := mul_nonneg hη.le (Nat.cast_nonneg K)
+  set k := halfOrder ε δ η m with hkdef
+  have hk1 : 4 * (1 + η) * K ≤ (k : ℝ) := Nat.le_ceil _
+  have hk2 : (k : ℝ) < 4 * (1 + η) * K + 1 := Nat.ceil_lt_add_one (by positivity)
+  have hk : 1 ≤ k := by exact_mod_cast (show (1 : ℝ) ≤ k by linarith)
+  have hk3 : (k : ℝ) ≤ 10 * (1 + η) * ε * s := by
+    have e1 : (1 : ℝ) ≤ (1 + η) * K := by linarith
+    have e2 : (1 + η) * (K : ℝ) ≤ (1 + η) * (2 * ε * s) :=
+      mul_le_mul_of_nonneg_left (hKd.trans hd2') (by positivity)
+    linarith
+  have hN : (((2 * m - 2 : ℕ)) : ℝ) = 2 * m - 2 := by
+    rw [Nat.cast_sub (by omega)]
+    push_cast
+    ring
+  have hNm : (m : ℝ) ≤ ((2 * m - 2 : ℕ) : ℝ) := by
+    rw [hN]
+    linarith
+  have hsd : Real.sqrt d ≤ Real.sqrt (2 * ε) * t := by
+    rw [htdef, ← Real.sqrt_mul (by positivity)]
+    exact Real.sqrt_le_sqrt (by linarith)
+  set x := 4 * Real.exp 1 * H * k /
+    (Real.pi * δ * ((2 * m - 2 : ℕ) : ℝ) / (80 * Real.sqrt d)) with hxdef
+  have hxpos : 0 < x := by
+    rw [hxdef]
+    have : (0 : ℝ) < ((2 * m - 2 : ℕ) : ℝ) := hmpos.trans_le hNm
+    have : (0 : ℝ) < k := by exact_mod_cast hk
+    positivity
+  have hx : x ≤ C1 / t := by
+    rw [hxdef, div_div_eq_mul_div]
+    calc 4 * Real.exp 1 * H * k * (80 * Real.sqrt d) / (Real.pi * δ * ((2 * m - 2 : ℕ) : ℝ))
+        ≤ 4 * Real.exp 1 * H * (10 * (1 + η) * ε * s) * (80 * (Real.sqrt (2 * ε) * t)) /
+            (Real.pi * δ * m) := by
+          gcongr
+      _ = C1 / t := by
+          rw [hC1, ← hss, ← htt]
+          field_simp
+          ring
+  have hx1 : x ≤ 1 := hx.trans ((div_le_one htpos).mpr hC1t)
+  have hlogt : Real.log t = Real.log m / 4 := by
+    rw [htdef, Real.log_sqrt hspos.le, hsdef, Real.log_sqrt hmpos.le]
+    ring
+  have hlog : Real.log x ≤ c - 1 / 4 * Real.log m := by
+    have h := Real.log_le_log hxpos hx
+    rw [Real.log_div hC1pos.ne' htpos.ne', hlogt] at h
+    linarith [le_abs_self (Real.log C1)]
+  have hLlog : L ≤ Real.log m := (Real.le_log_iff_exp_le hmpos).mpr hLm
+  have hm0 : 19 + Real.log 4 + (1 + η) * c / (1 / 4) ≤ η / 2 * Real.log m := by
+    have h := mul_le_mul_of_nonneg_left hLlog (by positivity : (0 : ℝ) ≤ η / 2)
+    rw [hLdef] at h
+    field_simp at h ⊢
+    linarith
+  have hM : (((m - 3 : ℕ)) : ℝ) = m - 3 := by
+    rw [Nat.cast_sub hm3]
+    push_cast
+    ring
+  have hY : 0 < 2 * (((m - 3 : ℕ) : ℝ) + d) := by positivity
+  have hYm : 2 * (((m - 3 : ℕ) : ℝ) + d) ≤ 4 * m := by
+    rw [hM]
+    linarith
+  have htail := tail_product_le (K := K) (k := k) hη (by norm_num : (0 : ℝ) < 1 / 4) hK hmpos hY
+    hYm hxpos hx1 (by linarith) hlog hm0
+  refine ⟨hm3, hd, hK, hk, htail, ?_⟩
+  have hβ : Real.pi * δ / (80 * Real.sqrt d) ≤ 1 / 20 := by
+    have hs1 : 1 ≤ Real.sqrt d := Real.one_le_sqrt.mpr (by exact_mod_cast hd)
+    rw [div_le_iff₀ (by positivity)]
+    have hπδ : Real.pi * δ ≤ 4 * 1 :=
+      mul_le_mul Real.pi_le_four hδ1.le hδ.le (by norm_num)
+    linarith
+  have h19 : 19 ≤ η / 2 * Real.log m := by
+    have h4 : 0 ≤ Real.log 4 := Real.log_nonneg (by norm_num)
+    have : 0 ≤ (1 + η) * c / (1 / 4) := by positivity
+    linarith
+  have hlogm : 0 ≤ Real.log m := Real.log_nonneg (by linarith)
+  have hpow : (m : ℝ) ^ (-(η * K / 2)) ≤ Real.exp (-19) := by
+    rw [Real.rpow_def_of_pos hmpos, Real.exp_le_exp]
+    have h := mul_nonneg (mul_nonneg hη.le hlogm) (sub_nonneg.mpr hK')
+    linarith
+  have he : Real.exp (-19) ≤ 1 / 20 := by
+    rw [Real.exp_neg, inv_eq_one_div, div_le_div_iff₀ (Real.exp_pos 19) (by norm_num)]
+    linarith [Real.add_one_le_exp (19 : ℝ)]
+  linarith
+
+universe u in
+/-- Theorem 1 of `hybrid-assembly.md`, conditional on Proposition 2 and Lemma 5. Fix `ε, η > 0`,
+`δ ∈ (0, 1)` and `H ≥ 1`, and put `d' = ⌈ε√m⌉`, `K = ⌊(1 - δ)d'⌋` and `k = ⌈4(1 + η)K⌉`. There is
+`m₀` such that for every `m ≥ m₀` the bound `πδ / (80√d') + m^(-ηK/2)` is below `1`, and the
+following holds for every family of pattern spaces at `m`, with `X ≤ n - 1 = 2m - 2`. If (H-JI)
+holds, the mean bound of Lemma 5 holds, `P(E' ∈ 𝔅) = pB ≤ πδ / (80√d')` under `H`, and the union
+of Proposition 2 bounds `P_H = P_H(ρ(H) ≤ K)`, then `P_H ≤ πδ / (80√d') + m^(-ηK/2)`. Since then
+`P_H(ρ(H) ≤ K) < 1`, some tail has `ρ > K`, and `N_m ≥ K + 1 ≥ (1 - δ)ε√m` by
+`le_radius_add_one`. -/
+theorem hybrid_theorem1 {ε δ η H : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hδ1 : δ < 1) (hη : 0 < η)
+    (hH : 1 ≤ H) : ∃ m₀ : ℕ, ∀ m ≥ m₀,
+      Real.pi * δ / (80 * Real.sqrt (defectSize ε m)) +
+        (m : ℝ) ^ (-(η * radius ε δ m / 2)) < 1 ∧
+      ∀ (Ω : ℕ → ℕ → Type u) [∀ a b, Fintype (Ω a b)] (P : ∀ a b, Ω a b → ℝ)
+        (X : ∀ a b, Ω a b → ℕ) (B : ∀ a b, Set (Ω a b)) (PH pB : ℝ),
+        (∀ a b, IsProb (P a b)) → (∀ a b ω, X a b ω ≤ 2 * m - 2) →
+        HJI P X B (2 * m - 2) (defectSize ε m) (radius ε δ m) (halfOrder ε δ η m) δ H →
+        (∀ a b, a + b ≤ radius ε δ m → Real.pi * δ * ((2 * m - 2 : ℕ) : ℝ) /
+          (40 * Real.sqrt (defectSize ε m)) ≤ ∑ ω, P a b ω * X a b ω) →
+        pB ≤ Real.pi * δ / (80 * Real.sqrt (defectSize ε m)) →
+        PH ≤ pB + ∑ j ∈ range (radius ε δ m + 1), ∑ x ∈ antidiagonal j,
+          (((m - 3).choose x.1 * (defectSize ε m).choose x.2 *
+            (2 * (3 + x.1 + x.2) - 1).doubleFactorial : ℕ) : ℝ) *
+            lawOf ((B x.1 x.2)ᶜ.indicator (P x.1 x.2)) (X x.1 x.2) 0 →
+        PH ≤ Real.pi * δ / (80 * Real.sqrt (defectSize ε m)) +
+          (m : ℝ) ^ (-(η * radius ε δ m / 2)) := by
+  obtain ⟨m₀, hm₀⟩ := exists_tail_le hε hδ hδ1 hη hH
+  refine ⟨m₀, fun m hm ↦ ?_⟩
+  obtain ⟨hm3, hd, hK, hk, htail, hlt⟩ := hm₀ m hm
+  refine ⟨hlt, fun Ω _ P X B PH pB hP hX hji hmean hpB hunion ↦ ?_⟩
+  refine (prob_le_of_hji' hP hX hδ hδ1.le hd hH hk (by omega) hji hmean hpB hunion).trans ?_
+  gcongr
+
+end Asymptotic
+
 end HybridConditional
 
 end Pairing
