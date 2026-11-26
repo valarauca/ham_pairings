@@ -564,3 +564,9 @@ open Pairing PerfectMatching
 #print axioms hamProb_succ
 #print axioms jointHamProb_eq_of_mate_eq
 #print axioms jointHamProb_div_sq_eq_of_mate_eq
+#print axioms contract_mate_of_pos
+#print axioms RoundRobin.Canonical.context_mate_of_lt
+#print axioms RoundRobin.Canonical.context_mate_neg_eq
+#print axioms RoundRobin.Canonical.context_half_mate_neg_eq
+#print axioms RoundRobin.Canonical.lattice_of_lt
+#print axioms RoundRobin.Canonical.context_common_edge
