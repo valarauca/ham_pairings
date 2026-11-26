@@ -1,7 +1,7 @@
 name = "prefect-pairing"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["Pairing", "Clifford", "Spin", "Suppression", "Repair"]
+defaultTargets = ["Pairing", "Suppression", "Repair"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -14,17 +14,15 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.35.0"
 
+[[require]]
+name = "ham-spin"
+path = "../ham-spin"
+
 [[lean_lib]]
 name = "Pairing"
 srcDir = "core"
-
-[[lean_lib]]
-name = "Clifford"
-srcDir = "clifford"
-
-[[lean_lib]]
-name = "Spin"
-srcDir = "spin"
+roots = ["Pairing.RoundRobin"]
+globs = ["Pairing", "Pairing.RoundRobin"]
 
 [[lean_lib]]
 name = "Suppression"

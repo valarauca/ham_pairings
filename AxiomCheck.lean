@@ -1,55 +1,8 @@
-import Clifford
-import Spin
 import Suppression
 import Repair
 
 open Pairing PerfectMatching
 
-#print axioms ham_glue_iff
-#print axioms sum_H_of_card_eq_four
-#print axioms sum_H_orbit_six
-#print axioms one_add_ρW_add_sq
-#print axioms Γ_anticomm
-#print axioms ΓU_unique
-#print axioms cliffordRep_ι_v
-#print axioms ρW_conj_gammaL
-#print axioms finrank_W_eq
-#print axioms rank_H_eq
-#print axioms cknUpperBound
-#print axioms frameE_sq
-#print axioms frameE_anticomm_frameF
-#print axioms adjoin_frame_eq_top
-#print axioms adjoin_ρW_eq_top
-#print axioms invariant_eq_bot_or_top
-#print axioms sum_Γ_matching
-#print axioms minpoly_ρW_threeCycle
-#print axioms not_isNilpotent_ρW_threeCycle_sub_one
-#print axioms cliffordRep_surjective
-#print axioms cliffordRep_ι_ones
-#print axioms adjoin_ρK_eq_top
-#print axioms ρK_invariant_eq_bot_or_top
-#print axioms ρK_threeCycle_ne_smul_one
-#print axioms minpoly_ρK_threeCycle
-#print axioms maasGen_closed
-#print axioms toMatrix_ρW_adj
-#print axioms wBasis_equivFun_ρW
-#print axioms exists_injective_intertwiner
-#print axioms exists_intertwining_equiv
-#print axioms cliffordRep_stildeCl
-#print axioms reduceHom_ι_adjU
-#print axioms schurHom_t
-#print axioms finrank_le_of_jSystem
-#print axioms schurQ_nondegenerate
-#print axioms finrank_le_of_simple
-#print axioms card_eq_of_lattice
-#print axioms finrank_eq_of_lattice
-#print axioms reduction_basicSpin
-#print axioms reduction_irreducible
-#print axioms T_mul_mem_monoSpan
-#print axioms exists_simple_submodule
-#print axioms exists_valuationSubring_two
-#print axioms exists_lattice
-#print axioms cod105
 #print axioms RoundRobin.factor_injective
 #print axioms RoundRobin.distinct_factors_edge_disjoint
 #print axioms RoundRobin.card_block
@@ -886,29 +839,6 @@ open Pairing PerfectMatching
 #print axioms card_le_two_mul_card_shared2_le_two
 #print axioms RoundRobin.Canonical.card_filter_repair_le
 #print axioms RoundRobin.Canonical.half_mul_le_of_hybrid_rescue
-#print axioms funCongr_H
-#print axioms map_funCongr_W
-#print axioms wCongr_rowW
-#print axioms congr_symm_inv_smul
-#print axioms wCongr_ρW
-#print axioms wCongr_comp_ρW
-#print axioms finrank_W_eq_of_card
-#print axioms rank_H_eq_of_card
-#print axioms hamForm_single
-#print axioms hamForm_apply
-#print axioms hamForm_comm
-#print axioms ker_hamForm
-#print axioms range_vecMulLinear_H
-#print axioms quotRadEquiv_single
-#print axioms finrank_quot_rad
-#print axioms vecMul_ρ
-#print axioms hamForm_ρ
-#print axioms ρ_mem_ker_hamForm
-#print axioms quotRadEquiv_ρRad
-#print axioms quotRadEquiv_comp_ρRad
-#print axioms exists_equivariant_quotRad
-#print axioms reduction_basicSpin_congr
-#print axioms reduction_basicSpin_quotRad
 #print axioms RoundRobin.Canonical.ReflSet.card_ofSystem
 #print axioms RoundRobin.Canonical.ReflSet.card_union
 #print axioms RoundRobin.Canonical.ReflSet.card_verts
