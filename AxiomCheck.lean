@@ -747,3 +747,15 @@ open Pairing PerfectMatching
 #print axioms CyclicContext.insert_context
 #print axioms CyclicContext.exists_slot
 #print axioms CyclicContext.zigzag_insertion
+#print axioms Obstruction.abs_prob_profile_sub_le_ne
+#print axioms RoundRobin.Canonical.isRobust_law
+#print axioms RoundRobin.Canonical.isRobust_coverage
+#print axioms RoundRobin.Canonical.card_coverage_change_le_of_radius
+#print axioms RoundRobin.Canonical.hole_isRobust
+#print axioms RoundRobin.Canonical.ngA_relativized
+#print axioms RoundRobin.Canonical.ngA_c
+#print axioms RoundRobin.Canonical.ngA_d
+#print axioms RoundRobin.Canonical.certPerm_smul
+#print axioms RoundRobin.Canonical.shortCert_smul_iff
+#print axioms RoundRobin.Canonical.smul_mem_certTwoClass_iff
+#print axioms RoundRobin.Canonical.ngA_c_certTwo

@@ -26,6 +26,7 @@ import Repair.SqrtObstructions.LocalFloor
 import Repair.SqrtObstructions.CertLength
 import Repair.SqrtObstructions.NearHybrid
 import Repair.SqrtObstructions.CoreCertLength
+import Repair.SqrtObstructions.NoGo
 import Repair.HybridPair.MeanCount
 import Repair.HybridPair.CommonEdge
 import Repair.HybridPair.Contexts
