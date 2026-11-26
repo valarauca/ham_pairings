@@ -410,3 +410,8 @@ open Pairing PerfectMatching
 #print axioms FactorCap.not_ham_capMatching_zero
 #print axioms FactorCap.not_ham_capMatching
 #print axioms FactorCap.isZeroState_capMatching
+#print axioms FactorCap.factorTail_mate
+#print axioms FactorCap.capAffine_smul_factor
+#print axioms FactorCap.isZeroState_capState
+#print axioms FactorCap.tailDist_capState_le
+#print axioms FactorCap.factorTail_cap
