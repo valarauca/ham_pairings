@@ -551,3 +551,12 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cliqueFinset_tripleUnion_six_three
 #print axioms RoundRobin.Canonical.card_fourCyclesThrough_six_three
 #print axioms RoundRobin.Canonical.card_fourCycles_six_two
+#print axioms hamPairCount_eq_sum_redCount
+#print axioms card_fiber_eq
+#print axioms not_ham_of_mate_eq
+#print axioms redType_of_even
+#print axioms redType_of_odd
+#print axioms redType_of_notMem
+#print axioms two_mul_sum_pairType
+#print axioms hamPairCount_eq_k2Count
+#print axioms hamPairCount_eq_k2Step
