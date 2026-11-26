@@ -16,3 +16,4 @@ import Repair.ExceptionalSix
 import Repair.TripleUnion
 import Repair.Insertion
 import Repair.FreeDefects
+import Repair.FixedDefectLimit
