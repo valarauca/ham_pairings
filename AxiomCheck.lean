@@ -575,3 +575,9 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.abs_prob_profile_hole_le
 #print axioms RoundRobin.Canonical.coverage_eq_of_far
 #print axioms RoundRobin.Canonical.card_coverage_change_le
+#print axioms Obstruction.card_liveIn_add_card_zeroIn
+#print axioms Obstruction.interIn_liveIn
+#print axioms Obstruction.zeroIn_liveIn
+#print axioms Obstruction.cond_ratio_eq
+#print axioms Obstruction.local_precision_floor
+#print axioms RoundRobin.Canonical.local_precision_floor_ball

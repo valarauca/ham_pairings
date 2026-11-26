@@ -17,3 +17,4 @@ import Repair.TripleUnion
 import Repair.SqrtObstructions.ClassCount
 import Repair.SqrtObstructions.Defect
 import Repair.SqrtObstructions.Hole
+import Repair.SqrtObstructions.LocalFloor
