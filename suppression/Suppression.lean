@@ -6,3 +6,4 @@ import Suppression.Prob
 import Suppression.HamCount
 import Suppression.Tilt
 import Suppression.ChainRule
+import Suppression.CouplingObstruction
