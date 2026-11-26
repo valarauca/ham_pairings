@@ -551,3 +551,8 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cliqueFinset_tripleUnion_six_three
 #print axioms RoundRobin.Canonical.card_fourCyclesThrough_six_three
 #print axioms RoundRobin.Canonical.card_fourCycles_six_two
+#print axioms card_near_class_le
+#print axioms RoundRobin.Canonical.card_near_class_le_pow
+#print axioms RoundRobin.Canonical.class_count
+#print axioms RoundRobin.Canonical.class_density_ge
+#print axioms RoundRobin.Canonical.near_class_fraction_le
