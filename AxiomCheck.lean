@@ -570,3 +570,5 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.context_half_mate_neg_eq
 #print axioms RoundRobin.Canonical.lattice_of_lt
 #print axioms RoundRobin.Canonical.context_common_edge
+#print axioms RoundRobin.Canonical.lt_of_context_mate_neg_eq
+#print axioms RoundRobin.Canonical.lattice_of_common_edge

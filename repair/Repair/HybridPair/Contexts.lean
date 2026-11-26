@@ -24,6 +24,12 @@ order of the normal form.
 * `context_common_edge` (Lemma 3) : under both conditions `{-x, x'}` is a common edge of
   `C_{1/2}(E)` and `C_{1/(2λ)}(E)`, and `lattice_of_lt` gives the lattice vector `(h, k)`,
   `h, k ≥ 1`, `2k < n`, `k ≡ λh`.
+* `lt_of_context_mate_neg_eq` (Lemma 3, "only if") : if `C_t(E)` pairs `-x` with `x'` off the
+  wrap arc, then `0 < v < w` or `v < w < 0` and no label lies strictly between.
+* `lattice_of_common_edge` (Lemma 3) : every common edge `{-x, x'}` of `C_{1/2}(E)` and
+  `C_{1/(2λ)}(E)` that is the wrap arc of neither gives a lattice vector `(h, k) ∈ L_λ`,
+  `h, k ≥ 1`. The wrap arcs are the edges at the lowest or highest vertex of `A` in the
+  respective order, so at most two common edges are excluded.
 
 Source: `results/hybrid-pair-incoherence.md` (organize-archive 0dca0a5), §1 and §2, Lemma 3,
 with the zig-zag positions of Lemma P of `factor-tail-L-test.md` (`FactorCap/ZigZag.lean`).
@@ -267,6 +273,173 @@ theorem context_common_edge (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ} {t : ZMo
         (lam : ZMod (2 * m - 1)) * ((x'.valMinAbs - x.valMinAbs : ℤ) : ZMod (2 * m - 1)) :=
   ⟨context_half_mate_neg_eq hm A hA hnx hx' h0 hlt hlab,
     context_mate_neg_eq hm ht A hA hnx hx' hv hw hvw hgap, lattice_of_lt hv hw hvw hlt⟩
+
+/-- The next defect end after an odd position is an entry end (`results/hybrid-pair-incoherence.md`
+§1): among the vertices of `A` above an odd position `p` in the order `zigPos m (λ ·)`, the lowest
+has even position. -/
+theorem exists_next_entry (lam : (ZMod (2 * m - 1))ˣ) (A : Finset (Vertex m))
+    (hA : ∀ v ∈ A, (factor m 0).mate v ∈ A) {p : ℤ} (hp : p % 2 = 1)
+    (hhi : ∃ y ∈ A, p < zigPos m (scale m lam y)) :
+    ∃ u ∈ A, zigPos m (scale m lam u) % 2 = 0 ∧ p < zigPos m (scale m lam u) ∧
+      ∀ y ∈ A, p < zigPos m (scale m lam y) →
+        zigPos m (scale m lam u) ≤ zigPos m (scale m lam y) := by
+  obtain ⟨u, hu, hmin⟩ := (A.filter fun y ↦ p < zigPos m (scale m lam y)).exists_min_image
+    (fun y ↦ zigPos m (scale m lam y)) (by
+      obtain ⟨y, hy, h⟩ := hhi
+      exact ⟨y, Finset.mem_filter.mpr ⟨hy, h⟩⟩)
+  rw [Finset.mem_filter] at hu
+  refine ⟨u, hu.1, ?_, hu.2, fun y hy h ↦ hmin y (Finset.mem_filter.mpr ⟨hy, h⟩)⟩
+  by_contra hodd
+  have h1 := zigPos_scale_factor_zero lam u
+  simp only [hodd, ↓reduceIte] at h1
+  have h2 := hmin _ (Finset.mem_filter.mpr ⟨hA u hu.1, by rw [h1]; omega⟩)
+  simp only [h1] at h2
+  omega
+
+/-- The previous defect end before an even position is an exit end
+(`results/hybrid-pair-incoherence.md` §1): among the vertices of `A` below an even position `p`
+in the order `zigPos m (λ ·)`, the highest has odd position. -/
+theorem exists_prev_exit (lam : (ZMod (2 * m - 1))ˣ) (A : Finset (Vertex m))
+    (hA : ∀ v ∈ A, (factor m 0).mate v ∈ A) {p : ℤ} (hp : p % 2 = 0)
+    (hlo : ∃ y ∈ A, zigPos m (scale m lam y) < p) :
+    ∃ u ∈ A, zigPos m (scale m lam u) % 2 = 1 ∧ zigPos m (scale m lam u) < p ∧
+      ∀ y ∈ A, zigPos m (scale m lam u) < zigPos m (scale m lam y) →
+        p ≤ zigPos m (scale m lam y) := by
+  obtain ⟨u, hu, hmax⟩ := (A.filter fun y ↦ zigPos m (scale m lam y) < p).exists_max_image
+    (fun y ↦ zigPos m (scale m lam y)) (by
+      obtain ⟨y, hy, h⟩ := hlo
+      exact ⟨y, Finset.mem_filter.mpr ⟨hy, h⟩⟩)
+  rw [Finset.mem_filter] at hu
+  refine ⟨u, hu.1, ?_, hu.2, fun y hy h ↦ ?_⟩
+  · by_contra hev
+    have hev' : zigPos m (scale m lam u) % 2 = 0 := by omega
+    have h1 := zigPos_scale_factor_zero lam u
+    simp only [hev', ↓reduceIte] at h1
+    have h2 := hmax _ (Finset.mem_filter.mpr ⟨hA u hu.1, by rw [h1]; omega⟩)
+    simp only [h1] at h2
+    omega
+  · by_contra h'
+    have := hmax y (Finset.mem_filter.mpr ⟨hy, by omega⟩)
+    omega
+
+/-- A label of a union of `F_0`-edges avoiding `∞` is nonzero. -/
+theorem ne_zero_of_mem (A : Finset (Vertex m)) (hA : ∀ v ∈ A, (factor m 0).mate v ∈ A)
+    (hinf : none ∉ A) {y : ZMod (2 * m - 1)} (hy : some y ∈ A) : y ≠ 0 := by
+  rintro rfl
+  exact hinf (by simpa [factor] using hA _ hy)
+
+omit [NeZero m] in
+/-- A unit multiple of a nonzero element has nonzero least absolute residue. -/
+theorem valMinAbs_mul_ne_zero (lam : (ZMod (2 * m - 1))ˣ) {y : ZMod (2 * m - 1)} (hy : y ≠ 0) :
+    ((lam : ZMod (2 * m - 1)) * y).valMinAbs ≠ 0 := by
+  rw [Ne, ZMod.valMinAbs_eq_zero]
+  intro h
+  exact hy ((Units.mul_right_eq_zero lam).mp h)
+
+/-- Lemma 3 of `results/hybrid-pair-incoherence.md`, "only if" direction, for one context. Let
+`2tλ = 1`, `A` a union of `F_0`-edges avoiding `∞`, and `-x, x' ∈ A` with `v = valMinAbs (λ x)`,
+`w = valMinAbs (λ x')`. If `C_t(E)` pairs `-x` with `x'` and the edge is not the wrap arc, that is
+`-x` is neither the lowest nor the highest vertex of `A` in the order `zigPos m (λ ·)`, then
+`0 < v < w` or `v < w < 0`, and no label `z` of `E` has `|valMinAbs (λ z)|` strictly between
+`|v|` and `|w|`. -/
+theorem lt_of_context_mate_neg_eq (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ}
+    {t : ZMod (2 * m - 1)} (ht : 2 * t * lam = 1) (A : Finset (Vertex m))
+    (hA : ∀ v ∈ A, (factor m 0).mate v ∈ A) (hinf : none ∉ A) {x x' : ZMod (2 * m - 1)}
+    (hnx : some (-x) ∈ A) (hx' : some x' ∈ A) {v w : ℤ}
+    (hv : (lam * x).valMinAbs = v) (hw : (lam * x').valMinAbs = w)
+    (hlo : ∃ y ∈ A, zigPos m (scale m lam y) < zigPos m (scale m lam (some (-x))))
+    (hhi : ∃ y ∈ A, zigPos m (scale m lam (some (-x))) < zigPos m (scale m lam y))
+    (hmate : ((context m t A hA).mate ⟨some (-x), hnx⟩ : Vertex m) = some x') :
+    ((0 < v ∧ v < w) ∨ (v < w ∧ w < 0)) ∧ ∀ z, some z ∈ A →
+      ¬(min |v| |w| < |(lam * z).valMinAbs| ∧ |(lam * z).valMinAbs| < max |v| |w|) := by
+  have hv0 : v ≠ 0 := by
+    rw [← hv]
+    exact valMinAbs_mul_ne_zero lam fun h ↦ ne_zero_of_mem A hA hinf hnx (by rw [h, neg_zero])
+  have hw0 : w ≠ 0 := by
+    rw [← hw]
+    exact valMinAbs_mul_ne_zero lam (ne_zero_of_mem A hA hinf hx')
+  have hneg : (lam * -x).valMinAbs = -v := by rw [mul_neg, valMinAbs_neg', hv]
+  have pnx := zigPos_scale_some (m := m) lam (-x)
+  have px' := zigPos_scale_some (m := m) lam x'
+  rw [hneg] at pnx
+  rw [hw] at px'
+  have hpz : ∀ z : ZMod (2 * m - 1), 2 * |(lam * z).valMinAbs| ≤ zigPos m (scale m lam (some z)) ∧
+      zigPos m (scale m lam (some z)) ≤ 2 * |(lam * z).valMinAbs| + 1 := by
+    intro z
+    rw [zigPos_scale_some]
+    split_ifs with hk
+    · rw [abs_of_pos hk]
+      omega
+    · rw [abs_of_nonpos (not_lt.mp hk)]
+      omega
+  rcases lt_or_gt_of_ne hv0 with hneg0 | hpos0
+  · simp only [show 0 < -v by omega, ↓reduceIte] at pnx
+    obtain ⟨u, hu, hu2, hup, hgap⟩ := exists_prev_exit lam A hA (p := 2 * -v) (by omega)
+      (by rw [← pnx]; exact hlo)
+    have h := context_mate_of_lt hm ht A hA hu hnx hu2 (by rw [pnx]; omega) (by rw [pnx]; exact hup)
+      (by rw [pnx]; exact hgap)
+    have h2 : (context m t A hA).mate ⟨u, hu⟩ = ⟨some (-x), hnx⟩ := Subtype.ext h
+    have h' : (context m t A hA).mate ⟨some (-x), hnx⟩ = ⟨u, hu⟩ := by
+      rw [← h2, mate_mate]
+    have hux : u = some x' := by rw [← hmate, h']
+    subst hux
+    have hw' : ¬0 < w := fun h ↦ by simp only [h, ↓reduceIte] at px'; omega
+    simp only [hw', ↓reduceIte] at px'
+    refine ⟨Or.inr ⟨by omega, by omega⟩, fun z hz hzb ↦ ?_⟩
+    rw [abs_of_neg hneg0, abs_of_neg (by omega : w < 0), min_eq_right (by omega),
+      max_eq_left (by omega)] at hzb
+    have := hpz z
+    have := hgap _ hz (by rw [px']; omega)
+    omega
+  · simp only [show ¬0 < -v by omega, ↓reduceIte] at pnx
+    obtain ⟨u, hu, hu2, hup, hgap⟩ := exists_next_entry lam A hA (p := 1 - 2 * -v) (by omega)
+      (by rw [← pnx]; exact hhi)
+    have h := context_mate_of_lt hm ht A hA hnx hu (by rw [pnx]; omega) hu2
+      (by rw [pnx]; exact hup) (by rw [pnx]; exact hgap)
+    have hux : u = some x' := by rw [← hmate, h]
+    subst hux
+    have hw' : 0 < w := by
+      by_contra h
+      simp only [h, ↓reduceIte] at px'
+      omega
+    simp only [hw', ↓reduceIte] at px'
+    refine ⟨Or.inl ⟨hpos0, by omega⟩, fun z hz hzb ↦ ?_⟩
+    rw [abs_of_pos hpos0, abs_of_pos hw', min_eq_left (by omega), max_eq_right (by omega)] at hzb
+    have := hpz z
+    have := hgap _ hz (by omega)
+    omega
+
+/-- Lemma 3 of `results/hybrid-pair-incoherence.md` ("only if" direction): common edges are
+lattice vectors. Let `2tλ = 1`, `A = V(E)` avoid `∞`, and `-x, x' ∈ A`. If `{-x, x'}` is an
+edge of both `C_{1/2}(E)` and `C_t(E)`, and in neither context is it the wrap arc (`-x` is neither the lowest nor the highest vertex of `A`, in label
+order and in the order `zigPos m (λ ·)`), then `(h, k) = (valMinAbs x' - valMinAbs x, w - v)`
+lies in `L_λ` with `h, k ≥ 1`, `2k < n` and `k ≡ λh`, where `v = valMinAbs (λ x)` and
+`w = valMinAbs (λ x')`. -/
+theorem lattice_of_common_edge (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod (2 * m - 1)}
+    (ht : 2 * t * lam = 1) (A : Finset (Vertex m)) (hA : ∀ v ∈ A, (factor m 0).mate v ∈ A)
+    (hinf : none ∉ A) {x x' : ZMod (2 * m - 1)} (hnx : some (-x) ∈ A) (hx' : some x' ∈ A)
+    (hlo1 : ∃ y ∈ A, zigPos m (scale m 1 y) < zigPos m (scale m 1 (some (-x))))
+    (hhi1 : ∃ y ∈ A, zigPos m (scale m 1 (some (-x))) < zigPos m (scale m 1 y))
+    (hlo : ∃ y ∈ A, zigPos m (scale m lam y) < zigPos m (scale m lam (some (-x))))
+    (hhi : ∃ y ∈ A, zigPos m (scale m lam (some (-x))) < zigPos m (scale m lam y))
+    (hhalf : ((context m m A hA).mate ⟨some (-x), hnx⟩ : Vertex m) = some x')
+    (hmate : ((context m t A hA).mate ⟨some (-x), hnx⟩ : Vertex m) = some x') :
+    1 ≤ x'.valMinAbs - x.valMinAbs ∧
+      1 ≤ (lam * x').valMinAbs - (lam * x).valMinAbs ∧
+      2 * ((lam * x').valMinAbs - (lam * x).valMinAbs) < 2 * m - 1 ∧
+      (((lam * x').valMinAbs - (lam * x).valMinAbs : ℤ) : ZMod (2 * m - 1)) =
+        (lam : ZMod (2 * m - 1)) * ((x'.valMinAbs - x.valMinAbs : ℤ) : ZMod (2 * m - 1)) := by
+  have ht1 : 2 * (m : ZMod (2 * m - 1)) * ((1 : (ZMod (2 * m - 1))ˣ) : ZMod (2 * m - 1)) = 1 := by
+    rw [Units.val_one, mul_one]
+    exact two_mul_natCast_self
+  have h1 : ∀ y : ZMod (2 * m - 1),
+      (((1 : (ZMod (2 * m - 1))ˣ) : ZMod (2 * m - 1)) * y).valMinAbs = y.valMinAbs := fun y ↦ by
+    rw [Units.val_one, one_mul]
+  obtain ⟨hlab, -⟩ := lt_of_context_mate_neg_eq hm ht1 A hA hinf hnx hx' (h1 x) (h1 x') hlo1
+    hhi1 hhalf
+  obtain ⟨hvw, -⟩ := lt_of_context_mate_neg_eq hm ht A hA hinf hnx hx' rfl rfl hlo hhi hmate
+  have hlt : x.valMinAbs < x'.valMinAbs := by omega
+  exact lattice_of_lt rfl rfl hvw hlt
 
 end RoundRobin.Canonical
 
