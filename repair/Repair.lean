@@ -44,3 +44,7 @@ import Repair.PairRecursion
 import Repair.PairVariance
 import Repair.PairFormula
 import Repair.PairLevelOne
+import Repair.Cover.Hybrid
+import Repair.Cover.NCycle
+import Repair.Cover.Lane
+import Repair.Cover.HybridLaw
