@@ -322,7 +322,7 @@ theorem card_mate_ham (A : PerfectMatching W) {x u : W} (hxu : x ≠ u) (hAu : A
   have h3 : #(cycleOf A A u) = 2 * 1 := by rw [card_cycleOf, cycLen_self]
   have hT := redType_of_notMem hu h2 h3
   rw [redType, dite_eq_right hxu] at hT
-  rw [h, hamPairCount_eq_k2Count, hT]
+  rw [h, jointCount_eq_k2Count, hT]
 
 /-- `|Ham(A)| = (2e - 2) · #{C ∈ Ham(A) : C(x) = u}` (`results/hybrid-pair-averaged.md`,
 Theorem 1). -/
@@ -330,9 +330,9 @@ theorem hamDeg_eq_mul (A : PerfectMatching W) :
     hamDeg A = (2 * e - 2) * k2Count (1 ::ₘ ((pairType A A).erase 1).erase 1) := by
   have hne : Nonempty W := Fintype.card_pos_iff.mp (by omega)
   obtain ⟨x⟩ := hne
-  have h1 : hamDeg A = hamPairCount A A := by
-    simp only [hamDeg, hamPairCount, and_self]
-  rw [h1, hamPairCount_eq_sum_redCount A A x (by omega)]
+  have h1 : hamDeg A = jointCount A A := by
+    simp only [hamDeg, jointCount, and_self]
+  rw [h1, jointCount_eq_sum_redCount A A x (by omega)]
   have h2 : ∀ u ∈ ((univ.erase x).erase (A.mate x)).erase (A.mate x),
       redCount A A x u = k2Count (1 ::ₘ ((pairType A A).erase 1).erase 1) := by
     intro u hu
@@ -368,7 +368,7 @@ theorem sum_hamInd_shared2 (A B : PerfectMatching W) :
     split_ifs with h
     · rw [card_eq_zero, filter_eq_empty_iff]
       rintro C - ⟨h1, h2⟩
-      exact not_ham_of_mate_eq (by omega) (h1.trans h.symm) h2
+      exact not_ham_of_mate_eq_of_two_lt (by omega) (h1.trans h.symm) h2
     · exact card_mate_ham A (B.mate_ne x).symm h
   rw [sum_congr rfl fun x _ ↦ h2 x, sum_ite, sum_const_zero, zero_add, sum_const, smul_eq_mul,
     hamDeg_eq_mul hW he A]

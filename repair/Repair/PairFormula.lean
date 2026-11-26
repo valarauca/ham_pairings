@@ -1,3 +1,4 @@
+import Repair.CycleCount
 import Repair.PairVariance
 
 /-!
@@ -5,11 +6,13 @@ import Repair.PairVariance
 
 Source: `results/hybrid-pair-averaged.md` (aed6f2d), §2, Theorem 1 and Corollary 1.1.
 
-* `pairProb A B = h(A, B) = P_R(R ∪ A and R ∪ B both one cycle)`, and `pairProb_eq_k2Count` :
-  it depends only on the type of `A ∪ B`, through the Lemma K2 recursion.
+* `jointHamProb A B = h(A, B) = P_R(R ∪ A and R ∪ B both one cycle)`, and
+  `jointHamProb_eq_k2Count` : it depends only on the type of `A ∪ B`, through the Lemma K2
+  recursion.
+* `card_pairType` : the type has `cycleCount A B` parts.
 * `HamSpectral.omega` : `ω_ν(A, B) = |PM| E_ν(A, B) / d_ν`, the spherical function of a spectral
   resolution `S` of `H`, with `d_ν = tr E_ν`.
-* `HamSpectral.pairProb_div_sq` : Theorem 1,
+* `HamSpectral.jointHamProb_div_sq` : Theorem 1,
   `h(A, B) / p² = Σ_ν d_ν ω_ν((e))² ω_ν(A, B)` with `ω_ν((e)) = λ_ν / |Ham(B)|`.
 * `levelOne e l = (2e - 3)((2e - 1) l - e) / (8 (e - 1)³)`, and `levelOne_eq` : it is
   `d ω((e))² ω(τ)` at `d = e(2e - 3)`, `ω((e)) = -1/(2(e - 1))` and
@@ -31,24 +34,52 @@ namespace PerfectMatching
 
 variable {W : Type*} [Fintype W] [DecidableEq W]
 
-/-- `h(A, B) = P_R(R ∪ A and R ∪ B both one cycle)` for `R` uniform on `PM`
-(`results/hybrid-pair-averaged.md`, Theorem 1). -/
-noncomputable def pairProb (A B : PerfectMatching W) : ℝ :=
-  hamPairCount A B / Fintype.card (PerfectMatching W)
-
 /-- `h(A, B)` depends only on the type of `A ∪ B`, through the Lemma K2 recursion
 (`results/hybrid-pair-averaged.md`, Theorem 1; `results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem pairProb_eq_k2Count (A B : PerfectMatching W) :
-    pairProb A B = k2Count (pairType A B) / Fintype.card (PerfectMatching W) := by
-  rw [pairProb, hamPairCount_eq_k2Count]
+theorem jointHamProb_eq_k2Count (A B : PerfectMatching W) :
+    jointHamProb A B = k2Count (pairType A B) / Fintype.card (PerfectMatching W) := by
+  rw [jointHamProb, jointCount_eq_k2Count]
 
 /-- `|PM| h(A, B) = (H²)(A, B)` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
-theorem hamPairCount_eq_hamMat_sq (A B : PerfectMatching W) :
-    (hamPairCount A B : ℝ) = ((hamMat * hamMat : Matrix _ _ ℝ) A B) := by
-  rw [Matrix.mul_apply, hamPairCount, card_eq_sum_ones, Nat.cast_sum, sum_filter]
+theorem jointCount_eq_hamMat_sq (A B : PerfectMatching W) :
+    (jointCount A B : ℝ) = ((hamMat * hamMat : Matrix _ _ ℝ) A B) := by
+  rw [Matrix.mul_apply, jointCount, card_eq_sum_ones, Nat.cast_sum, sum_filter]
   refine sum_congr rfl fun R _ ↦ ?_
   simp only [hamMat, Matrix.of_apply, hamInd, ham_comm A R]
   split_ifs <;> simp_all
+
+/-- The type has `κ(A ∪ B)` parts, one per cycle: `|μ| = cycleCount A B`
+(`results/k3-counterexample-hunt.md`, Lemma K2). -/
+theorem card_pairType (A B : PerfectMatching W) :
+    Multiset.card (pairType A B) = cycleCount A B := by
+  classical
+  set G := A.toGraph ⊔ B.toGraph
+  let φ : G.ConnectedComponent → Finset W :=
+    fun c ↦ univ.filter fun x ↦ G.connectedComponentMk x = c
+  have hφ : ∀ w, cycleOf A B w = φ (G.connectedComponentMk w) := by
+    intro w
+    ext x
+    simp only [mem_cycleOf, φ, mem_filter, mem_univ, true_and, SimpleGraph.ConnectedComponent.eq]
+    exact ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
+  have himg : univ.image (cycleOf A B) = univ.image φ := by
+    ext S
+    simp only [mem_image, mem_univ, true_and]
+    constructor
+    · rintro ⟨w, rfl⟩
+      exact ⟨_, (hφ w).symm⟩
+    · rintro ⟨c, rfl⟩
+      obtain ⟨w, rfl⟩ := c.exists_rep
+      exact ⟨w, hφ w⟩
+  have hinj : Function.Injective φ := by
+    intro c c' h
+    obtain ⟨w, rfl⟩ := c.exists_rep
+    have h' : φ (G.connectedComponentMk w) = φ c' := h
+    have hw : w ∈ φ (G.connectedComponentMk w) := by simp [φ]
+    rw [h'] at hw
+    change G.connectedComponentMk w = c'
+    simpa [φ] using hw
+  rw [pairType, Multiset.card_map, Finset.card_val, himg, card_image_of_injective _ hinj,
+    card_univ, cycleCount, Nat.card_eq_fintype_card]
 
 namespace HamSpectral
 
@@ -83,13 +114,13 @@ theorem E_eq_zero_of_trace (ν : I) (h : (S.E ν).trace = 0) (A C : PerfectMatch
 
 /-- Theorem 1, the spectral pair formula `h(A, B) / p² = Σ_ν d_ν ω_ν((e))² ω_ν(A, B)` with
 `ω_ν((e)) = λ_ν / |Ham(B)|` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
-theorem pairProb_div_sq (A B : PerfectMatching W) (hk : hamDeg B ≠ 0) :
-    pairProb A B / hamProb B ^ 2 =
+theorem jointHamProb_div_sq (A B : PerfectMatching W) (hk : hamDeg B ≠ 0) :
+    jointHamProb A B / hamProbOf B ^ 2 =
       ∑ ν, (S.E ν).trace * (S.eig ν / hamDeg B) ^ 2 * S.omega ν A B := by
   have hN : (Fintype.card (PerfectMatching W) : ℝ) ≠ 0 :=
     Nat.cast_ne_zero.mpr (Fintype.card_pos_iff.mpr ⟨B⟩).ne'
   have hk' : (hamDeg B : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hk
-  rw [pairProb, hamProb, hamPairCount_eq_hamMat_sq, S.hamMat_eq, S.sum_smul_mul_sum_smul,
+  rw [jointHamProb, hamProbOf, jointCount_eq_hamMat_sq, S.hamMat_eq, S.sum_smul_mul_sum_smul,
     Matrix.sum_apply, sum_div, sum_div]
   refine sum_congr rfl fun ν _ ↦ ?_
   rw [Matrix.smul_apply, smul_eq_mul, omega]

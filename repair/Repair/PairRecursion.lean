@@ -1,12 +1,11 @@
-import Clifford.Contraction
-import Suppression.Canonical
+import Repair.HybridPair.CommonEdge
 
 /-!
 # The k = 2 pair recursion (Lemma K2)
 
 Source: `results/k3-counterexample-hunt.md` (e5bd2f7), §3, Lemma K2.
 
-For two perfect matchings `F₀, F₁` of a finite vertex set `V`, `hamPairCount F₀ F₁` is the
+For two perfect matchings `F₀, F₁` of a finite vertex set `V`, `jointCount F₀ F₁` is the
 number of perfect matchings `P` with `P ∪ F₀` and `P ∪ F₁` both one cycle. The type
 `pairType F₀ F₁` is the multiset of half-lengths of the cycles of `F₀ ∪ F₁`, a part `1` being a
 shared edge.
@@ -17,13 +16,13 @@ shared edge.
 * `red F hvu` : the reduction of `F` by a red edge `vu`, a matching of `V ∖ {v, u}` that
   replaces `v F(v)` and `u F(u)` by `F(v) F(u)`.
 * `card_fiber_eq` : the matchings `P ∋ vu` with both unions Hamiltonian correspond to the pairs
-  counted by `hamPairCount (red F₀ hvu) (red F₁ hvu)`. `card_fiber_mate_eq_zero` : the two
+  counted by `jointCount (red F₀ hvu) (red F₁ hvu)`. `not_ham_of_mate_eq_of_two_lt` : the two
   neighbours `F₀(v), F₁(v)` are forbidden.
 * Lemma K2 : `redType_of_even`, `redType_of_odd`, `redType_of_notMem` give the type of the
   reduced pair for `u = c_d` with `d` even, `u = c_{2x+1}`, and `u` in another cycle.
-* `hamPairCount_eq_k2Count` : `hamPairCount F₀ F₁ = k2Count (pairType F₀ F₁)`, where
+* `jointCount_eq_k2Count` : `jointCount F₀ F₁ = k2Count (pairType F₀ F₁)`, where
   `k2Count` is the recursion over partitions with `k2Count {1} = 1`.
-  `hamPairCount_eq_k2Step` : the recursion holds at every vertex `v`.
+  `jointCount_eq_k2Step` : the recursion holds at every vertex `v`.
 -/
 
 open Finset
@@ -294,11 +293,6 @@ def cycleOf (w : V) : Finset V :=
 def pairType : Multiset ℕ :=
   (univ.image (cycleOf F0 F1)).val.map fun S ↦ #S / 2
 
-/-- `N(F₀, F₁)`, the number of perfect matchings `P` with `P ∪ F₀` and `P ∪ F₁` both one cycle
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
-def hamPairCount : ℕ :=
-  #{P : PerfectMatching V | Ham P F0 ∧ Ham P F1}
-
 variable {F0 F1}
 
 /-- Membership in the cycle through `w` is reachability from `w`
@@ -542,8 +536,8 @@ reduced pair (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem card_fiber_eq (F0 F1 : PerfectMatching V) {v u : V} (hvu : v ≠ u) (h0 : F0.mate v ≠ u)
     (h1 : F1.mate v ≠ u) :
     #{P : PerfectMatching V | P.mate v = u ∧ Ham P F0 ∧ Ham P F1} =
-      hamPairCount (red F0 hvu) (red F1 hvu) := by
-  rw [hamPairCount]
+      jointCount (red F0 hvu) (red F1 hvu) := by
+  rw [jointCount]
   have hK := switch_mem_redSet F0 hvu
   refine card_bij' (fun P hP ↦ restrict P (redSet v u)
       (mate_mem_redSet_of (mem_filter.mp hP).2.1))
@@ -581,33 +575,22 @@ theorem card_fiber_eq (F0 F1 : PerfectMatching V) {v u : V} (hvu : v ≠ u) (h0 
     exact restrict_glue _ _ hK X
 
 omit [DecidableEq V] in
-/-- The two neighbours `F₀(v)` and `F₁(v)` are forbidden partners of `v` once `|V| > 2`
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem not_ham_of_mate_eq {P F : PerfectMatching V} {v : V} (hV : 2 < Fintype.card V)
-    (h : P.mate v = F.mate v) : ¬Ham P F := by
+/-- The two neighbours `F₀(v)` and `F₁(v)` are forbidden partners of `v` once `|V| > 2`, from
+`not_ham_of_mate_eq` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+theorem not_ham_of_mate_eq_of_two_lt {P F : PerfectMatching V} {v : V}
+    (hV : 2 < Fintype.card V) (h : P.mate v = F.mate v) : ¬Ham P F := by
   classical
   have hcard : #({v, F.mate v} : Finset V) < #(univ : Finset V) := by
     rw [card_univ]
-    exact lt_of_le_of_lt (card_le_two) hV
+    exact lt_of_le_of_lt card_le_two hV
   obtain ⟨w, -, hw⟩ := exists_mem_notMem_of_card_lt_card hcard
-  have hPF : P.mate (F.mate v) = v := by rw [← h, mate_mate]
-  refine not_ham_of_closed P F ({v, F.mate v} : Finset V) ?_ ?_ (u := v) (w := w)
-    (by simp) (by simpa using hw)
-  · intro x hx
-    simp only [coe_insert, coe_singleton, Set.mem_insert_iff, Set.mem_singleton_iff] at hx ⊢
-    rcases hx with rfl | rfl
-    · exact Or.inr h
-    · exact Or.inl hPF
-  · intro x hx
-    simp only [coe_insert, coe_singleton, Set.mem_insert_iff, Set.mem_singleton_iff] at hx ⊢
-    rcases hx with rfl | rfl
-    · exact Or.inr rfl
-    · exact Or.inl (mate_mate _ _)
+  simp only [mem_insert, mem_singleton, not_or] at hw
+  exact not_ham_of_mate_eq h hw.1 hw.2
 
 /-- `N` of the reduced pair by the red edge `vu`, and `0` for `u = v`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 def redCount (F0 F1 : PerfectMatching V) (v u : V) : ℕ :=
-  if h : v = u then 0 else hamPairCount (red F0 h) (red F1 h)
+  if h : v = u then 0 else jointCount (red F0 h) (red F1 h)
 
 /-- The type of the reduced pair by the red edge `vu`, and `0` for `u = v`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
@@ -616,13 +599,13 @@ def redType (F0 F1 : PerfectMatching V) (v u : V) : Multiset ℕ :=
 
 /-- The GS reduction: `N(F₀, F₁)` is the sum over the allowed partners `u` of `v` of `N` of the
 reduced pair (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_eq_sum_redCount (F0 F1 : PerfectMatching V) (v : V)
+theorem jointCount_eq_sum_redCount (F0 F1 : PerfectMatching V) (v : V)
     (hV : 2 < Fintype.card V) :
-    hamPairCount F0 F1 =
+    jointCount F0 F1 =
       ∑ u ∈ ((univ.erase v).erase (F0.mate v)).erase (F1.mate v), redCount F0 F1 v u := by
-  have hfib : hamPairCount F0 F1 =
+  have hfib : jointCount F0 F1 =
       ∑ u, #{P : PerfectMatching V | P.mate v = u ∧ Ham P F0 ∧ Ham P F1} := by
-    rw [hamPairCount, card_eq_sum_card_fiberwise (f := fun P ↦ P.mate v) (t := univ)
+    rw [jointCount, card_eq_sum_card_fiberwise (f := fun P ↦ P.mate v) (t := univ)
       (fun _ _ ↦ mem_coe.mpr (mem_univ _))]
     refine sum_congr rfl fun u _ ↦ ?_
     rw [filter_filter]
@@ -641,9 +624,9 @@ theorem hamPairCount_eq_sum_redCount (F0 F1 : PerfectMatching V) (v : V)
     rintro P - ⟨hPv, hP0, hP1⟩
     simp only [mem_erase, mem_univ, and_true, not_and, not_not] at hu
     by_cases h1 : u = F1.mate v
-    · exact not_ham_of_mate_eq hV (hPv.trans h1) hP1
+    · exact not_ham_of_mate_eq_of_two_lt hV (hPv.trans h1) hP1
     by_cases h0 : u = F0.mate v
-    · exact not_ham_of_mate_eq hV (hPv.trans h0) hP0
+    · exact not_ham_of_mate_eq_of_two_lt hV (hPv.trans h0) hP0
     exact P.mate_ne v (hPv.trans (hu h1 h0))
 
 end Reduction
@@ -1498,17 +1481,17 @@ theorem sum_redCount_eq_k2Step (F0 F1 : PerfectMatching V) (v : V) (g : Multiset
         rfl
 
 /-- `N = 0` on the empty vertex set (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_of_card_eq_zero (F0 F1 : PerfectMatching V) (hV : Fintype.card V = 0) :
-    hamPairCount F0 F1 = 0 := by
-  rw [hamPairCount, card_eq_zero, filter_eq_empty_iff]
+theorem jointCount_of_card_eq_zero (F0 F1 : PerfectMatching V) (hV : Fintype.card V = 0) :
+    jointCount F0 F1 = 0 := by
+  rw [jointCount, card_eq_zero, filter_eq_empty_iff]
   intro P _ h
   obtain ⟨x⟩ := h.1.nonempty
   exact (Fintype.card_eq_zero_iff.mp hV).elim x
 
 /-- `N((1)) = 1`: on two vertices the only matching is Hamiltonian with itself
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_of_card_eq_two (F0 F1 : PerfectMatching V) (hV : Fintype.card V = 2) :
-    hamPairCount F0 F1 = 1 := by
+theorem jointCount_of_card_eq_two (F0 F1 : PerfectMatching V) (hV : Fintype.card V = 2) :
+    jointCount F0 F1 = 1 := by
   have hPM : Fintype.card (PerfectMatching V) = 1 := by
     rw [card_eq_doubleFactorial (n := 1) (by rw [hV])]
     rfl
@@ -1530,7 +1513,7 @@ theorem hamPairCount_of_card_eq_two (F0 F1 : PerfectMatching V) (hV : Fintype.ca
       · exact SimpleGraph.Reachable.refl _
       · exact (adj_mate_left _ _ x).reachable
     · exact Fintype.card_pos_iff.mp (by omega)
-  rw [hamPairCount, filter_true_of_mem, card_univ, hPM]
+  rw [jointCount, filter_true_of_mem, card_univ, hPM]
   intro P _
   rw [hall P F0, hall F1 F0]
   exact ⟨hham F0, hham F0⟩
@@ -1549,15 +1532,15 @@ universe u
 
 /-- `N(F₀, F₁) = k2Aux n μ` for `|V| = 2n`, by induction on `n`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_eq_k2Aux_aux (n : ℕ) : ∀ (W : Type u) [Fintype W] [DecidableEq W],
+theorem jointCount_eq_k2Aux_aux (n : ℕ) : ∀ (W : Type u) [Fintype W] [DecidableEq W],
     Fintype.card W = 2 * n → ∀ F0 F1 : PerfectMatching W,
-      hamPairCount F0 F1 = k2Aux n (pairType F0 F1) := by
+      jointCount F0 F1 = k2Aux n (pairType F0 F1) := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     intro W _ _ hW F0 F1
     match n, ih, hW with
-    | 0, _, hW => exact hamPairCount_of_card_eq_zero F0 F1 hW
-    | 1, _, hW => exact hamPairCount_of_card_eq_two F0 F1 hW
+    | 0, _, hW => exact jointCount_of_card_eq_zero F0 F1 hW
+    | 1, _, hW => exact jointCount_of_card_eq_two F0 F1 hW
     | j + 2, ih, hW =>
       have hne : pairType F0 F1 ≠ 0 := by
         intro h
@@ -1566,7 +1549,7 @@ theorem hamPairCount_eq_k2Aux_aux (n : ℕ) : ∀ (W : Type u) [Fintype W] [Deci
         omega
       obtain ⟨S, hS, hSa⟩ := Multiset.mem_map.mp (maxPart_mem hne)
       obtain ⟨v, -, rfl⟩ := mem_image.mp (Finset.mem_val.mp hS)
-      rw [hamPairCount_eq_sum_redCount F0 F1 v (by omega),
+      rw [jointCount_eq_sum_redCount F0 F1 v (by omega),
         sum_redCount_eq_k2Step F0 F1 v (k2Aux (j + 1)), hSa]
       · rfl
       · intro u hvu
@@ -1578,20 +1561,20 @@ theorem hamPairCount_eq_k2Aux_aux (n : ℕ) : ∀ (W : Type u) [Fintype W] [Deci
 /-- `N(F₀, F₁) = N(μ)`: the number of perfect matchings Hamiltonian with both `F₀` and `F₁`
 depends only on the type `μ` of `F₀ ∪ F₁` and is given by the Lemma K2 recursion
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_eq_k2Count {V : Type u} [Fintype V] [DecidableEq V]
-    (F0 F1 : PerfectMatching V) : hamPairCount F0 F1 = k2Count (pairType F0 F1) :=
-  hamPairCount_eq_k2Aux_aux _ V (two_mul_sum_pairType F0 F1).symm F0 F1
+theorem jointCount_eq_k2Count {V : Type u} [Fintype V] [DecidableEq V]
+    (F0 F1 : PerfectMatching V) : jointCount F0 F1 = k2Count (pairType F0 F1) :=
+  jointCount_eq_k2Aux_aux _ V (two_mul_sum_pairType F0 F1).symm F0 F1
 
 /-- Lemma K2 as a recursion: for every vertex `v`, in a cycle of half-length `a`, and
 `|V| > 2`, `N(F₀, F₁) = k2Step N μ a` where `μ` is the type of `F₀ ∪ F₁`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem hamPairCount_eq_k2Step {V : Type u} [Fintype V] [DecidableEq V]
+theorem jointCount_eq_k2Step {V : Type u} [Fintype V] [DecidableEq V]
     (F0 F1 : PerfectMatching V) (v : V) (hV : 2 < Fintype.card V) :
-    hamPairCount F0 F1 = k2Step k2Count (pairType F0 F1) (#(cycleOf F0 F1 v) / 2) := by
-  rw [hamPairCount_eq_sum_redCount F0 F1 v hV]
+    jointCount F0 F1 = k2Step k2Count (pairType F0 F1) (#(cycleOf F0 F1 v) / 2) := by
+  rw [jointCount_eq_sum_redCount F0 F1 v hV]
   refine sum_redCount_eq_k2Step F0 F1 v k2Count fun u hvu ↦ ?_
   rw [redCount, redType, dite_eq_right hvu, dite_eq_right hvu]
-  exact hamPairCount_eq_k2Count _ _
+  exact jointCount_eq_k2Count _ _
 
 end Main
 

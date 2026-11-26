@@ -17,7 +17,8 @@ Hamiltonian relation `(e)`.
 
 * `f_E = Σ_t δ_{C_t}` is `ctxMeasure`, `u_B = 1_{Ham(B)} / |Ham(B)|` is `hamUnif`, and
   `g_E = f_E - (n - 1) u_B` is `ctxDefect`, with `n - 1 = |ι|`.
-* `p = |Ham(B)| / |PM|` is `hamProb`, the probability that `R ∪ B` is one cycle.
+* `p = |Ham(B)| / |PM|` is `hamProbOf`, the probability that `R ∪ B` is one cycle, and
+  `hamProbOf_eq_hamProb` : it equals the closed form `hamProb e = 2^(e-1)(e-1)!/(2e-1)!!`.
 * `Γ(E) = |PM| · ‖H g_E‖² / |Ham(B)|²` is `coherence`, and
   `c_gen(e) = |PM| · Σ_R #{A : R ∪ A, A ∪ B one cycle}² / |Ham(B)|⁴ - 1` is `cGen`.
 * `HamSpectral` : a spectral resolution of `H` by symmetric orthogonal idempotents `E_ν` with
@@ -147,7 +148,7 @@ def hamDeg (B : PerfectMatching W) : ℕ :=
   #{C : PerfectMatching W | Ham C B}
 
 /-- `p = P_R(R ∪ B one cycle) = |Ham(B)| / |PM|` (`results/hybrid-pair-averaged.md`, §1). -/
-noncomputable def hamProb (B : PerfectMatching W) : ℝ :=
+noncomputable def hamProbOf (B : PerfectMatching W) : ℝ :=
   hamDeg B / Fintype.card (PerfectMatching W)
 
 /-- The mean of `Y` under the uniform `R ∈ PM` (`results/hybrid-pair-averaged.md`, §1). -/
@@ -255,8 +256,8 @@ theorem hamApply_ctxDefect (B : PerfectMatching W) (C : ι → PerfectMatching W
 
 /-- `E_R X = (n - 1) p` (`results/hybrid-pair-averaged.md`, Theorem 2). -/
 theorem mean_ctxCount (B : PerfectMatching W) (C : ι → PerfectMatching W) :
-    pmMean (fun R ↦ (ctxCount C R : ℝ)) = Fintype.card ι * hamProb B := by
-  rw [pmMean, hamProb]
+    pmMean (fun R ↦ (ctxCount C R : ℝ)) = Fintype.card ι * hamProbOf B := by
+  rw [pmMean, hamProbOf]
   simp only [cast_ctxCount]
   rw [sum_comm]
   simp only [sum_hamInd, hamDeg_eq _ B, sum_const, card_univ, nsmul_eq_mul]
@@ -274,7 +275,7 @@ any family of contexts `C_t` with every `C_t ∪ B` one cycle
 theorem var_ctxCount [Nonempty ι] (B : PerfectMatching W) (C : ι → PerfectMatching W)
     (hC : ∀ t, Ham (C t) B) :
     pmVar (fun R ↦ (ctxCount C R : ℝ)) =
-      hamProb B ^ 2 * ((Fintype.card ι : ℝ) ^ 2 * cGen B + coherence B C) := by
+      hamProbOf B ^ 2 * ((Fintype.card ι : ℝ) ^ 2 * cGen B + coherence B C) := by
   obtain ⟨t₀⟩ := ‹Nonempty ι›
   set N : ℝ := (Fintype.card (PerfectMatching W) : ℝ) with hN
   set k : ℝ := (hamDeg B : ℝ) with hk
@@ -289,7 +290,7 @@ theorem var_ctxCount [Nonempty ι] (B : PerfectMatching W) (C : ι → PerfectMa
   set X : PerfectMatching W → ℝ := fun R ↦ (ctxCount C R : ℝ) with hX
   set D : PerfectMatching W → ℝ := fun R ↦ hamTwo B R with hD
   have hmean : pmMean X = n * k / N := by
-    rw [mean_ctxCount B C, hamProb]
+    rw [mean_ctxCount B C, hamProbOf]
     ring
   have hXD : ∑ R, X R * D R = n * c₃ := by
     have e : ∀ t, ∑ R, hamInd R (C t) * hamTwo B R = c₃ := fun t ↦ hamThree_eq (hC t) (hC t₀)
@@ -338,11 +339,59 @@ theorem var_ctxCount [Nonempty ι] (B : PerfectMatching W) (C : ι → PerfectMa
   have hc : cGen B = N / k ^ 4 * (k * c₃) - 1 := by
     rw [cGen, ← hN, ← hk, ← hDD]
     rfl
-  rw [hvar, hG, hc, hamProb, ← hN, ← hk]
+  rw [hvar, hG, hc, hamProbOf, ← hN, ← hk]
   field_simp
   ring
 
 end Variance
+
+section ClosedForm
+
+universe u
+
+/-- `|Ham(A)| = 2^(e-1) (e-1)!` on `2e` points, by the reduction of Lemma K2
+(`results/hybrid-pair-averaged.md`, §1). -/
+theorem hamDeg_eq_closed (e : ℕ) : ∀ (W : Type u) [Fintype W] [DecidableEq W],
+    Fintype.card W = 2 * (e + 1) → ∀ A : PerfectMatching W,
+      hamDeg A = 2 ^ e * e.factorial := by
+  induction e with
+  | zero =>
+    intro W _ _ hW A
+    have h := jointCount_of_card_eq_two A A hW
+    simp only [jointCount, and_self] at h
+    simpa [hamDeg] using h
+  | succ e ih =>
+    intro W _ _ hW A
+    obtain ⟨x⟩ : Nonempty W := Fintype.card_pos_iff.mp (by omega)
+    have h1 : hamDeg A = jointCount A A := by
+      simp only [hamDeg, jointCount, and_self]
+    have h2 : ∀ u ∈ ((univ.erase x).erase (A.mate x)).erase (A.mate x),
+        redCount A A x u = 2 ^ e * e.factorial := by
+      intro u hu
+      simp only [mem_erase, mem_univ, and_true] at hu
+      have hxu : x ≠ u := Ne.symm hu.2.2
+      rw [redCount, dite_eq_right hxu]
+      have h3 := ih (redSet x u) (by rw [Fintype.card_coe, card_redSet hxu, hW]; ring_nf; omega)
+        (red A hxu)
+      simpa [hamDeg, jointCount] using h3
+    rw [h1, jointCount_eq_sum_redCount A A x (by omega), sum_congr rfl h2, sum_const, smul_eq_mul,
+      erase_idem, card_erase_of_mem (mem_erase.mpr ⟨A.mate_ne x, mem_univ _⟩),
+      card_erase_of_mem (mem_univ _), card_univ, hW, pow_succ, Nat.factorial_succ]
+    rw [show 2 * (e + 1 + 1) - 1 - 1 = 2 * (e + 1) by omega]
+    ring
+
+/-- `p = |Ham(B)| / |PM| = 2^(e-1)(e-1)!/(2e-1)!!`, main's closed form `hamProb e`
+(`results/hybrid-pair-averaged.md`, §1). -/
+theorem hamProbOf_eq_hamProb {W : Type u} [Fintype W] [DecidableEq W] {e : ℕ}
+    (hW : Fintype.card W = 2 * e) (he : 1 ≤ e) (B : PerfectMatching W) :
+    hamProbOf B = hamProb e := by
+  obtain ⟨f, rfl⟩ : ∃ f, e = f + 1 := ⟨e - 1, by omega⟩
+  rw [hamProbOf, hamProb, hamDeg_eq_closed f W hW B, card_eq_doubleFactorial hW,
+    Nat.add_sub_cancel]
+  push_cast
+  rfl
+
+end ClosedForm
 
 section Spectral
 
