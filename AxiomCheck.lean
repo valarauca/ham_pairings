@@ -551,3 +551,13 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cliqueFinset_tripleUnion_six_three
 #print axioms RoundRobin.Canonical.card_fourCyclesThrough_six_three
 #print axioms RoundRobin.Canonical.card_fourCycles_six_two
+#print axioms PerfectMatching.ham_iff_cycleCount_eq_one
+#print axioms PerfectMatching.cycleCount_le_contractAt
+#print axioms PerfectMatching.cycleCount_le_contractAt_add_one
+#print axioms PerfectMatching.sum_pow_cycleCount_le
+#print axioms RoundRobin.Canonical.hamBottomRatio_eq_cycleProfile
+#print axioms RoundRobin.Canonical.card_le_cycleProfile_mul_sum
+#print axioms RoundRobin.Canonical.inv_cycleMoment_le_hamBottomRatio
+#print axioms RoundRobin.Canonical.cycleMoment_le
+#print axioms RoundRobin.Canonical.rpow_neg_le_hamBottomRatio
+#print axioms RoundRobin.Canonical.not_boundedRadius_of_cycleProfile_le
