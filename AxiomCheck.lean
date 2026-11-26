@@ -568,3 +568,9 @@ open Pairing PerfectMatching
 #print axioms coherence_nonneg
 #print axioms HamSpectral.spectral_cGen
 #print axioms HamSpectral.spectral_coherence
+#print axioms pairProb_eq_k2Count
+#print axioms HamSpectral.pairProb_div_sq
+#print axioms levelOne_eq
+#print axioms levelOne_succ_sub
+#print axioms levelOne_zero
+#print axioms abs_levelOne_sub_le
