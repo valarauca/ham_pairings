@@ -557,3 +557,10 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.expect_hamCount_glue
 #print axioms RoundRobin.Canonical.ham_factor_factor_zero
 #print axioms RoundRobin.Canonical.sum_hamCount_glue_factor_zero
+#print axioms contract_mate_pairCompl
+#print axioms ham_iff_contract_pairCompl
+#print axioms dropEquiv
+#print axioms jointCount_eq_of_mate_eq
+#print axioms hamProb_succ
+#print axioms jointHamProb_eq_of_mate_eq
+#print axioms jointHamProb_div_sq_eq_of_mate_eq
