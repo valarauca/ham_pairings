@@ -16,3 +16,6 @@ import Repair.ExceptionalSix
 import Repair.TripleUnion
 import Repair.CumulantTail
 import Repair.HybridConditional
+import Repair.CycleCount
+import Repair.CycleStep
+import Repair.Switching
