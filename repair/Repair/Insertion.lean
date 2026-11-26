@@ -47,7 +47,8 @@ private theorem reachable_map_of_adj' {W' : Type*} {G : SimpleGraph W} {G' : Sim
   | nil => exact SimpleGraph.Reachable.refl _
   | cons hadj _ ih => exact (h _ _ hadj).trans ih
 
-/-- The ends of an added edge are joined in the enlarged graph. -/
+/-- The ends of an added edge are joined in the enlarged graph.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_sup_edge (G : SimpleGraph W) (u v : W) :
     (G ⊔ SimpleGraph.edge u v).Reachable u v := by
   by_cases h : u = v
@@ -57,7 +58,8 @@ theorem reachable_sup_edge (G : SimpleGraph W) (u v : W) :
       ((SimpleGraph.sup_adj _ _ _ _).mpr (Or.inr ((SimpleGraph.edge_adj _ _ _ _).mpr
         ⟨Or.inl ⟨rfl, rfl⟩, h⟩)))
 
-/-- Reachability after adding the edge `uv`: a walk uses the new edge at most once. -/
+/-- Reachability after adding the edge `uv`: a walk uses the new edge at most once.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_sup_edge_iff (G : SimpleGraph W) (u v a b : W) :
     (G ⊔ SimpleGraph.edge u v).Reachable a b ↔
       G.Reachable a b ∨ (G.Reachable a u ∧ G.Reachable v b) ∨
@@ -89,7 +91,8 @@ theorem reachable_sup_edge_iff (G : SimpleGraph W) (u v a b : W) :
     · exact (h1.mono hle).trans ((reachable_sup_edge G u v).trans (h2.mono hle))
     · exact (h1.mono hle).trans ((reachable_sup_edge G u v).symm.trans (h2.mono hle))
 
-/-- Adding an edge whose ends are already joined does not change reachability. -/
+/-- Adding an edge whose ends are already joined does not change reachability.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_sup_edge_iff_of_reachable (G : SimpleGraph W) {u v : W} (huv : G.Reachable u v)
     (a b : W) : (G ⊔ SimpleGraph.edge u v).Reachable a b ↔ G.Reachable a b := by
   rw [reachable_sup_edge_iff]
@@ -101,7 +104,8 @@ theorem reachable_sup_edge_iff_of_reachable (G : SimpleGraph W) {u v : W} (huv :
   · exact Or.inl
 
 /-- Two graphs related by maps that send edges to walks, and that are inverse to each other up
-to reachability, have the same number of components. -/
+to reachability, have the same number of components.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem card_connectedComponent_eq_of_retract {W' : Type*} {G : SimpleGraph W}
     {G' : SimpleGraph W'} (π : W → W') (ι : W' → W)
     (h1 : ∀ v w, G.Adj v w → G'.Reachable (π v) (π w))
@@ -127,7 +131,8 @@ theorem card_connectedComponent_eq_of_retract {W' : Type*} {G : SimpleGraph W}
       exact SimpleGraph.ConnectedComponent.sound (h4 w)
 
 /-- Under the hypotheses of `card_connectedComponent_eq_of_retract`, `π` preserves and reflects
-reachability. -/
+reachability.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_iff_of_retract {W' : Type*} {G : SimpleGraph W} {G' : SimpleGraph W'}
     (π : W → W') (ι : W' → W)
     (h1 : ∀ v w, G.Adj v w → G'.Reachable (π v) (π w))
@@ -137,7 +142,8 @@ theorem reachable_iff_of_retract {W' : Type*} {G : SimpleGraph W} {G' : SimpleGr
   ⟨reachable_map_of_adj' π h1, fun h ↦
     (h3 a).trans ((reachable_map_of_adj' ι h2 h).trans (h3 b).symm)⟩
 
-/-- Adding an edge inside a component keeps the number of components. -/
+/-- Adding an edge inside a component keeps the number of components.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem card_sup_edge_of_reachable (G : SimpleGraph W) {u v : W} (h : G.Reachable u v) :
     Nat.card (G ⊔ SimpleGraph.edge u v).ConnectedComponent = Nat.card G.ConnectedComponent :=
   card_connectedComponent_eq_of_retract id id
@@ -145,7 +151,8 @@ theorem card_sup_edge_of_reachable (G : SimpleGraph W) {u v : W} (h : G.Reachabl
     (fun _ _ hab ↦ (hab.reachable.mono le_sup_left))
     (fun _ ↦ SimpleGraph.Reachable.refl _) (fun _ ↦ SimpleGraph.Reachable.refl _)
 
-/-- Adding an edge between two components merges them. -/
+/-- Adding an edge between two components merges them.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem card_sup_edge_add_one [Finite W] (G : SimpleGraph W) {u v : W} (h : ¬G.Reachable u v) :
     Nat.card (G ⊔ SimpleGraph.edge u v).ConnectedComponent + 1 =
       Nat.card G.ConnectedComponent := by
@@ -205,11 +212,13 @@ connected components of the union graph. A common edge is a doubled `2`-cycle
 noncomputable def cycleCount (P Q : PerfectMatching V) : ℕ :=
   Nat.card (P.toGraph ⊔ Q.toGraph).ConnectedComponent
 
-/-- `κ(P ∪ Q) = κ(Q ∪ P)`. -/
+/-- `κ(P ∪ Q) = κ(Q ∪ P)`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem cycleCount_comm (P Q : PerfectMatching V) : cycleCount P Q = cycleCount Q P := by
   rw [cycleCount, cycleCount, sup_comm]
 
-/-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1`. -/
+/-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem ham_iff_cycleCount_eq_one (P Q : PerfectMatching V) :
     Ham P Q ↔ cycleCount P Q = 1 := by
   rw [cycleCount, Nat.card_eq_one_iff_unique, Ham, SimpleGraph.connected_iff]
@@ -225,7 +234,8 @@ section Off
 
 variable (P : PerfectMatching V) (A : Finset V) (hA : ∀ v ∈ A, P.mate v ∈ A)
 
-/-- The edges of `P` with no end in `A`, for `A` a union of edges of `P`. -/
+/-- The edges of `P` with no end in `A`, for `A` a union of edges of `P`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 def offGraph : SimpleGraph V where
   Adj v w := P.mate v = w ∧ v ∉ A
   symm := ⟨fun v w h ↦ ⟨by rw [← h.1, P.mate_mate], fun hw ↦ h.2 (by
@@ -233,12 +243,15 @@ def offGraph : SimpleGraph V where
     exact (mate_mem_iff P A hA v).mp hw)⟩⟩
   loopless := ⟨fun v h ↦ P.mate_ne v h.1⟩
 
+/-- Adjacency in `P` off `A`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 @[simp]
 theorem offGraph_adj (v w : V) : (offGraph P A hA).Adj v w ↔ P.mate v = w ∧ v ∉ A :=
   Iff.rfl
 
 /-- A matching that agrees with `P` off `A`, where `A` consists of the ends of two of its
-edges, is `P` off `A` plus those two edges. -/
+edges, is `P` off `A` plus those two edges.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem toGraph_eq_offGraph_sup (M : PerfectMatching V) (hM : ∀ v ∉ A, M.mate v = P.mate v)
     (u w : V) (hcov : ∀ v ∈ A, v = u ∨ v = M.mate u ∨ v = w ∨ v = M.mate w) :
     M.toGraph = offGraph P A hA ⊔ SimpleGraph.edge u (M.mate u) ⊔
@@ -268,7 +281,8 @@ section Walk
 variable [Fintype V] [DecidableEq V] (P Q : PerfectMatching V) (A : Finset V)
   (hA : ∀ v ∈ A, P.mate v ∈ A)
 
-/-- In `Q ∪ (P off A)` each `a ∈ A` is joined to its contraction partner `κ_Q a`. -/
+/-- In `Q ∪ (P off A)` each `a ∈ A` is joined to its contraction partner `κ_Q a`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_contractFun (a : A) :
     (Q.toGraph ⊔ offGraph P A hA).Reachable a (contractFun P Q A hA a) := by
   have key : ∀ i ≤ exitIdx P Q A hA a,
@@ -289,7 +303,8 @@ theorem reachable_contractFun (a : A) :
   rw [coe_contractFun]
   exact key _ le_rfl
 
-/-- In `Q ∪ (P off A)` the only points of `A` joined to `a ∈ A` are `a` and `κ_Q a`. -/
+/-- In `Q ∪ (P off A)` the only points of `A` joined to `a ∈ A` are `a` and `κ_Q a`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem eq_or_eq_contractFun_of_reachable (a : A) {w : V} (hw : w ∈ A)
     (h : (Q.toGraph ⊔ offGraph P A hA).Reachable a w) :
     w = a ∨ w = contractFun P Q A hA a := by
@@ -316,7 +331,8 @@ theorem eq_or_eq_contractFun_of_reachable (a : A) {w : V} (hw : w ∈ A)
     · exact absurd hw (oddPt_notMem P Q A hA a hlt)
     · exact Or.inr rfl
 
-/-- Every `a ∈ A` has exactly one partner `a' ≠ a` in `A` joined to it in `Q ∪ (P off A)`. -/
+/-- Every `a ∈ A` has exactly one partner `a' ≠ a` in `A` joined to it in `Q ∪ (P off A)`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem exists_partner {a : V} (ha : a ∈ A) :
     ∃ a' ∈ A, a' ≠ a ∧ (Q.toGraph ⊔ offGraph P A hA).Reachable a a' ∧
       ∀ w ∈ A, (Q.toGraph ⊔ offGraph P A hA).Reachable a w → w = a ∨ w = a' :=
@@ -331,21 +347,27 @@ section Switch
 
 variable [Fintype V] [DecidableEq V] (R C : PerfectMatching V) (p e : V)
 
-/-- The four ends `p, q, e, x` of two edges `pq = {p, C p}` and `ex = {e, C e}` of `C`. -/
+/-- The four ends `p, q, e, x` of two edges `pq = {p, C p}` and `ex = {e, C e}` of `C`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 def fourSet : Finset V := {p, C.mate p, e, C.mate e}
 
 omit [Fintype V] in
+/-- Membership in the four ends of two edges.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem mem_fourSet {v : V} :
     v ∈ fourSet C p e ↔ v = p ∨ v = C.mate p ∨ v = e ∨ v = C.mate e := by
   simp [fourSet]
 
 omit [Fintype V] in
+/-- The four ends of two edges of `C` are closed under `C`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem fourSet_closed : ∀ v ∈ fourSet C p e, C.mate v ∈ fourSet C p e := by
   intro v hv
   rw [mem_fourSet] at hv ⊢
   rcases hv with rfl | rfl | rfl | rfl <;> simp
 
-/-- `H = R ∪ (C ∖ {pq, ex})`, the union with the two switched edges of `C` removed. -/
+/-- `H = R ∪ (C ∖ {pq, ex})`, the union with the two switched edges of `C` removed.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 def switchCut : SimpleGraph V :=
   R.toGraph ⊔ offGraph C (fourSet C p e) (fourSet_closed C p e)
 
@@ -416,7 +438,8 @@ theorem pairing_of_four (hpe : p ≠ e) (hpx : p ≠ C.mate e) :
     · exact absurd (hpk.trans hqk'.symm) hnpq
 
 omit [Fintype V] in
-/-- `R ∪ C` is `H` plus the two edges `pq`, `ex`. -/
+/-- `R ∪ C` is `H` plus the two edges `pq`, `ex`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem sup_toGraph_eq_switchCut :
     R.toGraph ⊔ C.toGraph = switchCut R C p e ⊔ SimpleGraph.edge p (C.mate p) ⊔
       SimpleGraph.edge e (C.mate e) := by
@@ -524,6 +547,8 @@ variable [Fintype V] [DecidableEq V] {yp ym : V}
 (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 def lowerSet (yp ym : V) : Finset V := ({yp, ym} : Finset V)ᶜ
 
+/-- `V(E⁻)` is everything but `y₊`, `y₋`.
+(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem mem_lowerSet {v : V} : v ∈ lowerSet yp ym ↔ v ≠ yp ∧ v ≠ ym := by
   simp [lowerSet]
 

@@ -17,3 +17,5 @@ import Repair.TripleUnion
 import Repair.Insertion
 import Repair.FreeDefects
 import Repair.FixedDefectLimit
+import Repair.CyclicContext
+import Repair.ZigZagInsertion

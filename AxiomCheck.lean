@@ -563,3 +563,6 @@ open Pairing PerfectMatching
 #print axioms card_relation_le
 #print axioms card_not_generic_le
 #print axioms sum_abs_sum_le
+#print axioms CyclicContext.insert_context
+#print axioms CyclicContext.exists_slot
+#print axioms CyclicContext.zigzag_insertion

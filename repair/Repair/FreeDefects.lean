@@ -38,14 +38,16 @@ private theorem mem_of_reachable'' {G : SimpleGraph V} {D : Set V}
   | nil => exact ha
   | cons hadj _ ih => exact ih (hD _ _ hadj ha)
 
-/-- `offGraph` shrinks as `A` grows. -/
+/-- `offGraph` shrinks as `A` grows.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem offGraph_mono (P : PerfectMatching V) {A A' : Finset V} (hA : ∀ v ∈ A, P.mate v ∈ A)
     (hA' : ∀ v ∈ A', P.mate v ∈ A') (h : A ⊆ A') : offGraph P A' hA' ≤ offGraph P A hA :=
   fun _ _ hvw ↦ ⟨hvw.1, fun hv ↦ hvw.2 (h hv)⟩
 
 variable [Fintype V] [DecidableEq V]
 
-/-- `κ_Q a` is the unique `w ∈ A`, `w ≠ a`, joined to `a` in `Q ∪ (P off A)`. -/
+/-- `κ_Q a` is the unique `w ∈ A`, `w ≠ a`, joined to `a` in `Q ∪ (P off A)`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem contract_mate_eq (P Q : PerfectMatching V) (A : Finset V) (hA : ∀ v ∈ A, P.mate v ∈ A)
     (a w : A) (hw : w ≠ a) (h : (Q.toGraph ⊔ offGraph P A hA).Reachable a w) :
     (contract P Q A hA).mate a = w := by
@@ -55,7 +57,8 @@ theorem contract_mate_eq (P Q : PerfectMatching V) (A : Finset V) (hA : ∀ v �
     exact (Subtype.ext h').symm
 
 omit [Fintype V] [DecidableEq V] in
-/-- `R ∪ C` and its transport along `e` have the same cycles. -/
+/-- `R ∪ C` and its transport along `e` have the same cycles.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem cycleCount_congr {W : Type*} (e : V ≃ W) (P Q : PerfectMatching V) :
     cycleCount (congr e P) (congr e Q) = cycleCount P Q :=
   (card_connectedComponent_eq_of_retract e.symm e
@@ -64,7 +67,8 @@ theorem cycleCount_congr {W : Type*} (e : V ≃ W) (P Q : PerfectMatching V) :
     (fun v ↦ by simp) (fun w ↦ by simp))
 
 omit [Fintype V] [DecidableEq V] in
-/-- Reachability is transported along `e`. -/
+/-- Reachability is transported along `e`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem reachable_congr {W : Type*} (e : V ≃ W) (P Q : PerfectMatching V) (u v : V) :
     ((congr e P).toGraph ⊔ (congr e Q).toGraph).Reachable (e u) (e v) ↔
       (P.toGraph ⊔ Q.toGraph).Reachable u v :=
@@ -77,7 +81,8 @@ section Count
 variable {W : Type*} [Finite W]
 
 /-- Components of a graph in which every vertex is joined to a distinct partner have at least
-two vertices each. -/
+two vertices each.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem two_mul_card_le (G : SimpleGraph W) (σ : W → W) (hσ : ∀ v, σ v ≠ v)
     (hr : ∀ v, G.Reachable v (σ v)) (K : G.ConnectedComponent → Prop) (S : Finset W)
     (hS : ∀ v, K (G.connectedComponentMk v) → v ∈ S) :
@@ -119,15 +124,20 @@ section Step
 variable [Fintype V] [DecidableEq V] (B R : PerfectMatching V) {A : Finset V}
   (hA : ∀ v ∈ A, B.mate v ∈ A) {yp : V}
 
-/-- `A ∪ {y₊, y₋}`, the vertex set after reinserting the label `y = {y₊, B y₊}`. -/
+/-- `A ∪ {y₊, y₋}`, the vertex set after reinserting the label `y = {y₊, B y₊}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 def grow (A : Finset V) (yp : V) : Finset V := insert yp (insert (B.mate yp) A)
 
 omit [Fintype V] in
+/-- Membership in `A ∪ {y₊, y₋}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem mem_grow {v : V} : v ∈ grow B A yp ↔ v = yp ∨ v = B.mate yp ∨ v ∈ A := by
   simp [grow]
 
 omit [Fintype V] in
 include hA in
+/-- `A ∪ {y₊, y₋}` is a union of edges of `B`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem grow_closed : ∀ v ∈ grow B A yp, B.mate v ∈ grow B A yp := by
   intro v hv
   rw [mem_grow] at hv ⊢
@@ -140,9 +150,13 @@ theorem grow_closed : ∀ v ∈ grow B A yp, B.mate v ∈ grow B A yp := by
 
 omit [Fintype V] [DecidableEq V] in
 include hA in
+/-- The partner `y₋ = B y₊` of a label outside `A` is outside `A`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem mate_notMem (hyp : yp ∉ A) : B.mate yp ∉ A := fun h ↦ hyp (B.mate_mate yp ▸ hA _ h)
 
 omit [Fintype V] in
+/-- `A ⊆ A ∪ {y₊, y₋}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem subset_grow : A ⊆ grow B A yp := fun _ hv ↦ (mem_grow B).mpr (Or.inr (Or.inr hv))
 
 /-- `c_Y`, the number of cycles of `R ∪ B` that avoid `A`: the cycles that `R ∪ F_0|_Y`
@@ -151,6 +165,8 @@ noncomputable def closedCount (R B : PerfectMatching V) (A : Finset V) : ℕ :=
   Set.ncard {c : (R.toGraph ⊔ B.toGraph).ConnectedComponent |
     ∀ v, (R.toGraph ⊔ B.toGraph).connectedComponentMk v = c → v ∉ A}
 
+/-- `c_Y ≤ |Y|`: every cycle of `R ∪ B` inside `Y` contains a whole label.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem closedCount_le (n : ℕ) (hn : Aᶜ.card = 2 * n) : closedCount R B A ≤ n := by
   have h := two_mul_card_le (R.toGraph ⊔ B.toGraph) B.mate B.mate_ne
     (fun v ↦ (adj_mate_right R B v).reachable)
@@ -161,18 +177,24 @@ theorem closedCount_le (n : ℕ) (hn : Aᶜ.card = 2 * n) : closedCount R B A �
 
 variable (hyp : yp ∉ A)
 
-/-- The two ends of the reinserted label as points of `A ∪ {y₊, y₋}`. -/
+/-- The two ends of the reinserted label as points of `A ∪ {y₊, y₋}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 def yP : grow B A yp := ⟨yp, (mem_grow B).mpr (Or.inl rfl)⟩
 
-/-- The second end `y₋ = B y₊`. -/
+/-- The second end `y₋ = B y₊`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 def yM : grow B A yp := ⟨B.mate yp, (mem_grow B).mpr (Or.inr (Or.inl rfl))⟩
 
 omit [Fintype V] [DecidableEq V] in
 include hA hyp in
+/-- Points of `A` are neither `y₊` nor `y₋`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem lift_ne (v : A) : (v : V) ≠ yp ∧ (v : V) ≠ B.mate yp :=
   ⟨fun h ↦ hyp (h ▸ v.2), fun h ↦ mate_notMem B hA hyp (h ▸ v.2)⟩
 
 omit [Fintype V] in
+/-- A point of `A ∪ {y₊, y₋}` other than `y₊`, `y₋` lies in `A`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem mem_A_of_grow (v : grow B A yp) (h1 : (v : V) ≠ yp) (h2 : (v : V) ≠ B.mate yp) :
     (v : V) ∈ A := by
   rcases (mem_grow B).mp v.2 with h | h | h
@@ -182,18 +204,22 @@ theorem mem_A_of_grow (v : grow B A yp) (h1 : (v : V) ≠ yp) (h2 : (v : V) ≠ 
 
 omit [Fintype V] in
 include hA in
-/-- The walk graph of `R` grows when the level shrinks from `A ∪ {y₊, y₋}` to `A`. -/
+/-- The walk graph of `R` grows when the level shrinks from `A ∪ {y₊, y₋}` to `A`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem walkGraph_mono (Q : PerfectMatching V) :
     Q.toGraph ⊔ offGraph B (grow B A yp) (grow_closed B hA) ≤ Q.toGraph ⊔ offGraph B A hA :=
   sup_le_sup_left (offGraph_mono B hA (grow_closed B hA) (subset_grow B)) _
 
 omit [Fintype V] [DecidableEq V] in
 include hyp in
+/-- The label `{y₊, y₋}` is an edge of `B` off `A`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem offGraph_adj_y : (offGraph B A hA).Adj yp (B.mate yp) := ⟨rfl, hyp⟩
 
 include hA hyp in
 /-- A non-degenerate reinsertion step: `R` shortcut at `A` is `R` shortcut at `A ∪ {y₊, y₋}`
-with `{y₊, a}`, `{y₋, b}` replaced by `{a, b}`. -/
+with `{y₊, a}`, `{y₋, b}` replaced by `{a, b}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem contract_step_nondeg
     (hnd : (contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) ≠ yM B) :
     ∃ a b : A, ((contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) : V) = a ∧
@@ -240,7 +266,8 @@ theorem contract_step_nondeg
 
 include hA hyp in
 /-- A degenerate reinsertion step, `R(y₊) = y₋` at level `A ∪ {y₊, y₋}`: shortcutting `y`
-changes nothing on `A`. -/
+changes nothing on `A`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem contract_step_deg
     (hd : (contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) = yM B) :
     ∀ v : A, ((contract B R A hA).mate v : V) =
@@ -268,7 +295,8 @@ theorem contract_step_deg
 
 include hA hyp in
 /-- Reinserting `y` is degenerate (`R(y₊) = y₋` at level `A ∪ {y₊, y₋}`) exactly when the cycle
-of `R ∪ B` through `y` avoids `A`, and then it is one of the cycles counted by `c_Y`. -/
+of `R ∪ B` through `y` avoids `A`, and then it is one of the cycles counted by `c_Y`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem closedCount_step :
     closedCount R B A = closedCount R B (grow B A yp) +
       if (contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) = yM B then 1 else 0 := by
@@ -358,7 +386,8 @@ theorem closedCount_step :
 variable (C' : PerfectMatching A) (p : A) {ent : V}
 
 /-- The context `C'` of `E_0` with the label `y` inserted at the slot `{p, C' p}`, entered at
-`ent`, as a matching of `V` that is `B` off `A ∪ {y₊, y₋}`. -/
+`ent`, as a matching of `V` that is `B` off `A ∪ {y₊, y₋}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 def insertV (ent : V) : PerfectMatching V :=
   Equiv.swap ((C'.mate p : A) : V) ent • glue B A hA C'
 
@@ -366,6 +395,8 @@ variable (hent : ent = yp ∨ ent = B.mate yp)
 
 omit [Fintype V] [DecidableEq V] in
 include hA hyp hent in
+/-- The two ends of the inserted label lie outside `A` and are distinct.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem ent_notMem : ent ∉ A ∧ B.mate ent ∉ A ∧ ent ≠ B.mate ent := by
   rcases hent with rfl | rfl
   · exact ⟨hyp, mate_notMem B hA hyp, (B.mate_ne _).symm⟩
@@ -374,6 +405,8 @@ theorem ent_notMem : ent ∉ A ∧ B.mate ent ∉ A ∧ ent ≠ B.mate ent := by
 
 omit [Fintype V] in
 include hyp hent in
+/-- The partners in the inserted context: `p–entry`, `q–exit`, and `C'` elsewhere.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem insertV_mate :
     (insertV B hA C' p ent).mate p = ent ∧
       (insertV B hA C' p ent).mate (C'.mate p) = B.mate ent ∧
@@ -407,6 +440,8 @@ theorem insertV_mate :
 
 omit [Fintype V] in
 include hent in
+/-- `A ∪ {y₊, y₋}` described through the entry end of `y`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem mem_grow_iff_ent {v : V} : v ∈ grow B A yp ↔ v = ent ∨ v = B.mate ent ∨ v ∈ A := by
   rw [mem_grow]
   rcases hent with rfl | rfl
@@ -416,6 +451,8 @@ theorem mem_grow_iff_ent {v : V} : v ∈ grow B A yp ↔ v = ent ∨ v = B.mate 
 
 omit [Fintype V] in
 include hyp hent in
+/-- The inserted context maps `A ∪ {y₊, y₋}` into itself.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem insertV_closed : ∀ v ∈ grow B A yp, (insertV B hA C' p ent).mate v ∈ grow B A yp := by
   obtain ⟨m1, m2, m3, m4, m5⟩ := insertV_mate B hA hyp C' p hent
   intro v hv
@@ -444,12 +481,15 @@ def insertCtx : PerfectMatching (grow B A yp) :=
   restrict (insertV B hA C' p ent) (grow B A yp) (insertV_closed B hA hyp C' p hent)
 
 omit [Fintype V] in
+/-- Partners in the inserted context on `A ∪ {y₊, y₋}`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem insertCtx_mate (v : grow B A yp) :
     ((insertCtx B hA hyp C' p hent).mate v : V) = (insertV B hA C' p ent).mate v :=
   rfl
 
 include hent in
-/-- Restricting a context that extends the inserted context to `E_0` gives back `C'`. -/
+/-- Restricting a context that extends the inserted context to `E_0` gives back `C'`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem contract_insert (C : PerfectMatching V)
     (hC : contract B C (grow B A yp) (grow_closed B hA) = insertCtx B hA hyp C' p hent) :
     contract B C A hA = C' := by
@@ -493,7 +533,8 @@ theorem contract_insert (C : PerfectMatching V)
 omit [Fintype V] in
 include hent in
 /-- Inserting `y` into a slot of `C'` subdivides that slot when `P₁` pairs `y₊` with `y₋`, so
-the number of cycles is unchanged. -/
+the number of cycles is unchanged.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem cycleCount_insert (P₁ : PerfectMatching (grow B A yp)) (P₀ : PerfectMatching A)
     (h1 : P₁.mate (yP B) = yM B)
     (h0 : ∀ v : A, (P₁.mate ⟨v, subset_grow B v.2⟩ : V) = P₀.mate v) :
@@ -606,10 +647,13 @@ theorem cycleCount_insert (P₁ : PerfectMatching (grow B A yp)) (P₀ : Perfect
   exact card_connectedComponent_eq_of_retract π ι h1' h2' h3' (fun w ↦ by rw [πι])
 
 omit [Fintype V] in
+/-- The two ends of the inserted label are distinct.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem yP_ne_yM : yP B ≠ (yM B : grow B A yp) := fun h ↦
   B.mate_ne yp (congrArg (fun z : grow B A yp ↦ (z : V)) h).symm
 
-/-- `V(E_0)` as the lower vertex set `V(E_0 ∪ {y}) ∖ {y₊, y₋}` of Lemma 5. -/
+/-- `V(E_0)` as the lower vertex set `V(E_0 ∪ {y}) ∖ {y₊, y₋}` of Lemma 5.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 def liftEquiv : A ≃ lowerSet (yP B) (yM B : grow B A yp) where
   toFun a := ⟨⟨a, subset_grow B a.2⟩, mem_lowerSet.mpr
     ⟨fun h ↦ (lift_ne B hA hyp a).1 (congrArg (fun z : grow B A yp ↦ (z : V)) h),
@@ -621,12 +665,16 @@ def liftEquiv : A ≃ lowerSet (yP B) (yM B : grow B A yp) where
   right_inv _ := rfl
 
 omit [Fintype V] in
+/-- `liftEquiv` keeps the underlying vertex.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem coe_liftEquiv (a : A) : (((liftEquiv B hA hyp a : lowerSet (yP B) (yM B)) :
     grow B A yp) : V) = a :=
   rfl
 
 omit [Fintype V] in
 include hent in
+/-- The inserted context satisfies the hypotheses of `insertion_cycleCount`.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem insertCtx_transport :
     (insertCtx B hA hyp C' p hent).mate (liftEquiv B hA hyp p) =
         ⟨ent, (mem_grow_iff_ent B hent).mpr (Or.inl rfl)⟩ ∧
@@ -656,7 +704,8 @@ theorem insertCtx_transport :
 
 include hent in
 /-- Lemma 5 at a non-degenerate reinsertion step: inserting `y` into a slot on a cycle other
-than the split edge's lowers `κ` by one. -/
+than the split edge's lowers `κ` by one.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem cycleCount_insert_nondeg
     (hnd : (contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) ≠ yM B)
     (a : A) (ha : ((contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) : V) = a)
@@ -694,7 +743,8 @@ theorem cycleCount_insert_nondeg
   rw [L5.1 hr, cycleCount_congr]
 
 /-- Lemma 5 at a non-degenerate reinsertion step on a Hamiltonian context: one of the two signs
-of `y` keeps it Hamiltonian. -/
+of `y` keeps it Hamiltonian.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem ham_insert_nondeg
     (hnd : (contract B R (grow B A yp) (grow_closed B hA)).mate (yP B) ≠ yM B)
     (hH : Ham (contract B R A hA) C') :
@@ -731,7 +781,8 @@ section Main
 variable [Fintype V] [DecidableEq V]
 
 omit [Fintype V] [DecidableEq V] in
-/-- When `A` is everything, `P ∪ Q` on `V` and its copy on `A` have the same cycles. -/
+/-- When `A` is everything, `P ∪ Q` on `V` and its copy on `A` have the same cycles.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem cycleCount_eq_of_forall_mem {A : Finset V} (hall : ∀ v, v ∈ A)
     (P Q : PerfectMatching V) (P' Q' : PerfectMatching A) (hP : ∀ a : A, (P'.mate a : V) = P.mate a)
     (hQ : ∀ a : A, (Q'.mate a : V) = Q.mate a) : cycleCount P Q = cycleCount P' Q' := by
@@ -747,12 +798,15 @@ theorem cycleCount_eq_of_forall_mem {A : Finset V} (hall : ∀ v, v ∈ A)
     · change Q'.mate v = w at h
       exact SimpleGraph.Adj.reachable (Or.inr ((hQ v).symm.trans (congrArg Subtype.val h)))
 
-/-- Gluing a context of `E_0` to `B` and restricting back gives it again. -/
+/-- Gluing a context of `E_0` to `B` and restricting back gives it again.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem contract_glue (B : PerfectMatching V) (A : Finset V) (hA : ∀ v ∈ A, B.mate v ∈ A)
     (C' : PerfectMatching A) : contract B (glue B A hA C') A hA = C' :=
   PerfectMatching.ext (Equiv.ext fun a ↦ contract_mate_eq B _ A hA a (C'.mate a) (C'.mate_ne a)
     (SimpleGraph.Adj.reachable (Or.inl (glue_mate_coe B A hA C' a))))
 
+/-- Reinserting one label removes two vertices from the complement.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem card_compl_grow (B : PerfectMatching V) {A : Finset V} (hA : ∀ v ∈ A, B.mate v ∈ A)
     {yp : V} (hyp : yp ∉ A) : (grow B A yp)ᶜ.card + 2 = Aᶜ.card := by
   have h1 : B.mate yp ∉ A := mate_notMem B hA hyp
@@ -851,7 +905,8 @@ theorem exists_context_extension (B R : PerfectMatching V) (n : ℕ) :
         exact ⟨C, hC1, hC2, by omega⟩
 
 omit [DecidableEq V] in
-/-- `κ(P ∪ Q) ≤ |V|/2`: every cycle has at least two vertices. -/
+/-- `κ(P ∪ Q) ≤ |V|/2`: every cycle has at least two vertices.
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem two_mul_cycleCount_le (P Q : PerfectMatching V) :
     2 * cycleCount P Q ≤ Fintype.card V := by
   have h := two_mul_card_le (P.toGraph ⊔ Q.toGraph) P.mate P.mate_ne
