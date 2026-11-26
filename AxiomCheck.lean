@@ -560,3 +560,11 @@ open Pairing PerfectMatching
 #print axioms two_mul_sum_pairType
 #print axioms hamPairCount_eq_k2Count
 #print axioms hamPairCount_eq_k2Step
+#print axioms exists_smul_eq_of_ham
+#print axioms hamDeg_eq
+#print axioms hamThree_eq
+#print axioms mean_ctxCount
+#print axioms var_ctxCount
+#print axioms coherence_nonneg
+#print axioms HamSpectral.spectral_cGen
+#print axioms HamSpectral.spectral_coherence
