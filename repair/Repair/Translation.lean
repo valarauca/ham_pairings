@@ -15,7 +15,9 @@ General part, on `ℤ/n ∪ {∞}` for odd `n`.
   `a + σ, q_1 - σ, T(q_1) + σ, …, b - σ` also has its `P`-edges in `P`, and whose ends carry the
   `Q`-edges `{a, a + σ}` and `{b, b - σ}`, spans a vertex set `C ∌ ∞` closed under `P` and `F_t`
   with at most `4k + 4` vertices. `not_ham_of_translation_cycle` : so `¬Ham P F_t`.
-  `translation_cycle_neg` is the case `T = F_0`, Lemma 2 of the rescue in orbit form.
+  `translation_cycle_neg` is the case `T = F_0`, Lemma 2 of the rescue in orbit form, and
+  `Canonical.translation_cycle_of_reflection` derives it from the hypotheses of
+  `reflection_cycle` (main 2b0e563), so the rescue's Lemma 2 is a special case.
 * `ShiftSys n` : a set `W` (the `W`-parts of the units) and a shift `σ` with `W ∩ (W - σ) = ∅`.
   `ShiftSys.Q` pairs `w` with `w - σ`, a perfect matching of `V(W) = W ∪ (W - σ)`, and
   `ShiftSys.repair M` replaces the edges of `M` inside `V(W)` by `Q` (the swap of Lemma 2′).
@@ -221,7 +223,8 @@ hold the `Q_σ`-edges `{σ - x, -x}` and `{y, y - σ}` with `y = x + 2(k + 1)t`.
 `C ∌ ∞` with `some (-x) ∈ C` is closed under `P` and `F_t`, with `|C| ≤ 4k + 4`. In the
 positions `λ = (2t)⁻¹` of `Repair/Reflection.lean` (main 2b0e563) the label `x + 2lt` sits at
 `v + l`, so condition (b) of `reflection_cycle` there, for same-sign positions `v < w = v + k + 1`,
-supplies the kept edges here, and `δ = w - v = k + 1` matches `4δ = 4k + 4`. -/
+supplies the kept edges here, and `δ = w - v = k + 1` matches `4δ = 4k + 4`
+(`Canonical.translation_cycle_of_reflection`). -/
 theorem translation_cycle_neg (hn : Odd n) (P : PerfectMatching (Option (ZMod n)))
     {t σ x : ZMod n} {k : ℕ}
     (hint : ∀ l, 1 ≤ l → l ≤ k →
@@ -947,6 +950,104 @@ theorem ReflSet.repair_eq_shiftRepair (R : ReflSet m) (σ : ZMod (2 * m - 1))
       · exact absurd hz (R.notMem_of_neg_mem (by rwa [neg_neg]))
       · exact ((R.toShiftSys σ hcen).partner_of_add_mem hz').symm
   · rw [R.repair_mate_of_notMem h hp, ShiftSys.repair_mate_of_notMem _ _ (hv ▸ hp)]
+
+/-- `v < a < w` of one sign puts `|a|` strictly between `|v|` and `|w|`. -/
+theorem abs_between_of_sameSign {v w a : ℤ} (h : (0 < v ∧ v < w) ∨ (v < w ∧ w < 0))
+    (h1 : v < a) (h2 : a < w) : min |v| |w| < |a| ∧ |a| < max |v| |w| := by
+  rcases minmax_of_sameSign h with ⟨h0, -, hmin, hmax⟩ | ⟨-, h0, hmin, hmax⟩
+  · rw [hmin, hmax, abs_of_pos (by omega)]
+    omega
+  · rw [hmin, hmax, abs_of_neg (by omega)]
+    omega
+
+/-- **Lemma 2 of the rescue is Lemma 2′ at `T = F_0`.** Under the hypotheses of
+`reflection_cycle` (`Repair/Reflection.lean`, main 2b0e563; `ulzd-rescue.md` (2f5b9d3) Lemma 2),
+`translation_cycle_neg` with `k = w - v - 1` gives a set `C ∌ ∞` through `-x`, closed under `P`
+and `F_t`, with `|C| ≤ 4(w - v) = 4δ`. The labels `x + 2lt` at positions `v + l` and their
+shifts `x + 2lt - σ` at positions `l - w'` are the gap labels of conditions (b), and `y` is
+`x + 2δt`. `reflection_cycle` adds the exact size and the connectivity of `C`. -/
+theorem translation_cycle_of_reflection (P : PerfectMatching (Vertex m))
+    {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod (2 * m - 1)} (ht : 2 * t * lam = 1)
+    {σ x y : ZMod (2 * m - 1)} {v w v' w' : ℤ}
+    (hv : (lam * x).valMinAbs = v) (hw : (lam * y).valMinAbs = w)
+    (hv' : (lam * (σ - y)).valMinAbs = v') (hw' : (lam * (σ - x)).valMinAbs = w')
+    (ha : (0 < v ∧ v < w) ∨ (v < w ∧ w < 0)) (ha' : (0 < v' ∧ v' < w') ∨ (v' < w' ∧ w' < 0))
+    (hb : ∀ z : ZMod (2 * m - 1), min |v| |w| < |(lam * z).valMinAbs| →
+      |(lam * z).valMinAbs| < max |v| |w| → P.mate (some z) = some (-z))
+    (hb' : ∀ z : ZMod (2 * m - 1), min |v'| |w'| < |(lam * z).valMinAbs| →
+      |(lam * z).valMinAbs| < max |v'| |w'| → P.mate (some z) = some (-z))
+    (hy : P.mate (some y) = some (y - σ)) (hx : P.mate (some (σ - x)) = some (-x)) :
+    ∃ C : Finset (Vertex m), some (-x) ∈ C ∧ none ∉ C ∧ (∀ p ∈ C, P.mate p ∈ C) ∧
+      (∀ p ∈ C, (factor m t).mate p ∈ C) ∧ (C.card : ℤ) ≤ 4 * (w - v) := by
+  have bv := valMinAbs_bounds ((lam : ZMod (2 * m - 1)) * x)
+  have bw := valMinAbs_bounds ((lam : ZMod (2 * m - 1)) * y)
+  have bv' := valMinAbs_bounds ((lam : ZMod (2 * m - 1)) * (σ - y))
+  have bw' := valMinAbs_bounds ((lam : ZMod (2 * m - 1)) * (σ - x))
+  rw [hv] at bv
+  rw [hw] at bw
+  rw [hv'] at bv'
+  rw [hw'] at bw'
+  have ex : (lam : ZMod (2 * m - 1)) * x = v := by rw [← hv, ZMod.coe_valMinAbs]
+  have ey : (lam : ZMod (2 * m - 1)) * y = w := by rw [← hw, ZMod.coe_valMinAbs]
+  have ev' : (lam : ZMod (2 * m - 1)) * (σ - y) = v' := by rw [← hv', ZMod.coe_valMinAbs]
+  have ew' : (lam : ZMod (2 * m - 1)) * (σ - x) = w' := by rw [← hw', ZMod.coe_valMinAbs]
+  have hδ : w' - v' = w - v := by
+    have hc : ((w' - v' : ℤ) : ZMod (2 * m - 1)) = ((w - v : ℤ) : ZMod (2 * m - 1)) := by
+      push_cast
+      linear_combination -ew' + ev' + ey - ex
+    have e1 := valMinAbs_eq_of_eq (rfl : ((w' - v' : ℤ) : ZMod (2 * m - 1)) = _)
+      (by omega) (by omega)
+    have e2 := valMinAbs_eq_of_eq (rfl : ((w - v : ℤ) : ZMod (2 * m - 1)) = _)
+      (by omega) (by omega)
+    rw [hc] at e1
+    rw [← e1, e2]
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, w - v = k + 1 := ⟨(w - v - 1).toNat, by omega⟩
+  have hpos : ∀ l : ℕ,
+      (lam : ZMod (2 * m - 1)) * (x + 2 * l * t) = ((v + l : ℤ) : ZMod (2 * m - 1)) := by
+    intro l
+    push_cast
+    linear_combination ex + (l : ZMod (2 * m - 1)) * ht
+  have hpos' : ∀ l : ℕ,
+      (lam : ZMod (2 * m - 1)) * (σ - (x + 2 * l * t)) = ((w' - l : ℤ) : ZMod (2 * m - 1)) := by
+    intro l
+    push_cast
+    linear_combination ew' - (l : ZMod (2 * m - 1)) * ht
+  have hyx : y = x + 2 * ((k : ZMod (2 * m - 1)) + 1) * t := by
+    have e : (lam : ZMod (2 * m - 1)) * (y - x) = (k : ZMod (2 * m - 1)) + 1 := by
+      have hk' : ((w - v : ℤ) : ZMod (2 * m - 1)) = ((k + 1 : ℤ) : ZMod (2 * m - 1)) := by
+        rw [hk]
+      push_cast at hk'
+      linear_combination ey - ex + hk'
+    linear_combination (-(y - x)) * ht + 2 * t * e
+  refine (fun h ↦ ?_) (translation_cycle_neg (modulus_odd m) P (σ := σ) (x := x) (k := k)
+    (fun l h1 h2 ↦ ⟨?_, ?_⟩) (fun l hl ↦ ⟨fun h ↦ ?_, fun h ↦ ?_⟩) hx
+    (by rw [← hyx]; exact hy))
+  · obtain ⟨C, h1, h2, h3, h4, h5⟩ := h
+    refine ⟨C, h1, h2, h3, h4, ?_⟩
+    have h5' : (C.card : ℤ) ≤ 4 * k + 4 := by exact_mod_cast h5
+    rw [hk]
+    linarith
+  · have hval := valMinAbs_eq_of_eq (hpos l) (by omega) (by omega)
+    obtain ⟨i1, i2⟩ := abs_between_of_sameSign ha (a := v + l) (by omega) (by omega)
+    exact hb _ (by rw [hval]; exact i1) (by rw [hval]; exact i2)
+  · have e : (lam : ZMod (2 * m - 1)) * (x + 2 * l * t - σ) =
+        ((-(w' - l) : ℤ) : ZMod (2 * m - 1)) := by
+      rw [Int.cast_neg, ← hpos' l]
+      ring
+    have hval := valMinAbs_eq_of_eq e (by omega) (by omega)
+    obtain ⟨i1, i2⟩ := abs_between_of_sameSign ha' (a := w' - l) (by omega) (by omega)
+    rw [hb' _ (by rw [hval, abs_neg]; exact i1) (by rw [hval, abs_neg]; exact i2)]
+    congr 1
+    ring
+  · have e : (lam : ZMod (2 * m - 1)) * -(x + 2 * l * t) = ((-(v + l) : ℤ) : ZMod (2 * m - 1)) := by
+      rw [Int.cast_neg, ← hpos l]
+      ring
+    have hval := valMinAbs_eq_of_eq e (by omega) (by omega)
+    rw [h, mul_eq_half ht, valMinAbs_half] at hval
+    omega
+  · have hval := valMinAbs_eq_of_eq (hpos' l) (by omega) (by omega)
+    rw [h, mul_eq_half ht, valMinAbs_half] at hval
+    omega
 
 end Canonical
 

@@ -954,3 +954,4 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.mem_mirrorSet
 #print axioms RoundRobin.card_incoherent_two_le
 #print axioms RoundRobin.Canonical.exists_zeroState_of_blindCover
+#print axioms RoundRobin.Canonical.translation_cycle_of_reflection
