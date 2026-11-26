@@ -18,7 +18,8 @@ identification of its range with `V_{(e-1,1)}`.
   `Σ_C sh(A, C) sh(C, B) = 2 sh(A, B) (2e - 3)!! + (2e(2e - 4) + 2 sh(A, B)) (2e - 5)!!`.
 * `sum_hamInd_shared2` : `Σ_C h(A, C) sh(C, B) = (2e - sh(A, B)) |Ham(A)| / (2e - 2)`.
 * `levelOneKer_comm`, `levelOneKer_mul_self`, `sum_levelOneKer`, `hamMat_levelOneKer`,
-  `levelOneKer_self` : `E₁` is a symmetric idempotent orthogonal to the constants,
+  `levelOneKer_self`, `sum_levelOneKer_self`, `levelOneKer_omega` : `E₁` is a symmetric
+  idempotent orthogonal to the constants,
   `H E₁ = -|Ham(A)|/(2(e - 1)) E₁` (and `|Ham(A)| = |Ham(B)|` by `hamDeg_eq`), and
   `E₁(A, A) = e(2e - 3)/|PM|`. So `d = tr E₁ = e(2e - 3)` and `ω((e)) = -1/(2(e - 1))`, and
   `ω(A, B) = |PM| E₁(A, B)/d = ((2e - 1) l - e)/(2e(e - 1))`.
@@ -516,6 +517,36 @@ theorem levelOneKer_self (A : PerfectMatching W) :
     rw [shared2, filter_true_of_mem fun _ _ ↦ rfl, card_univ, hW]
   rw [levelOneKer, hsh, real_card_pm hW he]
   push_cast
+  field_simp
+  ring
+
+/-- `d_{(e-1,1)} = tr E₁ = e(2e - 3)` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
+theorem sum_levelOneKer_self :
+    ∑ A : PerfectMatching W, levelOneKer e A A = e * (2 * e - 3) := by
+  have hN : (Fintype.card (PerfectMatching W) : ℝ) ≠ 0 := by
+    rw [real_card_pm hW he]
+    have he' : (2 : ℝ) ≤ e := by exact_mod_cast he
+    have hM : ((2 * e - 5).doubleFactorial : ℝ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.doubleFactorial_pos _).ne'
+    have h1 : (2 * (e : ℝ) - 1) ≠ 0 := by linarith
+    have h3 : (2 * (e : ℝ) - 3) ≠ 0 := by linarith
+    exact mul_ne_zero (mul_ne_zero h1 h3) hM
+  simp only [levelOneKer_self hW he, sum_const, card_univ, nsmul_eq_mul]
+  field_simp
+
+/-- `ω_{(e-1,1)}(A, B) = |PM| E₁(A, B) / d = ((2e - 1) l - e)/(2e(e - 1))` with `l = sh/2`
+(`results/hybrid-pair-averaged.md`, Theorem 1). -/
+theorem levelOneKer_omega (A B : PerfectMatching W) :
+    (Fintype.card (PerfectMatching W) : ℝ) * levelOneKer e A B / (e * (2 * e - 3)) =
+      ((2 * e - 1) * ((shared2 A B : ℝ) / 2) - e) / (2 * e * (e - 1)) := by
+  have he' : (2 : ℝ) ≤ e := by exact_mod_cast he
+  have h1 : (2 * (e : ℝ) - 1) ≠ 0 := by linarith
+  have h2 : ((e : ℝ) - 1) ≠ 0 := by linarith
+  have h3 : (2 * (e : ℝ) - 3) ≠ 0 := by linarith
+  have h0 : (e : ℝ) ≠ 0 := by linarith
+  have hM : ((2 * e - 5).doubleFactorial : ℝ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.doubleFactorial_pos _).ne'
+  rw [real_card_pm hW he, levelOneKer]
   field_simp
   ring
 

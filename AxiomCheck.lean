@@ -585,3 +585,5 @@ open Pairing PerfectMatching
 #print axioms hamMat_levelOneKer
 #print axioms levelOneKer_self
 #print axioms levelOne_term
+#print axioms sum_levelOneKer_self
+#print axioms levelOneKer_omega
