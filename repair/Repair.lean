@@ -40,3 +40,7 @@ import Repair.FreeDefects
 import Repair.FixedDefectLimit
 import Repair.CyclicContext
 import Repair.ZigZagInsertion
+import Repair.PairRecursion
+import Repair.PairVariance
+import Repair.PairFormula
+import Repair.PairLevelOne
