@@ -411,8 +411,9 @@ theorem lt_of_context_mate_neg_eq (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ}
 
 /-- Lemma 3 of `results/hybrid-pair-incoherence.md` ("only if" direction): common edges are
 lattice vectors. Let `2tλ = 1`, `A = V(E)` avoid `∞`, and `-x, x' ∈ A`. If `{-x, x'}` is an
-edge of both `C_{1/2}(E)` and `C_t(E)`, and in neither context is it the wrap arc (`-x` is neither the lowest nor the highest vertex of `A`, in label
-order and in the order `zigPos m (λ ·)`), then `(h, k) = (valMinAbs x' - valMinAbs x, w - v)`
+edge of both `C_{1/2}(E)` and `C_t(E)`, and in neither context is it the wrap arc (`-x` is
+neither the lowest nor the highest vertex of `A`, in label order and in the order
+`zigPos m (λ ·)`), then `(h, k) = (valMinAbs x' - valMinAbs x, w - v)`
 lies in `L_λ` with `h, k ≥ 1`, `2k < n` and `k ≡ λh`, where `v = valMinAbs (λ x)` and
 `w = valMinAbs (λ x')`. -/
 theorem lattice_of_common_edge (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod (2 * m - 1)}
