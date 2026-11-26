@@ -24,3 +24,8 @@ import Repair.SqrtObstructions.Defect
 import Repair.SqrtObstructions.Hole
 import Repair.SqrtObstructions.LocalFloor
 import Repair.SqrtObstructions.CertLength
+import Repair.HybridPair.MeanCount
+import Repair.HybridPair.CommonEdge
+import Repair.HybridPair.Contexts
+import Repair.HybridPair.Ratio
+import Repair.HybridPair.CommonEdges
