@@ -561,3 +561,8 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cycleMoment_le
 #print axioms RoundRobin.Canonical.rpow_neg_le_hamBottomRatio
 #print axioms RoundRobin.Canonical.not_boundedRadius_of_cycleProfile_le
+#print axioms RoundRobin.Canonical.cycleProfile_zero_eq
+#print axioms RoundRobin.Canonical.hamBottomRatio_zero_eq
+#print axioms RoundRobin.Canonical.cycleProfile_two_le_iff
+#print axioms RoundRobin.Canonical.div_le_hamBottomRatio_of_cycleProfile_two_le
+#print axioms RoundRobin.Canonical.cycleProfile_two_le_of_le_hamBottomRatio

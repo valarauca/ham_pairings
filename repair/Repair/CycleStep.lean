@@ -22,9 +22,13 @@ and `g_j(k) = P(Y_0 ≤ j | κ_0 = k)`.
   fails. The proof goes through `not_boundedRadius_of_le_hamBottomRatio` (Proposition 1 of
   `results/bounded-radius-spike.md`).
 * `cycleProfile_zero_eq` (Identity D) : `g_0(k) = P_0 E[D_k | Z] / E[D_k]` for `k ≥ 2`, with
-  `D_k = #{t : κ_t = k}`.
+  `D_k = #{t : κ_t = k}` (`cycleLevelCount`) and `E[D_k | Z] / E[D_k] = zeroTilt m k`.
+  `hamBottomRatio_zero_eq` : `ρ_0 = g_0(1) / P_0`.
 * `cycleProfile_two_le_iff` (Proposition G, (a) ⇔ (b)) : for `C > 0` and `P_0 > 0`,
-  `g_0(2) ≤ C g_0(1) ↔ ρ_0 ≥ (E[D_2 | Z] / E[D_2]) / C`.
+  `g_0(2) ≤ C g_0(1) ↔ ρ_0 ≥ (E[D_2 | Z] / E[D_2]) / C`. The two consequences stated after it
+  are `div_le_hamBottomRatio_of_cycleProfile_two_le` and
+  `cycleProfile_two_le_of_le_hamBottomRatio`. Item (c) of Proposition G needs the exact value
+  `E[D_2] = μ H_(m-1) / 2`, which is not formalized here.
 
 Proposition D in the spike requires `P(X ≤ j) > 0` implicitly, since `ρ_j` is a ratio with that
 denominator. Corollary D′ gets it from (BK) itself, which forces `P(X = 0) > 0`.
@@ -417,6 +421,131 @@ theorem not_boundedRadius_of_cycleProfile_le {C : ℝ} (hC0 : 0 ≤ C) (hC2 : C 
   refine le_trans ?_ hD
   rw [Real.rpow_neg hs.le, Real.rpow_neg hm'.le]
   exact inv_anti₀ hpos hb
+
+/-- `κ` is invariant under relabelling both matchings (`results/switching-j0-spike.md`,
+Identity D, translation symmetry). -/
+theorem cycleCount_smul {V : Type*} (σ : Equiv.Perm V) (P Q : PerfectMatching V) :
+    cycleCount (σ • P) (σ • Q) = cycleCount P Q :=
+  (Nat.card_congr (unionIso σ P Q).connectedComponentEquiv).symm
+
+/-- `D_k(P) = #{t : κ_t(P) = k}`, the number of factors `F_t` with `P ∪ F_t` made of `k` cycles
+(`results/switching-j0-spike.md`, Identity D). `D_2` is the number of two-cycle factors. -/
+noncomputable def cycleLevelCount (m : ℕ) [NeZero m] (k : ℕ) (P : PerfectMatching (Vertex m)) :
+    ℕ :=
+  (univ.filter fun t ↦ cycleCount P (factor m t) = k).card
+
+/-- `#{P | κ_t(P) = k ∧ q (X P)}` does not depend on `t` (`results/switching-j0-spike.md`,
+Identity D, translation symmetry). -/
+theorem card_cycleCount_and_eq (m : ℕ) [NeZero m] (k : ℕ) (q : ℕ → Prop) [DecidablePred q]
+    (t : ZMod (2 * m - 1)) :
+    (univ.filter fun P ↦ cycleCount P (factor m t) = k ∧ q (hamCount m P)).card =
+      (univ.filter fun P ↦ cycleCount P (factor m 0) = k ∧ q (hamCount m P)).card := by
+  refine card_equiv (MulAction.toPerm (shift m (-t))) fun P ↦ ?_
+  simp only [mem_filter, mem_univ, true_and, MulAction.toPerm_apply, hamCount_shift_smul]
+  rw [← cycleCount_smul (shift m (-t)) P (factor m t), shift_smul_factor, add_neg_cancel]
+
+/-- Double counting of the pairs `(P, t)` with `κ_t(P) = k`,
+`∑_{P | q (X P)} D_k(P) = n · #{P | κ_0(P) = k ∧ q (X P)}` (`results/switching-j0-spike.md`,
+Identity D). -/
+theorem sum_cycleLevelCount (m : ℕ) [NeZero m] (k : ℕ) (q : ℕ → Prop) [DecidablePred q] :
+    ∑ P ∈ univ.filter fun P ↦ q (hamCount m P), cycleLevelCount m k P =
+      (2 * m - 1) * (univ.filter fun P ↦ cycleCountZero m P = k ∧ q (hamCount m P)).card := by
+  have e : ∑ t, (univ.filter fun P ↦ cycleCount P (factor m t) = k ∧ q (hamCount m P)).card =
+      ∑ P ∈ univ.filter fun P ↦ q (hamCount m P), cycleLevelCount m k P := by
+    simp only [card_filter]
+    rw [sum_comm, sum_filter]
+    refine sum_congr rfl fun P _ ↦ ?_
+    by_cases h : q (hamCount m P)
+    · simp only [h, and_true, ite_true]
+      rw [cycleLevelCount, card_filter]
+    · simp [h]
+  rw [← e, sum_congr rfl fun t _ ↦ card_cycleCount_and_eq m k q t, sum_const, card_univ,
+    ZMod.card, smul_eq_mul]
+  rfl
+
+/-- The zero-set tilt `E[D_k | Z] / E[D_k]` of the number of `k`-cycle factors
+(`results/switching-j0-spike.md`, Identity D, and `results/merge-step-spike.md`,
+Proposition G, where `k = 2`). It is `0` when `Z` is empty or `E[D_k] = 0`. -/
+noncomputable def zeroTilt (m : ℕ) [NeZero m] (k : ℕ) : ℝ :=
+  ((∑ P ∈ univ.filter fun P ↦ hamCount m P = 0, (cycleLevelCount m k P : ℝ)) /
+      (univ.filter fun P : PerfectMatching (Vertex m) ↦ hamCount m P = 0).card) /
+    ((∑ P : PerfectMatching (Vertex m), (cycleLevelCount m k P : ℝ)) /
+      Fintype.card (PerfectMatching (Vertex m)))
+
+/-- Identity D of `results/switching-j0-spike.md`: for `k ≥ 2`,
+`g_0(k) = P_0 · E[D_k | Z] / E[D_k]`, that is,
+`g_0(k) / P_0 = E[#{t : κ_t = k} | Z] / (n P(κ_0 = k))`. -/
+theorem cycleProfile_zero_eq (m : ℕ) [NeZero m] {k : ℕ} (hk : 2 ≤ k) :
+    cycleProfile m 0 k = hamLaw m 0 * zeroTilt m k := by
+  have hA := sum_cycleLevelCount m k (· = 0)
+  have hB := sum_cycleLevelCount m k (fun _ ↦ True)
+  simp only [and_true, filter_true] at hB
+  have ha : (univ.filter fun P ↦ cycleCountZero m P = k ∧ hamCountOff m P ≤ 0) =
+      univ.filter fun P ↦ cycleCountZero m P = k ∧ hamCount m P = 0 := by
+    ext P
+    simp only [mem_filter, mem_univ, true_and]
+    refine and_congr_right fun h ↦ ?_
+    have hn : ¬Ham P (factor m 0) := fun hh ↦ by
+      rw [← cycleCountZero_eq_one_iff, h] at hh
+      omega
+    simp only [hamCount_eq_hamCountOff_add, hn, ↓reduceIte, add_zero, Nat.le_zero]
+  set a := (univ.filter fun P ↦ cycleCountZero m P = k ∧ hamCount m P = 0).card
+  set b := (univ.filter fun P ↦ cycleCountZero m P = k).card
+  set z := (univ.filter fun P : PerfectMatching (Vertex m) ↦ hamCount m P = 0).card
+  set N := Fintype.card (PerfectMatching (Vertex m))
+  have hN : (N : ℝ) ≠ 0 := cast_card_perfectMatching_ne_zero m
+  have hn : ((2 * m - 1 : ℕ) : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne _)
+  have hA' : (∑ P ∈ univ.filter fun P ↦ hamCount m P = 0, (cycleLevelCount m k P : ℝ)) =
+      ((2 * m - 1 : ℕ) : ℝ) * a := by exact_mod_cast hA
+  have hB' : (∑ P : PerfectMatching (Vertex m), (cycleLevelCount m k P : ℝ)) =
+      ((2 * m - 1 : ℕ) : ℝ) * b := by exact_mod_cast hB
+  have hq : hamLaw m 0 = (z : ℝ) / N := rfl
+  rw [cycleProfile, ha, zeroTilt, hA', hB', hq]
+  rcases eq_or_ne (z : ℝ) 0 with hz | hz
+  · have haz : a ≤ z := card_le_card fun P hP ↦ by
+      rw [mem_filter] at hP ⊢
+      exact ⟨hP.1, hP.2.2⟩
+    have ha0 : (a : ℝ) = 0 := by
+      have : z = 0 := by exact_mod_cast hz
+      rw [this] at haz
+      exact_mod_cast Nat.le_zero.mp haz
+    rw [ha0, hz]
+    simp
+  rcases eq_or_ne (b : ℝ) 0 with hb | hb
+  · rw [hb]
+    simp
+  change (a : ℝ) / b =
+    (z : ℝ) / N * (((2 * m - 1 : ℕ) : ℝ) * a / z / (((2 * m - 1 : ℕ) : ℝ) * b / N))
+  field_simp
+
+/-- `ρ_0 = g_0(1) / P_0` (`results/switching-j0-spike.md`, Identity D). -/
+theorem hamBottomRatio_zero_eq (m : ℕ) [NeZero m] :
+    hamBottomRatio m 0 = cycleProfile m 0 1 / hamLaw m 0 := by
+  rw [hamBottomRatio_eq_cycleProfile, show SizeBias.cdf (hamLaw m) 0 = hamLaw m 0 by
+    simp [SizeBias.cdf]]
+
+/-- Proposition G of `results/merge-step-spike.md`, (a) ⇔ (b). For `C > 0` and `P_0 > 0`,
+`g_0(2) ≤ C g_0(1)` iff `ρ_0 ≥ (E[D_2 | Z] / E[D_2]) / C`. -/
+theorem cycleProfile_two_le_iff {m : ℕ} [NeZero m] {C : ℝ} (hC : 0 < C) (hq : 0 < hamLaw m 0) :
+    cycleProfile m 0 2 ≤ C * cycleProfile m 0 1 ↔ zeroTilt m 2 / C ≤ hamBottomRatio m 0 := by
+  rw [hamBottomRatio_zero_eq, cycleProfile_zero_eq m le_rfl, div_le_div_iff₀ hC hq,
+    mul_comm (zeroTilt m 2) (hamLaw m 0), mul_comm (cycleProfile m 0 1) C]
+
+/-- Proposition G of `results/merge-step-spike.md`, first consequence. If
+`E[D_2 | Z] ≥ c E[D_2]`, that is `E[D_2 | Z] / E[D_2] ≥ c`, then `g_0(2) ≤ C g_0(1)` gives
+`ρ_0 ≥ c / C`. -/
+theorem div_le_hamBottomRatio_of_cycleProfile_two_le {m : ℕ} [NeZero m] {C c : ℝ} (hC : 0 < C)
+    (hq : 0 < hamLaw m 0) (hc : c ≤ zeroTilt m 2)
+    (h : cycleProfile m 0 2 ≤ C * cycleProfile m 0 1) : c / C ≤ hamBottomRatio m 0 :=
+  (div_le_div_of_nonneg_right hc hC.le).trans ((cycleProfile_two_le_iff hC hq).mp h)
+
+/-- Proposition G of `results/merge-step-spike.md`, converse. If `ρ_0 ≥ c > 0` then
+`g_0(2) ≤ C g_0(1)` with `C = (E[D_2 | Z] / E[D_2]) / c`, provided the tilt is positive. -/
+theorem cycleProfile_two_le_of_le_hamBottomRatio {m : ℕ} [NeZero m] {c : ℝ} (hc : 0 < c)
+    (hq : 0 < hamLaw m 0) (hτ : 0 < zeroTilt m 2) (h : c ≤ hamBottomRatio m 0) :
+    cycleProfile m 0 2 ≤ zeroTilt m 2 / c * cycleProfile m 0 1 := by
+  refine (cycleProfile_two_le_iff (div_pos hτ hc) hq).mpr ?_
+  rwa [div_div_cancel₀ hτ.ne']
 
 end RoundRobin.Canonical
 
