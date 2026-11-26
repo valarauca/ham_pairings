@@ -574,3 +574,14 @@ open Pairing PerfectMatching
 #print axioms levelOne_succ_sub
 #print axioms levelOne_zero
 #print axioms abs_levelOne_sub_le
+#print axioms card_mate_eq_doubleFactorial
+#print axioms card_mate_mate_eq_doubleFactorial
+#print axioms sum_shared2
+#print axioms sum_shared2_mul
+#print axioms sum_hamInd_shared2
+#print axioms levelOneKer_comm
+#print axioms sum_levelOneKer
+#print axioms levelOneKer_mul_self
+#print axioms hamMat_levelOneKer
+#print axioms levelOneKer_self
+#print axioms levelOne_term

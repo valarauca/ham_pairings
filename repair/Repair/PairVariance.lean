@@ -375,6 +375,30 @@ structure HamSpectral (W : Type*) [Fintype W] [DecidableEq W] (I : Type*) [Finty
   diag_E : ∀ ν A A', E ν A A = E ν A' A'
   E_triv : E triv = (Fintype.card (PerfectMatching W) : ℝ)⁻¹ • Matrix.of fun _ _ ↦ 1
 
+/-- `H` is symmetric (`results/hybrid-pair-averaged.md`, Theorem 2). -/
+theorem hamMat_symm (A C : PerfectMatching W) : (hamMat : Matrix _ _ ℝ) A C = hamMat C A := by
+  simp [hamMat, hamInd, ham_comm A C]
+
+/-- `h(A, C) = h(C, A)` (`results/hybrid-pair-averaged.md`, Theorem 2). -/
+theorem hamInd_comm (A C : PerfectMatching W) : hamInd A C = hamInd C A := by
+  simp [hamInd, ham_comm A C]
+
+/-- `Hᵀ = H` (`results/hybrid-pair-averaged.md`, Theorem 2). -/
+theorem transpose_hamMat : (hamMat : Matrix (PerfectMatching W) (PerfectMatching W) ℝ)ᵀ =
+    hamMat := by
+  ext A C
+  exact hamMat_symm C A
+
+/-- `Σ_R ((M x)(R))² = x · M² x` for a symmetric `M` (`results/hybrid-pair-averaged.md`,
+Theorem 2). -/
+theorem sum_sq_mulVec (M : Matrix (PerfectMatching W) (PerfectMatching W) ℝ) (hM : Mᵀ = M)
+    (x : PerfectMatching W → ℝ) : ∑ R, (M *ᵥ x) R ^ 2 = x ⬝ᵥ ((M * M) *ᵥ x) := by
+  have h : ∑ R, (M *ᵥ x) R ^ 2 = (M *ᵥ x) ⬝ᵥ (M *ᵥ x) := by
+    simp only [dotProduct, sq]
+  rw [h]
+  nth_rw 1 [← Matrix.vecMul_transpose]
+  rw [hM, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec]
+
 namespace HamSpectral
 
 variable {I : Type*} [Fintype I] [DecidableEq I] (S : HamSpectral W I)
@@ -397,10 +421,6 @@ theorem hamMat_eq : (hamMat : Matrix (PerfectMatching W) (PerfectMatching W) ℝ
     ∑ ν, S.eig ν • S.E ν := by
   rw [← Matrix.mul_one hamMat, ← S.sum_E, Matrix.mul_sum]
   exact sum_congr rfl fun ν _ ↦ S.ham_mul_E ν
-
-/-- `H` is symmetric (`results/hybrid-pair-averaged.md`, Theorem 2). -/
-theorem hamMat_symm (A C : PerfectMatching W) : (hamMat : Matrix _ _ ℝ) A C = hamMat C A := by
-  simp [hamMat, hamInd, ham_comm A C]
 
 /-- `λ_{(e)} = |Ham(B)|` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
 theorem eig_triv (B : PerfectMatching W) : S.eig S.triv = hamDeg B := by
@@ -427,26 +447,6 @@ theorem trace_eq (ν : I) (B : PerfectMatching W) :
     (S.E ν).trace = Fintype.card (PerfectMatching W) * S.E ν B B := by
   rw [Matrix.trace]
   simp only [Matrix.diag_apply, S.diag_E ν _ B, sum_const, card_univ, nsmul_eq_mul]
-
-/-- `h(A, C) = h(C, A)` (`results/hybrid-pair-averaged.md`, Theorem 2). -/
-theorem hamInd_comm (A C : PerfectMatching W) : hamInd A C = hamInd C A := by
-  simp [hamInd, ham_comm A C]
-
-/-- `Hᵀ = H` (`results/hybrid-pair-averaged.md`, Theorem 2). -/
-theorem transpose_hamMat : (hamMat : Matrix (PerfectMatching W) (PerfectMatching W) ℝ)ᵀ =
-    hamMat := by
-  ext A C
-  exact hamMat_symm C A
-
-/-- `Σ_R ((M x)(R))² = x · M² x` for a symmetric `M` (`results/hybrid-pair-averaged.md`,
-Theorem 2). -/
-theorem sum_sq_mulVec (M : Matrix (PerfectMatching W) (PerfectMatching W) ℝ) (hM : Mᵀ = M)
-    (x : PerfectMatching W → ℝ) : ∑ R, (M *ᵥ x) R ^ 2 = x ⬝ᵥ ((M * M) *ᵥ x) := by
-  have h : ∑ R, (M *ᵥ x) R ^ 2 = (M *ᵥ x) ⬝ᵥ (M *ᵥ x) := by
-    simp only [dotProduct, sq]
-  rw [h]
-  nth_rw 1 [← Matrix.vecMul_transpose]
-  rw [hM, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec]
 
 /-- `x · (Σ_ν c_ν E_ν) x = Σ_ν c_ν (x · E_ν x)` (`results/hybrid-pair-averaged.md`,
 Theorem 2). -/
