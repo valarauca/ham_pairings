@@ -16,3 +16,4 @@ import Repair.ExceptionalSix
 import Repair.TripleUnion
 import Repair.CycleCount
 import Repair.CycleStep
+import Repair.Switching

@@ -566,3 +566,7 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cycleProfile_two_le_iff
 #print axioms RoundRobin.Canonical.div_le_hamBottomRatio_of_cycleProfile_two_le
 #print axioms RoundRobin.Canonical.cycleProfile_two_le_of_le_hamBottomRatio
+#print axioms PerfectMatching.isSwitch_comm
+#print axioms RoundRobin.Canonical.sum_switchOut_eq_sum_switchIn
+#print axioms RoundRobin.Canonical.hamLaw_one_mul_meanSwitchIn
+#print axioms RoundRobin.Canonical.hamLaw_one_div_hamLaw_zero
