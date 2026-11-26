@@ -33,3 +33,8 @@ import Repair.HybridPair.Ratio
 import Repair.HybridPair.CommonEdges
 import Repair.TripleUnionAP
 import Repair.TripleUnionLocal
+import Repair.Insertion
+import Repair.FreeDefects
+import Repair.FixedDefectLimit
+import Repair.CyclicContext
+import Repair.ZigZagInsertion

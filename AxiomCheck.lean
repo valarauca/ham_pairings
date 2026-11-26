@@ -453,7 +453,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Covering.Witness.rho_not_monotone
 #print axioms exists_mate_eq
 #print axioms le_card_ham
-#print axioms card_ham_eq
 #print axioms RoundRobin.Canonical.card_ham_factor
 #print axioms RoundRobin.Canonical.prob_hamEvent_eq
 #print axioms RoundRobin.Canonical.prob_hamEvent_pos
@@ -732,3 +731,19 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.mem_coreDefect
 #print axioms RoundRobin.Canonical.exists_mem_coreDefect
 #print axioms RoundRobin.Canonical.core_certLength_bound
+#print axioms PerfectMatching.two_switch
+#print axioms PerfectMatching.insertion_cycleCount
+#print axioms PerfectMatching.insertion_ham_iff
+#print axioms PerfectMatching.exists_context_extension
+#print axioms PerfectMatching.free_defects
+#print axioms PerfectMatching.free_defects_of_closedCount_eq_zero
+#print axioms pow_le_descFactorial_add
+#print axioms sum_pow_le_sum_descFactorial_add
+#print axioms abs_pow_sub_pow_le_of_mem
+#print axioms abs_sum_pow_sub_le
+#print axioms card_relation_le
+#print axioms card_not_generic_le
+#print axioms sum_abs_sum_le
+#print axioms CyclicContext.insert_context
+#print axioms CyclicContext.exists_slot
+#print axioms CyclicContext.zigzag_insertion
