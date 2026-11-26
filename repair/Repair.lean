@@ -29,3 +29,5 @@ import Repair.HybridPair.CommonEdge
 import Repair.HybridPair.Contexts
 import Repair.HybridPair.Ratio
 import Repair.HybridPair.CommonEdges
+import Repair.TripleUnionAP
+import Repair.TripleUnionLocal
