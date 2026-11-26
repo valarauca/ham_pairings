@@ -721,3 +721,14 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.nearHybrid_majority
 #print axioms RoundRobin.Canonical.nearHybrid_certLength
 #print axioms RoundRobin.Canonical.exists_nearHybrid
+#print axioms mate_inv
+#print axioms mate_mul_self
+#print axioms mate_zpow_apply
+#print axioms not_sameCycle_mate_right
+#print axioms not_sameCycle_mate_left
+#print axioms exists_pow_eq_of_closed
+#print axioms RoundRobin.Canonical.certLength_bound_of_hit
+#print axioms RoundRobin.Canonical.exists_walkEnd_mem_of_agree
+#print axioms RoundRobin.Canonical.mem_coreDefect
+#print axioms RoundRobin.Canonical.exists_mem_coreDefect
+#print axioms RoundRobin.Canonical.core_certLength_bound
