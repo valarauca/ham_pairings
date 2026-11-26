@@ -583,3 +583,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.sum_pairJoint_normal_form
 #print axioms RoundRobin.Canonical.sum_pairJoint_comm
 #print axioms RoundRobin.Canonical.sum_pairCommon_comm
+#print axioms jointCount_restrict_eq_of_mate_eq
+#print axioms jointCount_restrict_eq_prod
+#print axioms jointCount_eq_prod
