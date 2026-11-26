@@ -389,6 +389,19 @@ open Pairing PerfectMatching
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_pairInfo_of_reweight_harmonic
 #print axioms ChainRule.div_le_neg_log_prob_avoid_of_reweight'
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_reweight'
+#print axioms ChainRule.lt_one_of_le_mul_one_sub
+#print axioms ChainRule.mul_neg_log_one_sub_le
+#print axioms ChainRule.mul_neg_log_le_condMean_sub
+#print axioms ChainRule.prob_avoid_pos_of_le_palmGap
+#print axioms ChainRule.neg_log_le_div_of_le_palmGap
+#print axioms ChainRule.exp_neg_div_le_prob_avoid_of_le_palmGap
+#print axioms ChainRule.mul_log_sub_le_of_exists_le_palmGap
+#print axioms ChainRule.neg_log_le_div_of_exists_le_palmGap
+#print axioms ChainRule.condMean_mul_prob_avoid_le
+#print axioms ChainRule.one_sub_le_prob_avoid_of_card_le
+#print axioms ChainRule.neg_log_le_div_add_of_exists_le_palmGap
+#print axioms ChainRule.neg_log_le_div_add_of_exists_le_palmGap_of_le
+#print axioms ChainRule.neg_log_le_div_add_of_le_palmGap_of_le
 #print axioms FactorCap.farey_param
 #print axioms FactorCap.form_pos_of_endpoints
 #print axioms FactorCap.not_farey_hit
@@ -455,4 +468,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.prob_hamEvent_le_half
 #print axioms RoundRobin.Canonical.exp_neg_sqrt_le_hamLaw_zero
 #print axioms RoundRobin.Canonical.exp_neg_sqrt_sub_le_hamLaw_zero
+#print axioms RoundRobin.Canonical.exp_neg_sqrt_le_hamLaw_zero_of_le_palmGap
+#print axioms RoundRobin.Canonical.exp_neg_sqrt_sub_le_hamLaw_zero_of_le_palmGap
 #print axioms RoundRobin.Canonical.hamLaw_zero_le_exp_neg_sqrt

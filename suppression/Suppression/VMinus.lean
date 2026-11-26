@@ -29,6 +29,20 @@ From `cod-198-attempt.md` (COD-198):
   `H_n = ∑_{N=2}^n 1 / N`. `harmonic_le_log` is `H_n ≤ log n`, and
   `div_le_neg_log_prob_avoid_of_reweight'`, `neg_log_prob_avoid_le_div_of_reweight'` recover the
   `log n` forms of `Reweighted.lean` from the `H_n` forms.
+
+From `two-sided-corner-spike.md` (Proposition 4) and `soft-floor-spike.md` (§7 step 2), the
+lower-side twin of Lemma A of the (V+) survey (`v-plus-strategy-survey.md`), with `f_k` and
+`Δ_k = palmGap` along a path:
+
+* `neg_log_le_div_of_le_palmGap`, `exp_neg_div_le_prob_avoid_of_le_palmGap` : if
+  `(1 + Δ_k)(1 - f_k) ≥ c > 0` at every step of an ordering, then `-log q ≤ μ / c`, with no
+  hypothesis `q > 0` (`prob_avoid_pos_of_le_palmGap`).
+* `neg_log_le_div_of_exists_le_palmGap` : the same along an adaptive ordering.
+* `mul_log_sub_le_of_exists_le_palmGap`, `neg_log_le_div_add_of_exists_le_palmGap`,
+  `neg_log_le_div_add_of_exists_le_palmGap_of_le`, `neg_log_le_div_add_of_le_palmGap_of_le` :
+  windowed forms, adaptive or on a fixed path. The steps with `|T| < ⌊δ / p⌋` cost `-log(1 - δ)`
+  and the factor `1 / (1 - δ)` on `μ`. The last `K` steps cost a named bound `G`, because unlike
+  Lemma B(i) on the upper side they are not free.
 -/
 
 namespace Pairing
@@ -656,6 +670,316 @@ theorem neg_log_prob_avoid_le_div_of_reweight' (hP : IsProb P) {φ J : ℝ} {K :
   linarith
 
 end Corollary5
+
+section LemmaALower
+
+/-- The step of the lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4, proof): if
+`c > 0`, `f ≤ 1` and `c ≤ (1 + Δ)(1 - f)`, then `f < 1`. -/
+theorem lt_one_of_le_mul_one_sub {c f Δ : ℝ} (hc : 0 < c) (h1 : f ≤ 1)
+    (h : c ≤ (1 + Δ) * (1 - f)) : f < 1 := by
+  rcases h1.lt_or_eq with h1 | rfl
+  · exact h1
+  · rw [sub_self, mul_zero] at h
+    linarith
+
+/-- The step of the lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4, proof): if
+`c > 0`, `0 ≤ f ≤ 1` and `c ≤ (1 + Δ)(1 - f)`, then `c (-log(1 - f)) ≤ f (1 + Δ)`, from
+`-log(1 - f) ≤ f / (1 - f)`. -/
+theorem mul_neg_log_one_sub_le {c f Δ : ℝ} (hc : 0 < c) (h0 : 0 ≤ f) (h1 : f ≤ 1)
+    (h : c ≤ (1 + Δ) * (1 - f)) : c * -Real.log (1 - f) ≤ f * (1 + Δ) := by
+  have hf : 0 < 1 - f := sub_pos.2 (lt_one_of_le_mul_one_sub hc h1 h)
+  have hΔ : 0 ≤ 1 + Δ := by
+    by_contra hneg
+    push Not at hneg
+    linarith [mul_neg_of_neg_of_pos hneg hf]
+  have hℓ : 0 ≤ -Real.log (1 - f) := neg_nonneg.2 (Real.log_nonpos hf.le (by linarith))
+  calc c * -Real.log (1 - f) ≤ (1 + Δ) * (1 - f) * -Real.log (1 - f) :=
+        mul_le_mul_of_nonneg_right h hℓ
+    _ = (1 + Δ) * (-(1 - f) * Real.log (1 - f)) := by ring
+    _ ≤ (1 + Δ) * f := mul_le_mul_of_nonneg_left (neg_mul_log_le h0 h1) hΔ
+    _ = f * (1 + Δ) := mul_comm _ _
+
+/-- The step of the lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4,
+`soft-floor-spike.md` §7 step 2): if `s ∉ T`, `c > 0` and `c ≤ (1 + Δ_s(T))(1 - f_s(T))`, then
+`c (-log(1 - f_s(T))) ≤ M_T - M_{T ∪ s}`. -/
+theorem mul_neg_log_le_condMean_sub (hP : IsProb P) {T : Finset ι} {s : ι} (hsT : s ∉ T)
+    {c : ℝ} (hc : 0 < c) (h : c ≤ (1 + palmGap P A T s) * (1 - condProb P A T s)) :
+    c * -Real.log (1 - condProb P A T s) ≤ condMean P A T - condMean P A (insert s T) := by
+  rw [condMean_sub_condMean_insert hP hsT]
+  exact mul_neg_log_one_sub_le hc (condProb_nonneg hP T s) (condProb_le_one hP T s) h
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4): if `c > 0` and
+`(1 + Δ_k)(1 - f_k) ≥ c` at every step of an ordering `σ`, then every `f_k < 1`, so `q > 0` by the
+chain rule. -/
+theorem prob_avoid_pos_of_le_palmGap (hP : IsProb P) {c : ℝ} (hc : 0 < c) {n : ℕ}
+    (σ : Fin n ≃ ι)
+    (h : ∀ k : Fin n,
+      c ≤ (1 + palmGap P A (pre σ k) (σ k)) * (1 - condProb P A (pre σ k) (σ k))) :
+    0 < prob P (avoid A univ) := by
+  rw [prob_avoid_univ hP σ]
+  exact prod_pos fun k _ ↦ sub_pos.2 (lt_one_of_le_mul_one_sub hc (condProb_le_one hP _ _) (h k))
+
+/-- The lower-side twin of Lemma A of the (V+) survey (`v-plus-strategy-survey.md`), which is
+Proposition 4 of `two-sided-corner-spike.md` and the lemma asked for in `soft-floor-spike.md` §7
+step 2: if `c > 0` and `(1 + Δ_k)(1 - f_k) ≥ c` at every step of an ordering `σ`, then
+`-log q ≤ μ / c`. The proof is `-log(1 - f) ≤ f / (1 - f) ≤ f (1 + Δ) / c` with
+`μ = ∑_k f_k (1 + Δ_k)`. No hypothesis `q > 0` is needed, since the step bound forces `f_k < 1`. -/
+theorem neg_log_le_div_of_le_palmGap (hP : IsProb P) {c : ℝ} (hc : 0 < c) {n : ℕ}
+    (σ : Fin n ≃ ι)
+    (h : ∀ k : Fin n,
+      c ≤ (1 + palmGap P A (pre σ k) (σ k)) * (1 - condProb P A (pre σ k) (σ k))) :
+    -Real.log (prob P (avoid A univ)) ≤ (∑ t, prob P (A t)) / c := by
+  have hq := prob_avoid_pos_of_le_palmGap hP hc σ h
+  rw [le_div_iff₀ hc, ← sum_condProb_mul_one_add_palmGap hP σ, neg_log_prob_avoid_eq_sum hP hq σ,
+    sum_mul]
+  refine sum_le_sum fun k _ ↦ ?_
+  rw [mul_comm _ c]
+  exact mul_neg_log_one_sub_le hc (condProb_nonneg hP _ _) (condProb_le_one hP _ _) (h k)
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4, `soft-floor-spike.md` §7
+step 2) in the form of `exp_neg_div_le_prob_avoid_of_le_condVar`: if `c > 0` and
+`(1 + Δ_k)(1 - f_k) ≥ c` at every step of an ordering `σ`, then `q ≥ exp(-μ / c)`. -/
+theorem exp_neg_div_le_prob_avoid_of_le_palmGap (hP : IsProb P) {c : ℝ} (hc : 0 < c) {n : ℕ}
+    (σ : Fin n ≃ ι)
+    (h : ∀ k : Fin n,
+      c ≤ (1 + palmGap P A (pre σ k) (σ k)) * (1 - condProb P A (pre σ k) (σ k))) :
+    Real.exp (-((∑ t, prob P (A t)) / c)) ≤ prob P (avoid A univ) := by
+  have h1 := neg_log_le_div_of_le_palmGap hP hc σ h
+  calc Real.exp (-((∑ t, prob P (A t)) / c))
+      ≤ Real.exp (Real.log (prob P (avoid A univ))) := Real.exp_le_exp.mpr (by linarith)
+    _ = prob P (avoid A univ) := Real.exp_log (prob_avoid_pos_of_le_palmGap hP hc σ h)
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4) along an adaptive path, on
+a window. Assume `q > 0`, `c > 0` and a family `S` of sets such that every `T ∈ S` with
+`N_T ≥ K + 1` has some `s ∉ T` with `T ∪ s ∈ S` and `(1 + Δ_s(T))(1 - f_s(T)) ≥ c`, and every
+`T ∈ S` with `N_T ≤ K` has `log U(Z_T) - log q ≤ G`. Then every `T ∈ S` has
+`c (log U(Z_T) - log q) ≤ M_T + c G`. With `S` the sets with `k₀ ≤ |T|` this is the twin of
+`condMean_le_of_exists_palmGap_le`, and with `S` the sets `T_k`, `k ≥ k₀`, of an ordering it is
+a fixed path. Unlike Lemma B(i) on the upper side, the last `K` steps are not free, since
+`-log(1 - f)` is unbounded, so they cost the named bound `G`. -/
+theorem mul_log_sub_le_of_exists_le_palmGap (hP : IsProb P) (hq : 0 < prob P (avoid A univ))
+    {c G : ℝ} (hc : 0 < c) {K : ℕ} (S : Finset ι → Prop)
+    (hS : ∀ T, S T → K < Tᶜ.card → ∃ s ∉ T, S (insert s T) ∧
+      c ≤ (1 + palmGap P A T s) * (1 - condProb P A T s))
+    (hG : ∀ T, S T → Tᶜ.card ≤ K →
+      Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ)) ≤ G)
+    (T : Finset ι) (hT : S T) :
+    c * (Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ))) ≤
+      condMean P A T + c * G := by
+  have base : ∀ T, S T → Tᶜ.card ≤ K →
+      c * (Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ))) ≤
+        condMean P A T + c * G := fun T hT hK ↦ by
+    linarith [mul_le_mul_of_nonneg_left (hG T hT hK) hc.le, condMean_nonneg hP (A := A) T]
+  have key : ∀ N : ℕ, ∀ T : Finset ι, Tᶜ.card = N → S T →
+      c * (Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ))) ≤
+        condMean P A T + c * G := by
+    intro N
+    induction N with
+    | zero => exact fun T hN hT ↦ base T hT (by omega)
+    | succ N ih =>
+      intro T hN hT
+      by_cases hK : K < N + 1
+      · obtain ⟨s, hs, hS', hstep⟩ := hS T hT (hN ▸ hK)
+        have hN' : (insert s T)ᶜ.card = N := by
+          rw [compl_insert, card_erase_of_mem (mem_compl.mpr hs), hN]
+          rfl
+        have ih' := ih (insert s T) hN' hS'
+        have hstep' := mul_neg_log_le_condMean_sub hP hs hc hstep
+        have hlog := neg_log_avoid_insert hP hq (A := A) T s
+        have e : c * (Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ))) =
+            c * (Real.log (prob P (avoid A (insert s T))) - Real.log (prob P (avoid A univ))) +
+              c * -Real.log (1 - condProb P A T s) := by
+          rw [← hlog]
+          ring
+        linarith
+      · exact base T hT (by omega)
+  exact key _ T rfl hT
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4, `soft-floor-spike.md` §7
+step 2) along an adaptive ordering, with `s_k` chosen from `T_{k-1}`: if `c > 0` and every
+`T ≠ ι` has some `s ∉ T` with `(1 + Δ_s(T))(1 - f_s(T)) ≥ c`, then `-log q ≤ μ / c`. No
+hypothesis `q > 0` is needed. -/
+theorem neg_log_le_div_of_exists_le_palmGap (hP : IsProb P) {c : ℝ} (hc : 0 < c)
+    (h : ∀ T : Finset ι, T ≠ univ →
+      ∃ s ∉ T, c ≤ (1 + palmGap P A T s) * (1 - condProb P A T s)) :
+    -Real.log (prob P (avoid A univ)) ≤ (∑ t, prob P (A t)) / c := by
+  have hpos : ∀ N : ℕ, ∀ T : Finset ι, Tᶜ.card = N → 0 < prob P (avoid A T) →
+      0 < prob P (avoid A univ) := by
+    intro N
+    induction N with
+    | zero =>
+      intro T hN hT
+      rw [card_eq_zero, compl_eq_empty_iff] at hN
+      rwa [hN] at hT
+    | succ N ih =>
+      intro T hN hT
+      have hTu : T ≠ univ := by
+        rintro rfl
+        simp at hN
+      obtain ⟨s, hs, hstep⟩ := h T hTu
+      have hN' : (insert s T)ᶜ.card = N := by
+        rw [compl_insert, card_erase_of_mem (mem_compl.mpr hs), hN]
+        rfl
+      refine ih (insert s T) hN' ?_
+      rw [prob_avoid_insert hP]
+      exact mul_pos hT (sub_pos.2 (lt_one_of_le_mul_one_sub hc (condProb_le_one hP T s) hstep))
+  have hq := hpos _ ∅ rfl (by rw [avoid_empty, prob_univ hP]; exact one_pos)
+  have hmain := mul_log_sub_le_of_exists_le_palmGap hP hq hc (K := 0) (G := 0) (fun _ ↦ True)
+    (fun T _ hK ↦ by
+      obtain ⟨s, hs, hstep⟩ := h T fun e ↦ by
+        rw [e, compl_univ, card_empty] at hK
+        omega
+      exact ⟨s, hs, trivial, hstep⟩)
+    (fun T _ hK ↦ by
+      rw [Nat.le_zero, card_eq_zero, compl_eq_empty_iff] at hK
+      rw [hK, sub_self])
+    ∅ trivial
+  rw [avoid_empty, prob_univ hP, Real.log_one, condMean_empty hP] at hmain
+  rw [le_div_iff₀ hc]
+  linarith
+
+/-- `M_T U(Z_T) ≤ μ` (the proof of Corollary 4 of COD-198, `cod-198-attempt.md`), which bounds
+the start of a window in the lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4). -/
+theorem condMean_mul_prob_avoid_le (hP : IsProb P) (T : Finset ι) :
+    condMean P A T * prob P (avoid A T) ≤ ∑ t, prob P (A t) := by
+  rw [condMean, sum_mul]
+  calc ∑ s ∈ Tᶜ, condProb P A T s * prob P (avoid A T) ≤ ∑ s ∈ Tᶜ, prob P (A s) :=
+        sum_le_sum fun s _ ↦ by
+          rw [condProb_mul_prob hP]
+          exact prob_mono hP Set.inter_subset_left
+    _ ≤ ∑ t, prob P (A t) :=
+        sum_le_sum_of_subset_of_nonneg (subset_univ _) fun t _ _ ↦ prob_nonneg hP _
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- The low levels of the lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4, with the
+window of COD-198 Corollary 4, `cod-198-attempt.md`): if `U(A_t) ≤ p`, `p > 0`, `δ ≥ 0` and
+`|T| ≤ ⌊δ / p⌋`, then `U(Z_T) ≥ 1 - δ`, by the union bound. -/
+theorem one_sub_le_prob_avoid_of_card_le (hP : IsProb P) {p δ : ℝ} (hp : ∀ t, prob P (A t) ≤ p)
+    (hp0 : 0 < p) (hδ0 : 0 ≤ δ) {T : Finset ι} (hT : T.card ≤ ⌊δ / p⌋₊) :
+    1 - δ ≤ prob P (avoid A T) := by
+  have hfl : (⌊δ / p⌋₊ : ℝ) * p ≤ δ := by
+    have := Nat.floor_le (div_nonneg hδ0 hp0.le)
+    rwa [le_div_iff₀ hp0] at this
+  have hTp : (T.card : ℝ) * p ≤ δ := by
+    have : (T.card : ℝ) ≤ ⌊δ / p⌋₊ := by exact_mod_cast hT
+    nlinarith
+  have h1 := one_sub_sum_le_prob_avoid hP (A := A) T
+  have h2 : ∑ u ∈ T, prob P (A u) ≤ T.card * p :=
+    calc ∑ u ∈ T, prob P (A u) ≤ ∑ _u ∈ T, p := sum_le_sum fun u _ ↦ hp u
+      _ = T.card * p := by rw [sum_const, nsmul_eq_mul]
+  linarith
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4) on a window, general form.
+Assume `q > 0`, `c > 0`, `S`, `K` and `G` as in `mul_log_sub_le_of_exists_le_palmGap`, and some
+`T₀ ∈ S` with `U(Z_{T₀}) ≥ u > 0`. Then `-log q ≤ μ / (c u) - log u + G`. The steps before `T₀`
+cost `-log U(Z_{T₀}) ≤ -log u`, and they can raise `M_{T₀}` up to `μ / u`
+(`condMean_mul_prob_avoid_le`). -/
+theorem neg_log_le_div_add_of_exists_le_palmGap (hP : IsProb P)
+    (hq : 0 < prob P (avoid A univ)) {c G u : ℝ} (hc : 0 < c) {K : ℕ} (S : Finset ι → Prop)
+    (hS : ∀ T, S T → K < Tᶜ.card → ∃ s ∉ T, S (insert s T) ∧
+      c ≤ (1 + palmGap P A T s) * (1 - condProb P A T s))
+    (hG : ∀ T, S T → Tᶜ.card ≤ K →
+      Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ)) ≤ G)
+    {T₀ : Finset ι} (hT₀ : S T₀) (hu : 0 < u) (hU : u ≤ prob P (avoid A T₀)) :
+    -Real.log (prob P (avoid A univ)) ≤ (∑ t, prob P (A t)) / (c * u) - Real.log u + G := by
+  have h1 := mul_log_sub_le_of_exists_le_palmGap hP hq hc S hS hG T₀ hT₀
+  have hlog := Real.log_le_log hu hU
+  have hM : condMean P A T₀ * u ≤ ∑ t, prob P (A t) :=
+    (mul_le_mul_of_nonneg_left hU (condMean_nonneg hP T₀)).trans
+      (condMean_mul_prob_avoid_le hP T₀)
+  have h2 : condMean P A T₀ / c ≤ (∑ t, prob P (A t)) / (c * u) := by
+    rw [div_le_div_iff₀ hc (mul_pos hc hu)]
+    nlinarith [mul_le_mul_of_nonneg_left hM hc.le]
+  have h3 : Real.log (prob P (avoid A T₀)) - Real.log (prob P (avoid A univ)) ≤
+      condMean P A T₀ / c + G := by
+    rw [div_add' _ _ _ hc.ne', le_div_iff₀ hc]
+    linarith
+  linarith
+
+/-- The lower-side Lemma A (`two-sided-corner-spike.md` Proposition 4) along an adaptive ordering,
+on the window `⌊δ / p⌋ ≤ |T|`, `N_T ≥ K + 1`, the twin of `div_le_neg_log_of_exists_palmGap_le`.
+Assume `q > 0`, `c > 0`, `U(A_t) ≤ p` with `p > 0`, `0 ≤ δ < 1`, that every `T` in the window has
+some `s ∉ T` with `(1 + Δ_s(T))(1 - f_s(T)) ≥ c`, and that every `T` with `N_T ≤ K` has
+`log U(Z_T) - log q ≤ G`. Then `-log q ≤ μ / (c (1 - δ)) - log(1 - δ) + G`. No pair-ratio bound
+is needed, but the low levels cost the factor `1 / (1 - δ)` on `μ`. -/
+theorem neg_log_le_div_add_of_exists_le_palmGap_of_le (hP : IsProb P)
+    (hq : 0 < prob P (avoid A univ)) {c p δ G : ℝ} {K : ℕ} (hc : 0 < c)
+    (hp : ∀ t, prob P (A t) ≤ p) (hp0 : 0 < p) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hH : ∀ T : Finset ι, ⌊δ / p⌋₊ ≤ T.card → K < Tᶜ.card →
+      ∃ s ∉ T, c ≤ (1 + palmGap P A T s) * (1 - condProb P A T s))
+    (hG : ∀ T : Finset ι, Tᶜ.card ≤ K →
+      Real.log (prob P (avoid A T)) - Real.log (prob P (avoid A univ)) ≤ G) :
+    -Real.log (prob P (avoid A univ)) ≤
+      (∑ t, prob P (A t)) / (c * (1 - δ)) - Real.log (1 - δ) + G := by
+  have hδ : 0 < 1 - δ := by linarith
+  by_cases hk : ⌊δ / p⌋₊ ≤ Fintype.card ι
+  · obtain ⟨T₀, hT₀⟩ := powersetCard_nonempty.mpr (show ⌊δ / p⌋₊ ≤ (univ : Finset ι).card by
+      rwa [card_univ])
+    have hT₀c := (mem_powersetCard.mp hT₀).2
+    exact neg_log_le_div_add_of_exists_le_palmGap hP hq hc (fun T ↦ ⌊δ / p⌋₊ ≤ T.card)
+      (fun T hT hK ↦ by
+        obtain ⟨s, hs, hstep⟩ := hH T hT hK
+        exact ⟨s, hs, by rw [card_insert_of_notMem hs]; omega, hstep⟩)
+      (fun T _ hK ↦ hG T hK) hT₀c.ge hδ (one_sub_le_prob_avoid_of_card_le hP hp hp0 hδ0 hT₀c.le)
+  · have hU := one_sub_le_prob_avoid_of_card_le hP hp hp0 hδ0 (T := univ)
+      (by rw [card_univ]; omega)
+    have hlog := Real.log_le_log hδ hU
+    have hG0 : 0 ≤ G := by
+      have := hG univ (by rw [compl_univ, card_empty]; omega)
+      rwa [sub_self] at this
+    have hμ : 0 ≤ (∑ t, prob P (A t)) / (c * (1 - δ)) :=
+      div_nonneg (sum_nonneg fun t _ ↦ prob_nonneg hP _) (mul_pos hc hδ).le
+    linarith
+
+/-- The lower interval Palm lemma (`two-sided-corner-spike.md` §7 item 2 and Proposition 4,
+`soft-floor-spike.md` §7 step 2) on a fixed ordering `σ`, with a window. Assume `q > 0`, `c > 0`,
+`U(A_t) ≤ p` with `p > 0`, `0 ≤ δ < 1`, `(1 + Δ_k)(1 - f_k) ≥ c` at every step `k` with
+`⌊δ / p⌋ ≤ k` and `k + K < n`, and that the last `K` steps cost
+`log U(Z_{T_{n-K}}) - log q ≤ G`. Then `-log q ≤ μ / (c (1 - δ)) - log(1 - δ) + G`. With `σ` the
+interval ordering `0, 1, 2, …` the step hypothesis is `(1 + Δ_k([0, k)))(1 - f_k([0, k))) ≥ c`. -/
+theorem neg_log_le_div_add_of_le_palmGap_of_le (hP : IsProb P)
+    (hq : 0 < prob P (avoid A univ)) {c p δ G : ℝ} {K n : ℕ} (hc : 0 < c)
+    (hp : ∀ t, prob P (A t) ≤ p) (hp0 : 0 < p) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1) (σ : Fin n ≃ ι)
+    (h : ∀ k : Fin n, ⌊δ / p⌋₊ ≤ (k : ℕ) → (k : ℕ) + K < n →
+      c ≤ (1 + palmGap P A (pre σ k) (σ k)) * (1 - condProb P A (pre σ k) (σ k)))
+    (hG : Real.log (prob P (avoid A (pre σ (n - K)))) - Real.log (prob P (avoid A univ)) ≤ G) :
+    -Real.log (prob P (avoid A univ)) ≤
+      (∑ t, prob P (A t)) / (c * (1 - δ)) - Real.log (1 - δ) + G := by
+  have hδ : 0 < 1 - δ := by linarith
+  have hn : Fintype.card ι = n := by rw [← Fintype.card_congr σ, Fintype.card_fin]
+  have hcard : ∀ k, k ≤ n → (pre σ k)ᶜ.card = n - k := fun k hk ↦ by
+    rw [card_compl, card_pre σ hk, hn]
+  have hmono : ∀ j k, j ≤ k → pre σ j ⊆ pre σ k := fun j k hjk x hx ↦
+    mem_pre.mpr (lt_of_lt_of_le (mem_pre.mp hx) hjk)
+  have hμ : 0 ≤ (∑ t, prob P (A t)) / (c * (1 - δ)) :=
+    div_nonneg (sum_nonneg fun t _ ↦ prob_nonneg hP _) (mul_pos hc hδ).le
+  by_cases hk : ⌊δ / p⌋₊ ≤ n
+  · refine neg_log_le_div_add_of_exists_le_palmGap hP hq hc (K := K)
+      (fun T ↦ ∃ k, ⌊δ / p⌋₊ ≤ k ∧ k ≤ n ∧ T = pre σ k) ?_ ?_ (T₀ := pre σ ⌊δ / p⌋₊)
+      ⟨⌊δ / p⌋₊, le_rfl, hk, rfl⟩ hδ
+      (one_sub_le_prob_avoid_of_card_le hP hp hp0 hδ0 (by rw [card_pre σ hk]))
+    · rintro T ⟨k, hk0, hkn, rfl⟩ hK
+      rw [hcard k hkn] at hK
+      have hkn' : k < n := by omega
+      exact ⟨σ ⟨k, hkn'⟩, notMem_pre σ le_rfl, ⟨k + 1, by omega, hkn', (pre_succ σ hkn').symm⟩,
+        h ⟨k, hkn'⟩ hk0 (show k + K < n by omega)⟩
+    · rintro T ⟨k, -, hkn, rfl⟩ hK
+      rw [hcard k hkn] at hK
+      have h1 : prob P (avoid A (pre σ k)) ≤ prob P (avoid A (pre σ (n - K))) :=
+        prob_mono hP (avoid_anti (hmono _ _ (by omega)))
+      have h2 : 0 < prob P (avoid A (pre σ k)) :=
+        hq.trans_le (prob_mono hP (avoid_anti (subset_univ _)))
+      linarith [Real.log_le_log h2 h1]
+  · have hU := one_sub_le_prob_avoid_of_card_le hP hp hp0 hδ0 (T := univ)
+      (by rw [card_univ, hn]; omega)
+    have hlog := Real.log_le_log hδ hU
+    have hG0 : 0 ≤ G := by
+      have h1 : prob P (avoid A univ) ≤ prob P (avoid A (pre σ (n - K))) :=
+        prob_mono hP (avoid_anti (subset_univ _))
+      linarith [Real.log_le_log hq h1]
+    linarith
+
+end LemmaALower
 
 end ChainRule
 

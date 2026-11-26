@@ -27,6 +27,11 @@ statements about `q_m` with explicit `√m` rates. Notation is that of the front
 * `RoundRobin.Canonical.exp_neg_sqrt_le_hamLaw_zero` (COD-168 from (V−_M)) : if
   `c M_T ≤ V_T` for every `T ≠ ℤ_n`, then `q_m ≥ exp(-(√π / c) √m)`.
 * `RoundRobin.Canonical.exp_neg_sqrt_sub_le_hamLaw_zero` (COD-168 from windowed (V−_M)).
+* `RoundRobin.Canonical.exp_neg_sqrt_le_hamLaw_zero_of_le_palmGap` (COD-168 from the lower-side
+  Lemma A on one path) : if `(1 + Δ_k)(1 - f_k) ≥ c > 0` at every step of one ordering of `ℤ_n`,
+  then `q_m ≥ exp(-(√π / c) √m)`.
+* `RoundRobin.Canonical.exp_neg_sqrt_sub_le_hamLaw_zero_of_le_palmGap` (COD-168 from the lower
+  interval Palm lemma on a window) : `q_m ≥ exp(-(√π / (c (1 - δ))) √m - 2δ - G)`.
 * `RoundRobin.Canonical.hamLaw_zero_le_exp_neg_sqrt` (COD-174 from (V+_B)) : (V+_B) on the window
   `⌊δ / p⌋ ≤ |T|`, `N_T ≥ K + 1` with constant `κ`, and the named hypothesis `Var X ≤ A μ_m`,
   give `q_m ≤ exp(-(√π / (2κ)) √m + (8 A δ + K (K + 1) / 2) / κ)`.
@@ -389,6 +394,63 @@ theorem exp_neg_sqrt_sub_le_hamLaw_zero {m : ℕ} [NeZero m] (hm : 6 ≤ m) {c �
     exact div_le_div_of_nonneg_right hbd.2 hc.le
   rw [← prob_avoid_hamEvent]
   calc Real.exp (-(Real.sqrt π / c * Real.sqrt m) - 8 * δ)
+      ≤ Real.exp (Real.log (prob (unifWeight m) (avoid (hamEvent m) univ))) :=
+        exp_le_exp.mpr (by linarith)
+    _ = prob (unifWeight m) (avoid (hamEvent m) univ) := exp_log hq
+
+/-- COD-168 (`q_m ≥ e^(-C√m)`) from the lower-side Lemma A on one path, end to end, through
+`exp_neg_div_le_prob_avoid_of_le_palmGap` (`results/two-sided-corner-spike.md` Proposition 4,
+`results/soft-floor-spike.md` §7 step 2) and `μ_m ≤ √π √m` (frontier
+`results/frontier-2026-11-25.md` §1). If `c > 0` and `(1 + Δ_k)(1 - f_k) ≥ c` at every step of
+one ordering `σ` of `ℤ_n`, for instance the interval ordering, then `q_m ≥ exp(-(√π / c) √m)`,
+the bound of `exp_neg_sqrt_le_hamLaw_zero`. This holds for every `m ≥ 1`. -/
+theorem exp_neg_sqrt_le_hamLaw_zero_of_le_palmGap {m : ℕ} [NeZero m] {c : ℝ} (hc : 0 < c)
+    {n : ℕ} (σ : Fin n ≃ ZMod (2 * m - 1))
+    (h : ∀ k : Fin n,
+      c ≤ (1 + palmGap (unifWeight m) (hamEvent m) (pre σ k) (σ k)) *
+        (1 - condProb (unifWeight m) (hamEvent m) (pre σ k) (σ k))) :
+    Real.exp (-(Real.sqrt π / c * Real.sqrt m)) ≤ hamLaw m 0 := by
+  rw [← prob_avoid_hamEvent]
+  refine le_trans (exp_le_exp.mpr ?_)
+    (exp_neg_div_le_prob_avoid_of_le_palmGap (isProb_unifWeight m) hc σ h)
+  rw [neg_le_neg_iff, div_mul_eq_mul_div]
+  exact div_le_div_of_nonneg_right (sqrt_mul_sqrt_le_sum_prob_hamEvent m).2 hc.le
+
+/-- COD-168 (`q_m ≥ e^(-C√m)`) from the lower interval Palm lemma on a window, end to end,
+through `neg_log_le_div_add_of_le_palmGap_of_le` (`results/two-sided-corner-spike.md` §7 item 2
+and Proposition 4) and `μ_m ≤ √π √m` (frontier `results/frontier-2026-11-25.md` §1). Let `m ≥ 6`,
+`c > 0` and `0 ≤ δ ≤ 1 / 2`. If `(1 + Δ_k)(1 - f_k) ≥ c` at every step `k` of one ordering `σ`
+of `ℤ_n` with `⌊δ / p⌋ ≤ k` and `k + K < n`, and the last `K` steps cost
+`log U(Z_{T_{n-K}}) - log q_m ≤ G`, then `q_m ≥ exp(-(√π / (c (1 - δ))) √m - 2δ - G)`. With
+`K = 0` one may take `G = 0`. -/
+theorem exp_neg_sqrt_sub_le_hamLaw_zero_of_le_palmGap {m : ℕ} [NeZero m] (hm : 6 ≤ m)
+    {c δ G : ℝ} {K n : ℕ} (hc : 0 < c) (hδ0 : 0 ≤ δ) (hδ : δ ≤ 1 / 2)
+    (σ : Fin n ≃ ZMod (2 * m - 1))
+    (h : ∀ k : Fin n, ⌊δ / prob (unifWeight m) (hamEvent m 0)⌋₊ ≤ (k : ℕ) → (k : ℕ) + K < n →
+      c ≤ (1 + palmGap (unifWeight m) (hamEvent m) (pre σ k) (σ k)) *
+        (1 - condProb (unifWeight m) (hamEvent m) (pre σ k) (σ k)))
+    (hG : Real.log (prob (unifWeight m) (avoid (hamEvent m) (pre σ (n - K)))) -
+      Real.log (hamLaw m 0) ≤ G) :
+    Real.exp (-(Real.sqrt π / (c * (1 - δ)) * Real.sqrt m) - 2 * δ - G) ≤ hamLaw m 0 := by
+  set p := prob (unifWeight m) (hamEvent m 0) with hpdef
+  have hq := prob_avoid_hamEvent_pos hm
+  have hp : ∀ t, prob (unifWeight m) (hamEvent m t) ≤ p := fun t ↦ (prob_hamEvent m t).le
+  have hp0 : 0 < p := prob_hamEvent_pos m 0
+  have hδ1 : 0 < 1 - δ := by linarith
+  rw [← prob_avoid_hamEvent] at hG ⊢
+  have h1 := neg_log_le_div_add_of_le_palmGap_of_le (isProb_unifWeight m) hq hc hp hp0 hδ0
+    (by linarith) σ h hG
+  have h2 : -Real.log (1 - δ) ≤ 2 * δ := by
+    have h3 := one_sub_inv_le_log_of_pos hδ1
+    have h4 : (1 - δ)⁻¹ ≤ 1 + 2 * δ := by
+      rw [inv_eq_one_div, div_le_iff₀ hδ1]
+      nlinarith
+    linarith
+  have h3 : (∑ t, prob (unifWeight m) (hamEvent m t)) / (c * (1 - δ)) ≤
+      Real.sqrt π / (c * (1 - δ)) * Real.sqrt m := by
+    rw [div_mul_eq_mul_div]
+    exact div_le_div_of_nonneg_right (sqrt_mul_sqrt_le_sum_prob_hamEvent m).2 (mul_pos hc hδ1).le
+  calc Real.exp (-(Real.sqrt π / (c * (1 - δ)) * Real.sqrt m) - 2 * δ - G)
       ≤ Real.exp (Real.log (prob (unifWeight m) (avoid (hamEvent m) univ))) :=
         exp_le_exp.mpr (by linarith)
     _ = prob (unifWeight m) (avoid (hamEvent m) univ) := exp_log hq
