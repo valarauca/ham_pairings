@@ -943,3 +943,14 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.repairBound_of_hasTransCover
 #print axioms RoundRobin.Canonical.repairBound_of_window_transCover
 #print axioms RoundRobin.Canonical.ReflSet.repair_eq_shiftRepair
+#print axioms RoundRobin.coherent_two
+#print axioms RoundRobin.orbit_drift
+#print axioms RoundRobin.mul_eq_of_returns
+#print axioms RoundRobin.card_blindSet_le
+#print axioms RoundRobin.two_mul_sum_Ico_le
+#print axioms RoundRobin.mem_blindSet_of_returns
+#print axioms RoundRobin.mirror_eq
+#print axioms RoundRobin.card_mirrorSet_le
+#print axioms RoundRobin.mem_mirrorSet
+#print axioms RoundRobin.card_incoherent_two_le
+#print axioms RoundRobin.Canonical.exists_zeroState_of_blindCover

@@ -37,6 +37,20 @@ Round-robin part, on `V_m`.
   Theorem B stays a hypothesis.
 * `Canonical.ReflSet.repair_eq_shiftRepair` : a one-centre reflection repair of
   `Repair/Reflection.lean` (main 2b0e563) is the translation repair of the same matching.
+
+Corollary C2, deterministic part (normalized coordinates `a = 0`, `b = 1`, `σ = 2`; the affine
+normalization itself is `isZeroState_affine_smul_iff` and is not redone here).
+* `coherent_two` (arcs) : a vertex whose completion edges at `z`, `z - 2`, `2 - z` lie in
+  `F_0 ∪ F_1` is `2`-coherent. `card_incoherent_two_le` : at most `3|X|` incoherent vertices, `X`
+  the vertices off `F_0 ∪ F_1`.
+* `orbit_drift`, `mul_eq_of_returns` : on such stretches `Φ_t^h(x) - x = 2th - 2S`, so a type-1
+  return gives `t h = S + k`. `blindSet`, `mem_blindSet_of_returns`, `card_blindSet_le`,
+  `two_mul_sum_Ico_le` : every type-1 blind factor lies in an explicit set of size
+  `Σ_{h<ℓ} (h + 5) ≤ ℓ²/2 + 5ℓ`.
+* `mirror_eq`, `mirrorSet`, `mem_mirrorSet`, `card_mirrorSet_le` : forward type-2 points of `F_t`
+  lie in an explicit set of size `5ℓ(ℓ + 1)`.
+* `Canonical.exists_zeroState_of_blindCover` : spots on `blindSet` and certificates elsewhere give
+  `ρ(T) ≤ |W| + 2 Σ_{h<ℓ} (h + 5)`.
 -/
 
 namespace Pairing
@@ -601,6 +615,200 @@ theorem ShiftSys.isZeroState_spotRepair (hn : Odd n) (S : ShiftSys n)
       (fun p hp ↦ S.spotRepair_mate_of_notMem hM hY hYS QY hp)
   · exact not_ham_of_isCleanCycle hn hc (fun p hp ↦ S.spotRepair_mate_of_notMem hM hY hYS QY hp)
 
+/-! ### Two-factor tails, the deterministic part of Corollary C2 -/
+
+/-- **Arcs of Corollary C2** (`ulzd-general-extend.md` (6d8435d) §4, "Arcs"), in the normalized
+coordinates `a = 0`, `b = 1`, `σ = 2`. Along the cycle `F_0 ∪ F_1` the vertices `z` and `z - 2`
+share the neighbour `2 - z`. If the completion edges at `z`, `z - 2` and `2 - z` are all edges of
+`F_0 ∪ F_1`, then `z` is `2`-coherent, `M (z - 2) = M z + 2`. So `c(z) ≠ c(z - 2)` happens only
+next to an edge off `F_0 ∪ F_1` (an arc end, a gadget vertex, the partner of `∞`). -/
+theorem coherent_two (h2 : (2 : ZMod n) ≠ 0) {M : PerfectMatching (Option (ZMod n))}
+    {z : ZMod n} (h0 : M.mate (some z) = some (-z) ∨ M.mate (some z) = some (2 - z))
+    (h1 : M.mate (some (z - 2)) = some (-(z - 2)) ∨ M.mate (some (z - 2)) = some (2 - (z - 2)))
+    (h3 : M.mate (some (2 - z)) = some (-(2 - z)) ∨
+      M.mate (some (2 - z)) = some (2 - (2 - z))) :
+    ∃ r, M.mate (some z) = some r ∧ M.mate (some (z - 2)) = some (r + 2) := by
+  rcases h0 with h0 | h0 <;> rcases h1 with h1 | h1
+  · exact ⟨-z, h0, by rw [h1]; congr 1; ring⟩
+  · exfalso
+    apply h2
+    rcases h3 with h3 | h3
+    · have e := congrArg M.mate h3
+      rw [mate_mate, show -(2 - z) = z - 2 by ring, h1] at e
+      linear_combination -Option.some.inj e
+    · have e := congrArg M.mate h3
+      rw [mate_mate, show 2 - (2 - z) = z by ring, h0] at e
+      linear_combination Option.some.inj e
+  · exfalso
+    apply h2
+    have e := Option.some.inj (M.mate.injective (h0.trans (by rw [h1]; congr 1; ring)))
+    linear_combination e
+  · exact ⟨2 - z, h0, by rw [h1]; congr 1; ring⟩
+
+/-- **Drift on a two-factor stretch** (`ulzd-general-extend.md` (6d8435d) §4, "Blind factors").
+If every step of an orbit stretch of `Φ_t = F_t ∘ M` uses an edge `M v = 2 c(v) - v` of
+`F_0 ∪ F_1`, so `Φ_t(v) = v + 2t - 2c(v)`, then `Φ_t^h(x) - x = 2th - 2S`, `S = Σ c`. -/
+theorem orbit_drift {t : ZMod n} {x : ℕ → ZMod n} {c : ℕ → ℕ} {h : ℕ}
+    (hstep : ∀ l < h, x (l + 1) = 2 * t - (2 * (c l : ZMod n) - x l)) :
+    x h = x 0 + 2 * t * h - 2 * ((∑ l ∈ Finset.range h, c l : ℕ) : ZMod n) := by
+  induction h with
+  | zero => simp
+  | succ h ih =>
+    rw [hstep h (by omega), ih (fun l hl ↦ hstep l (by omega)), Finset.sum_range_succ]
+    push_cast
+    ring
+
+/-- A type-1 return on a two-factor stretch (`ulzd-general-extend.md` (6d8435d) §3 and §4),
+`Φ_t^h(x) = x + kσ` with `σ = 2`, forces `t h = S + k`. -/
+theorem mul_eq_of_returns (hn : Odd n) {t : ZMod n} {x : ℕ → ZMod n} {c : ℕ → ℕ} {h : ℕ}
+    {k : ℤ} (hstep : ∀ l < h, x (l + 1) = 2 * t - (2 * (c l : ZMod n) - x l))
+    (hret : x h = x 0 + 2 * k) :
+    t * h = ((∑ l ∈ Finset.range h, c l : ℕ) : ZMod n) + k := by
+  rw [orbit_drift hstep] at hret
+  apply (isUnit_two hn).mul_left_cancel
+  linear_combination hret
+
+/-- The blind set of Corollary C2 (`ulzd-general-extend.md` (6d8435d) §4): the `t` with
+`t h ∈ [-2, h + 2]` for some `1 ≤ h < ℓ`, listed as `j h⁻¹`. -/
+def blindSet (n ℓ : ℕ) : Finset (ZMod n) :=
+  (Finset.Ico 1 ℓ).biUnion fun h ↦
+    (Finset.Icc (-2 : ℤ) ((h : ℤ) + 2)).image fun j : ℤ ↦ (j : ZMod n) * (h : ZMod n)⁻¹
+
+/-- `|Bl| ≤ Σ_{1 ≤ h < ℓ} (h + 5)` (`ulzd-general-extend.md` (6d8435d) §4, "at most `h + 5`
+values of `t`" for each `h`). -/
+theorem card_blindSet_le (n ℓ : ℕ) : (blindSet n ℓ).card ≤ ∑ h ∈ Finset.Ico 1 ℓ, (h + 5) := by
+  refine Finset.card_biUnion_le.trans (Finset.sum_le_sum fun h _ ↦ ?_)
+  refine Finset.card_image_le.trans ?_
+  rw [Int.card_Icc]
+  omega
+
+/-- `2 Σ_{1 ≤ h < ℓ} (h + 5) ≤ ℓ² + 10ℓ`, that is `|Bl| ≤ ℓ²/2 + 5ℓ`
+(`ulzd-general-extend.md` (6d8435d) §4). -/
+theorem two_mul_sum_Ico_le (ℓ : ℕ) : 2 * ∑ h ∈ Finset.Ico 1 ℓ, (h + 5) ≤ ℓ ^ 2 + 10 * ℓ := by
+  induction ℓ with
+  | zero => simp
+  | succ ℓ ih =>
+    rcases Nat.eq_zero_or_pos ℓ with rfl | hℓ
+    · simp
+    · rw [Finset.sum_Ico_succ_top (by omega)]
+      nlinarith [ih]
+
+/-- `t h = j` with `j ∈ [-2, h + 2]`, `1 ≤ h < ℓ` and `h` prime to `n` puts `t` in the blind
+set. -/
+theorem mem_blindSet {ℓ h : ℕ} {t : ZMod n} {j : ℤ} (h1 : 1 ≤ h) (hℓ : h < ℓ)
+    (hcop : Nat.Coprime h n) (hj1 : -2 ≤ j) (hj2 : j ≤ h + 2) (ht : t * h = j) :
+    t ∈ blindSet n ℓ := by
+  have hu : IsUnit (h : ZMod n) := by
+    simpa using (ZMod.unitOfCoprime h hcop).isUnit
+  refine Finset.mem_biUnion.2 ⟨h, Finset.mem_Ico.2 ⟨h1, hℓ⟩,
+    Finset.mem_image.2 ⟨j, Finset.mem_Icc.2 ⟨hj1, hj2⟩, ?_⟩⟩
+  rw [← ht, mul_assoc, ZMod.mul_inv_of_unit _ hu, mul_one]
+
+/-- **Blind factors of Corollary C2** (`ulzd-general-extend.md` (6d8435d) §4, with
+`review-ulzd-general.md` (d6cc131) §4). A type-1 coincidence `Φ_t^h(x) = x + 2k`, `k ∈ [-2, 2]`,
+`1 ≤ h < ℓ`, on a stretch whose steps use edges of `F_0 ∪ F_1`, puts `t` in `blindSet n ℓ`
+whenever `h` is prime to `n` (every `h < n` for prime `n`). -/
+theorem mem_blindSet_of_returns (hn : Odd n) {ℓ h : ℕ} {t : ZMod n} {x : ℕ → ZMod n}
+    {c : ℕ → ℕ} {k : ℤ} (hstep : ∀ l < h, x (l + 1) = 2 * t - (2 * (c l : ZMod n) - x l))
+    (hc : ∀ l < h, c l ≤ 1) (hk1 : -2 ≤ k) (hk2 : k ≤ 2) (h1 : 1 ≤ h) (hℓ : h < ℓ)
+    (hcop : Nat.Coprime h n) (hret : x h = x 0 + 2 * k) : t ∈ blindSet n ℓ := by
+  have hS : ∑ l ∈ Finset.range h, c l ≤ h := by
+    simpa using Finset.sum_le_card_nsmul (Finset.range h) c 1
+      (fun l hl ↦ hc l (Finset.mem_range.1 hl))
+  refine mem_blindSet (j := ((∑ l ∈ Finset.range h, c l : ℕ) : ℤ) + k) h1 hℓ hcop (by omega)
+    (by omega) ?_
+  rw [mul_eq_of_returns hn hstep hret]
+  push_cast
+  ring
+
+/-- A type-2 coincidence on a two-factor stretch (`ulzd-general-extend.md` (6d8435d) §4,
+"Mirror points"), `Φ_t^h(x) = T(x) + 2k` with `T(x) = 2c(x) - x`, pins
+`x = c(x) + k + S - th`. -/
+theorem mirror_eq (hn : Odd n) {t : ZMod n} {x : ℕ → ZMod n} {c : ℕ → ℕ} {h : ℕ} {k : ℤ}
+    (hstep : ∀ l < h, x (l + 1) = 2 * t - (2 * (c l : ZMod n) - x l))
+    (hret : x h = 2 * (c 0 : ZMod n) - x 0 + 2 * k) :
+    x 0 = (c 0 : ZMod n) + k + ((∑ l ∈ Finset.range h, c l : ℕ) : ZMod n) - t * h := by
+  rw [orbit_drift hstep] at hret
+  apply (isUnit_two hn).mul_left_cancel
+  linear_combination hret
+
+/-- The candidate mirror points of `F_t` with `0 ≤ h < ℓ`, the values `c + k + S - th` with
+`c ∈ {0, 1}`, `k ∈ [-1, 3]` and `S ∈ [0, h]`. -/
+def mirrorSet (t : ZMod n) (ℓ : ℕ) : Finset (ZMod n) :=
+  (Finset.range ℓ).biUnion fun h ↦
+    ((Finset.range 2 ×ˢ Finset.Icc (-1 : ℤ) 3) ×ˢ Finset.range (h + 1)).image
+      fun p ↦ (p.1.1 : ZMod n) + p.1.2 + p.2 - t * h
+
+/-- `|M_t| ≤ Σ_{h < ℓ} 10(h + 1) = 5ℓ(ℓ + 1)` for the forward coincidences. The backward ones
+(`h < 0`) are the forward ones of the partner orbit, which doubles this to the `10ℓ(ℓ + 1)` of
+`ulzd-general-extend.md` (6d8435d) §4. -/
+theorem card_mirrorSet_le (t : ZMod n) (ℓ : ℕ) :
+    (mirrorSet t ℓ).card ≤ ∑ h ∈ Finset.range ℓ, 10 * (h + 1) := by
+  refine Finset.card_biUnion_le.trans (Finset.sum_le_sum fun h _ ↦ ?_)
+  refine Finset.card_image_le.trans ?_
+  rw [Finset.card_product, Finset.card_product, Finset.card_range, Finset.card_range,
+    Int.card_Icc]
+  norm_num
+
+/-- Every forward mirror point of a two-factor stretch lies in `mirrorSet t ℓ`
+(`ulzd-general-extend.md` (6d8435d) §4, "one `x` per `(h, c(x), k, S)`"). -/
+theorem mem_mirrorSet (hn : Odd n) {ℓ h : ℕ} {t : ZMod n} {x : ℕ → ZMod n} {c : ℕ → ℕ} {k : ℤ}
+    (hstep : ∀ l < h, x (l + 1) = 2 * t - (2 * (c l : ZMod n) - x l))
+    (hc : ∀ l < h, c l ≤ 1) (hc0 : c 0 ≤ 1) (hk1 : -1 ≤ k) (hk2 : k ≤ 3) (hℓ : h < ℓ)
+    (hret : x h = 2 * (c 0 : ZMod n) - x 0 + 2 * k) : x 0 ∈ mirrorSet t ℓ := by
+  have hS : ∑ l ∈ Finset.range h, c l ≤ h := by
+    simpa using Finset.sum_le_card_nsmul (Finset.range h) c 1
+      (fun l hl ↦ hc l (Finset.mem_range.1 hl))
+  refine Finset.mem_biUnion.2 ⟨h, Finset.mem_range.2 hℓ, Finset.mem_image.2
+    ⟨((c 0, k), ∑ l ∈ Finset.range h, c l), ?_, (mirror_eq hn hstep hret).symm⟩⟩
+  simp only [Finset.mem_product, Finset.mem_range, Finset.mem_Icc]
+  omega
+
+section Count
+
+variable [NeZero n]
+
+/-- The vertices `z` whose completion edge is not an edge of `F_0 ∪ F_1`, the set behind `β` in
+Corollary C2 (`ulzd-general-extend.md` (6d8435d) §4): the ends of the extra edges `E_x`, the
+gadget, and the partner of `∞`, so `|offTwo M| ≤ 2d + 7`. -/
+def offTwo (M : PerfectMatching (Option (ZMod n))) : Finset (ZMod n) :=
+  Finset.univ.filter fun z ↦ M.mate (some z) ≠ some (-z) ∧ M.mate (some z) ≠ some (2 - z)
+
+/-- The `σ`-incoherent vertices of the completion `M`. -/
+def incoherent (M : PerfectMatching (Option (ZMod n))) (σ : ZMod n) : Finset (ZMod n) :=
+  Finset.univ.filter fun z ↦
+    ¬∃ r, M.mate (some z) = some r ∧ M.mate (some (z - σ)) = some (r + σ)
+
+theorem eq_or_eq_of_notMem_offTwo {M : PerfectMatching (Option (ZMod n))} {z : ZMod n}
+    (h : z ∉ offTwo M) : M.mate (some z) = some (-z) ∨ M.mate (some z) = some (2 - z) := by
+  simp only [offTwo, Finset.mem_filter, Finset.mem_univ, true_and, not_and_or, not_not] at h
+  exact h
+
+/-- **`β` for two-factor tails** (`ulzd-general-extend.md` (6d8435d) §4, "Arcs"): every
+`2`-incoherent vertex lies in `X ∪ (X + 2) ∪ (2 - X)` for `X = offTwo M`, so
+`|incoherent M 2| ≤ 3|X|`, and also `|incoherent ∪ X ∪ (X + 2)| ≤ 3|X|`. Since `|X| ≤ 2d + 7`
+(not formalized), this is `6d + 21`. The bad set of the paper also holds the at most six tail
+points `z` with `z - 2` in the gadget, and stays inside its bound `β ≤ 16d + 40`. -/
+theorem card_incoherent_two_le (h2 : (2 : ZMod n) ≠ 0) (M : PerfectMatching (Option (ZMod n))) :
+    (incoherent M 2).card ≤ 3 * (offTwo M).card := by
+  have hsub : incoherent M 2 ⊆
+      offTwo M ∪ (offTwo M).image (· + 2) ∪ (offTwo M).image (2 - ·) := by
+    intro z hz
+    simp only [incoherent, Finset.mem_filter, Finset.mem_univ, true_and] at hz
+    by_contra hn
+    simp only [Finset.mem_union, Finset.mem_image, not_or, not_exists, not_and] at hn
+    obtain ⟨⟨h0, h1⟩, h3⟩ := hn
+    exact hz (coherent_two h2 (eq_or_eq_of_notMem_offTwo h0)
+      (eq_or_eq_of_notMem_offTwo fun h ↦ h1 _ h (sub_add_cancel z 2))
+      (eq_or_eq_of_notMem_offTwo fun h ↦ h3 _ h (sub_sub_cancel 2 z)))
+  have hu := (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
+  have hu' := Finset.card_union_le (offTwo M) ((offTwo M).image (· + 2))
+  have i1 := Finset.card_image_le (s := offTwo M) (f := (· + 2))
+  have i2 := Finset.card_image_le (s := offTwo M) (f := (2 - ·))
+  omega
+
+end Count
+
 namespace Canonical
 
 variable {m : ℕ} [NeZero m]
@@ -655,6 +863,31 @@ theorem repairBound_of_window_transCover (hm : 5 ≤ m) {d₁ K K₀ : ℕ}
         ∃ P : ZeroState m, tailDist P.1 (glue (FactorCap.factorTail m hm) S hS R) ≤ K) :
     RepairBound m (FactorCap.gadget m) (max K K₀) :=
   repairBound_of_window hm (fun T hT ↦ exists_zeroState_of_hasTransCover (hlow T hT)) hwin
+
+/-- **Corollary C2, deterministic reduction** (`ulzd-general-extend.md` (6d8435d) §4, with
+`review-ulzd-general.md` (d6cc131) D4). Let `M` complete a tail of any gadget, let `S` be a shift
+system with `M`-closed `V(W)`, and let the spots `(Y, Q_Y)`, at most four vertices per blind
+factor, give each `t ∈ blindSet n ℓ` an `F_t`-edge. If every other `t` has a Lemma 2′ certificate
+or a clean cycle, then `ρ(T) ≤ |W| + 2 Σ_{1 ≤ h < ℓ} (h + 5) ≤ |W| + ℓ² + 10ℓ`. Only the
+window argument of Theorem B, which supplies the certificates for the non-blind `t` with
+`|W| ≤ C √(m ln n / ℓ)`, stays probabilistic. -/
+theorem exists_zeroState_of_blindCover {G : Finset (Vertex m)}
+    {T : PerfectMatching (Gᶜ : Finset (Vertex m))} (M : PerfectMatching (Vertex m))
+    (hMT : ∀ u : (Gᶜ : Finset (Vertex m)), M.mate u = T.mate u) (S : ShiftSys (2 * m - 1))
+    (hM : ∀ p ∈ S.verts, M.mate p ∈ S.verts) {Y : Finset (Vertex m)}
+    (hY : ∀ p ∈ Y, M.mate p ∈ Y) (hYS : Disjoint Y S.verts) (QY : PerfectMatching Y) {ℓ : ℕ}
+    (hYc : Y.card ≤ 4 * (blindSet (2 * m - 1) ℓ).card)
+    (hspot : ∀ t ∈ blindSet (2 * m - 1) ℓ, ∃ x : ZMod (2 * m - 1), ∃ hx : some x ∈ Y, x ≠ t ∧
+      (QY.mate ⟨some x, hx⟩ : Vertex m) = (factor m t).mate (some x))
+    (hcov : ∀ t ∉ blindSet (2 * m - 1) ℓ,
+      IsTransCert M S (S.verts ∪ Y) t ∨ IsCleanCycle (modulus_odd m) M (S.verts ∪ Y) t) :
+    ∃ P : ZeroState m, tailDist P.1 T ≤ S.W.card + 2 * ∑ h ∈ Finset.Ico 1 ℓ, (h + 5) := by
+  refine exists_zeroState_of_hasTransCover ⟨M, hMT, S, hM, Y, hY, hYS, QY, ?_, fun t ↦ ?_⟩
+  · have := card_blindSet_le (2 * m - 1) ℓ
+    omega
+  · by_cases ht : t ∈ blindSet (2 * m - 1) ℓ
+    · exact Or.inl (hspot t ht)
+    · exact Or.inr (hcov t ht)
 
 /-! ### The reflection repair is a translation repair -/
 
