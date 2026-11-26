@@ -405,3 +405,8 @@ open Pairing PerfectMatching
 #print axioms FactorCap.Cell.ent_facts
 #print axioms FactorCap.zigPos_entry
 #print axioms FactorCap.zigPos_exit
+#print axioms FactorCap.capMatching_endVtx
+#print axioms FactorCap.capMatching_of_ne_endVtx
+#print axioms FactorCap.not_ham_capMatching_zero
+#print axioms FactorCap.not_ham_capMatching
+#print axioms FactorCap.isZeroState_capMatching
