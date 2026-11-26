@@ -9,3 +9,4 @@ import Suppression.ChainRule
 import Suppression.CouplingObstruction
 import Suppression.Reweighted
 import Suppression.VMinus
+import Suppression.MixtureBarrier

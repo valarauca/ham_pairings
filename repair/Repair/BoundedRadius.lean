@@ -201,7 +201,7 @@ theorem hamLaw_zero_le_of_le_hamBottomRatio {m : ℕ} [NeZero m] {θ : ℝ} {J :
   field_simp
 
 /-- `(2m - 1)(2m - 3)(2m - 5)(K + 1)(2m)^K ≤ (K + 1) 2^(K + 3) m^(K + 3)` for `m ≥ 3`, the
-second inequality of C1 (`results/bounded-radius-spike.md` §1.1). -/
+second inequality of C1 (`results/bounded-radius-spike.md` §1.1), used in Proposition 1. -/
 theorem density_denom_le {m : ℕ} (hm : 3 ≤ m) (K : ℕ) :
     (2 * m - 1) * (2 * m - 3) * (2 * m - 5) * (K + 1) * (2 * m) ^ K ≤
       ((K + 1) * 2 ^ (K + 3) * (m : ℝ) ^ (K + 3) : ℝ) := by
@@ -218,7 +218,8 @@ theorem density_denom_le {m : ℕ} (hm : 3 ≤ m) (K : ℕ) :
         mul_le_mul_of_nonneg_right h3 (by positivity)
     _ = (K + 1) * 2 ^ (K + 3) * (m : ℝ) ^ (K + 3) := by ring
 
-/-- C1 in closed form (`results/bounded-radius-spike.md` §1.1, from `density_ge`): if
+/-- C1 in closed form (`results/bounded-radius-spike.md` §1.1, from `density_ge`), the floor
+that Proposition 1 and Corollary 3 contradict: if
 `RepairBound m G K` holds for a six-vertex gadget `G`, then
 `1 ≤ q_m (K + 1) 2^(K + 3) m^(K + 3)`. -/
 theorem one_le_hamLaw_zero_mul {m : ℕ} [NeZero m] {G : Finset (Vertex m)} (hG : G.card = 6)

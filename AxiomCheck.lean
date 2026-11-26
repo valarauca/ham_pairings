@@ -481,3 +481,15 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.not_boundedRadius_of_le_hamBottomRatio
 #print axioms RoundRobin.Canonical.prod_hamBottomRatio_le
 #print axioms RoundRobin.Canonical.exists_hamBottomRatio_le
+#print axioms MixtureBarrier.mixWeight_map_perm
+#print axioms MixtureBarrier.card_superset_mul_descFactorial
+#print axioms MixtureBarrier.sum_binPmf_mul_descFactorial
+#print axioms MixtureBarrier.isProb_mixWeight
+#print axioms MixtureBarrier.prob_superset_eq
+#print axioms MixtureBarrier.sum_mixWeight_mul_descFactorial
+#print axioms MixtureBarrier.prob_superset_mixWeight
+#print axioms MixtureBarrier.lawOf_mixWeight_zero
+#print axioms MixtureBarrier.jointRatio_mixWeight
+#print axioms MixtureBarrier.descFactorial_div_pow_eq_prod
+#print axioms MixtureBarrier.mixture_props
+#print axioms MixtureBarrier.mixture_barrier
