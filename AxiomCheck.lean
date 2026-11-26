@@ -415,3 +415,4 @@ open Pairing PerfectMatching
 #print axioms FactorCap.isZeroState_capState
 #print axioms FactorCap.tailDist_capState_le
 #print axioms FactorCap.factorTail_cap
+#print axioms FactorCap.tailDist_capState

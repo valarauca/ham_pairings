@@ -105,12 +105,14 @@ def capFn (m : ℕ) [NeZero m] : Vertex m → Vertex m
 
 variable {m : ℕ} [NeZero m]
 
+/-- For `m ≥ 9`, `capInt` of a least absolute residue is again a least absolute residue. -/
 theorem valMinAbs_capInt (hm : 9 ≤ m) (x : ZMod (2 * m - 1)) :
     ((capInt x.valMinAbs : ℤ) : ZMod (2 * m - 1)).valMinAbs = capInt x.valMinAbs := by
   have hb := valMinAbs_bounds x
   have h := capInt_bounds (N := 2 * m - 1) (k := x.valMinAbs) (by omega) (by omega) (by omega)
   exact valMinAbs_eq_of_eq rfl (by omega) (by omega)
 
+/-- The partner map of `P_q` is an involution for `m ≥ 9`. -/
 theorem capFn_involutive (hm : 9 ≤ m) : Function.Involutive (capFn m) := by
   rintro (_ | x)
   · simp [capFn]
@@ -122,6 +124,7 @@ theorem capFn_involutive (hm : 9 ≤ m) : Function.Involutive (capFn m) := by
     exact hk
   simp only [capFn, hx, hy, ite_false, valMinAbs_capInt hm, capInt_capInt, ZMod.coe_valMinAbs]
 
+/-- The partner map of `P_q` has no fixed point for `m ≥ 9`. -/
 theorem capFn_ne (hm : 9 ≤ m) (v : Vertex m) : capFn m v ≠ v := by
   rcases v with _ | x
   · simp [capFn]
@@ -172,7 +175,8 @@ theorem capMatching_of_ne_endVtx (hm : 9 ≤ m) {v : Vertex m}
     ring
   · exact absurd (by rw [endVtx, h, ZMod.coe_valMinAbs]) (hv ε hε)
 
-/-- `P_q` blocks `F_0`, since the edge `∞0` lies in both and closes a `2`-cycle. -/
+/-- `P_q` blocks `F_0`, since the edge `∞0` lies in both and closes a `2`-cycle (step 1 of
+`lean-scope-p9-p10.md` §1). -/
 theorem not_ham_capMatching_zero (hm : 9 ≤ m) : ¬Ham (capMatching m hm) (factor m 0) := by
   have h1 : (1 : ZMod (2 * m - 1)) ≠ 0 := fun h ↦ absurd
     (natCast_injOn (m := m) (x := 1) (y := 0) (by omega) (by omega) (by simpa using h))
@@ -185,7 +189,8 @@ theorem not_ham_capMatching_zero (hm : 9 ≤ m) : ¬Ham (capMatching m hm) (fact
 /-- `P_q` blocks `F_u` for `u ≠ 0` when `n = 2m - 1 ≥ 17` is prime. With `λ = (2u)⁻¹` the
 scaled positions `zigPos (λ v)` put `F_u` on the zig-zag as `F_{1/2}` (`scale_mate_factor`), the
 cell containing `λ.val / n` orders the levels of the sixteen scaled ends, and its end set `Z`
-selects a proper union of segments closed under `P_q` and `F_u`. -/
+selects a proper union of segments closed under `P_q` and `F_u` (steps 2 to 6 of
+`lean-scope-p9-p10.md` §1). -/
 theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2 * m - 1)}
     (hu : u ≠ 0) : ¬Ham (capMatching m hm) (factor m u) := by
   have := Fact.mk hp
@@ -270,7 +275,8 @@ theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2
       exact hclose _ hε ((hkey _ hε).1 hSv)
 
 /-- P9 in the coordinate `x = 2v - 7`. For prime `n = 2m - 1 ≥ 17`, `P_q` is a zero state:
-no `P_q ∪ F_u` is one cycle. -/
+no `P_q ∪ F_u` is one cycle. This is the zero-state half of claim C1 of
+`cod-186-archive-cap-check.md`. -/
 theorem isZeroState_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) :
     IsZeroState (factor m) (capMatching m hm) := by
   intro u

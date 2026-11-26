@@ -49,7 +49,8 @@ theorem scale_inv_some (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) (x : ZMod
     (scale m a)⁻¹ (some x) = some (↑a⁻¹ * x) := by
   rw [Equiv.Perm.inv_eq_iff_eq, scale_some, ← mul_assoc, Units.mul_inv, one_mul]
 
-/-- The scaling by `a` maps `F_t` to `F_{a t}`. -/
+/-- The scaling by `a` maps `F_t` to `F_{a t}` (Lemma 1 of
+`cod-186-direct-construction-spike.md`). -/
 theorem scale_smul_factor (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) (t : ZMod (2 * m - 1)) :
     scale m a • factor m t = factor m (a * t) := by
   refine PerfectMatching.ext (Equiv.ext fun v ↦ ?_)

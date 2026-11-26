@@ -123,7 +123,9 @@ theorem valMinAbs_half : (m : ZMod (2 * m - 1)).valMinAbs = 1 - m := by
   push_cast
   linear_combination (two_mul_natCast_self (m := m))
 
-/-- `F_{1/2}` in positions: it pairs `2i + 1 ↔ 2i + 2` and `2m - 1 ↔ 0`. -/
+/-- `F_{1/2}` in positions: it pairs `2i + 1 ↔ 2i + 2` and `2m - 1 ↔ 0`. With
+`zigPos_factor_zero` this is Lemma 1 of `cod-186-direct-construction-spike.md` for `s = 0`,
+`t = 1/2`. -/
 theorem zigPos_factor_half (hm : 2 ≤ m) (v : Vertex m) :
     zigPos m ((factor m m).mate v) =
       if zigPos m v = 0 then (2 * m - 1 : ℤ) else if zigPos m v = 2 * m - 1 then 0
@@ -203,7 +205,9 @@ which `Y` pairs `2i + 1 ↔ 2i + 2` and `2M - 1 ↔ 0`, and let `X` pair `2i ↔
 level edges `{2 L_r, 2 L_r + 1}`, with `0 ≤ L_r` and `2 L_r < 2M - 1`. A set `S` of segment
 classes `zigCount mod j` that `X` preserves at the level edges, and that holds at `u` but not at
 `w`, makes `X ∪ Y` disconnected. The classes `0` and `j` are identified, which joins the two
-halves of the wrap segment through position `0`. -/
+halves of the wrap segment through position `0`. This is the non-Hamiltonian half of Lemma 2(b)
+of `cod-186-direct-construction-spike.md`, in the segment form of `lean-scope-p9-p10.md` §1,
+step 4. -/
 theorem not_ham_of_segments {V : Type*} (X Y : PerfectMatching V) (pos : V → ℤ) {j : ℕ}
     (L : Fin j → ℤ) (M : ℤ) (hL0 : ∀ r, 0 ≤ L r) (hLM : ∀ r, 2 * L r < 2 * M - 1)
     (hY : ∀ v, pos (Y.mate v) = if pos v = 0 then 2 * M - 1 else if pos v = 2 * M - 1 then 0

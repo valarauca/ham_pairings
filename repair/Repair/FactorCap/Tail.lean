@@ -15,7 +15,8 @@ The coordinate `x = 2v - 7` (`capAffine`) sends `F_{s0}` to `F_0` and `G0` to th
   `isZeroState_capMatching` and `isZeroState_affine_smul_iff`.
 * `tailDist_capState_le` : `|T(n) ∖ P_q| ≤ 5`. By `two_mul_tailDist` this is the count of tail
   vertices that `T(n)` and `P_q` pair differently. Such a vertex is an end of `D` outside the
-  gadget, and there are `16 - 6 = 10` of them.
+  gadget, and there are `16 - 6 = 10` of them. `tailDist_capState` : all ten differ, so
+  `|T(n) ∖ P_q| = 5` exactly.
 * `factorTail_cap` : P9. For prime `n = 2m - 1 ≥ 17` some zero state is within 5 edges of
   `T(n)`, so `ρ(T(n)) ≤ 5`.
 
@@ -166,10 +167,92 @@ theorem tailDist_capState_le (hm : 9 ≤ m) :
   simp
 
 /-- P9, the factor-tail cap. For every prime `n = 2m - 1 ≥ 17` the zero state `P_q` is within 5
-edges of the factor tail `T(n)` of the default gadget, so `ρ(T(n)) ≤ 5`. -/
+edges of the factor tail `T(n)` of the default gadget, so `ρ(T(n)) ≤ 5`. This is claim C1 of
+`cod-186-archive-cap-check.md` at prime `n`. -/
 theorem factorTail_cap (hp : (2 * m - 1).Prime) (hn : 17 ≤ 2 * m - 1) :
     ∃ P : ZeroState m, tailDist P.1 (factorTail m (by omega)) ≤ 5 :=
   ⟨⟨capState m (by omega), isZeroState_capState hp (by omega)⟩, tailDist_capState_le (by omega)⟩
+
+/-- Integers in `[-8, 8]` are determined by their residues mod `2m - 1` for `m ≥ 9`. -/
+theorem intCast_inj_of_small (hm : 9 ≤ m) {a b : ℤ} (ha : -8 ≤ a ∧ a ≤ 8) (hb : -8 ≤ b ∧ b ≤ 8)
+    (h : (a : ZMod (2 * m - 1)) = b) : a = b := by
+  have h1 : ((a : ℤ) : ZMod (2 * m - 1)).valMinAbs = a :=
+    valMinAbs_eq_of_eq rfl (by omega) (by omega)
+  have h2 : ((b : ℤ) : ZMod (2 * m - 1)).valMinAbs = b :=
+    valMinAbs_eq_of_eq rfl (by omega) (by omega)
+  rw [← h1, ← h2, h]
+
+/-- The end labels are distinct. -/
+theorem endInt_injOn : ∀ ε < 16, ∀ ε' < 16, endInt ε = endInt ε' → ε = ε' := by
+  decide
+
+/-- The ten ends outside the gadget are not of the form `2k - 7` with `1 ≤ k ≤ 6`. -/
+theorem endInt_ne_gadget :
+    ∀ ε < 16, 6 ≤ ε → ∀ k : ℕ, k < 7 → 1 ≤ k → endInt ε ≠ 2 * (k : ℤ) - 7 := by
+  decide
+
+/-- `Q` moves every end: `capInt (endInt ε) ≠ -endInt ε`, and `capInt (endInt ε) ∈ [-8, 8]`. -/
+theorem capInt_endInt_ne_neg : ∀ ε < 16,
+    capInt (endInt ε) ≠ -endInt ε ∧ -8 ≤ capInt (endInt ε) ∧ capInt (endInt ε) ≤ 8 := by
+  decide
+
+/-- `|T(n) ∖ P_q| = 5` exactly. The ten ends of `D` outside the gadget are exactly the tail
+vertices that `T(n)` and `P_q` pair differently, and `two_mul_tailDist` counts them. -/
+theorem tailDist_capState (hm : 9 ≤ m) :
+    tailDist (capState m hm) (factorTail m (by omega)) = 5 := by
+  have hle := tailDist_capState_le hm
+  have h2 := two_mul_tailDist (capState m hm) (factorTail m (by omega))
+  set F := Finset.univ.filter fun u : ((gadget m)ᶜ : Finset (Vertex m)) ↦
+    ((factorTail m (by omega)).mate u : Vertex m) ≠ (capState m hm).mate u with hF
+  set g : ℕ → Vertex m := fun ε ↦ (capAffine m)⁻¹ (endVtx m ε) with hg
+  have hsmall : ∀ ε < 16, -8 ≤ endInt ε ∧ endInt ε ≤ 8 := fun ε hε ↦ (endInt_bounds ε hε).2
+  have hginj : Set.InjOn g (Finset.Ico 6 16 : Finset ℕ) := by
+    intro ε hε ε' hε' h
+    rw [Finset.coe_Ico, Set.mem_Ico] at hε hε'
+    have h' : endVtx m ε = endVtx m ε' := (capAffine m)⁻¹.injective h
+    rw [endVtx, endVtx, Option.some.injEq] at h'
+    exact endInt_injOn ε (by omega) ε' (by omega)
+      (intCast_inj_of_small hm (hsmall ε (by omega)) (hsmall ε' (by omega)) h')
+  have hT : ((Finset.Ico 6 16).image g).card = 10 := by
+    rw [Finset.card_image_of_injOn hginj]
+    simp
+  have hsub : (Finset.Ico 6 16).image g ⊆ F.image Subtype.val := by
+    intro v hv
+    obtain ⟨ε, hε, rfl⟩ := Finset.mem_image.1 hv
+    rw [Finset.mem_Ico] at hε
+    have hσ : capAffine m (g ε) = endVtx m ε := by simp [hg]
+    have hcomp : g ε ∈ (gadget m)ᶜ := by
+      rw [Finset.mem_compl]
+      intro hG
+      obtain ⟨k, hk, hkv⟩ := Finset.mem_image.1 hG
+      rw [Finset.mem_Icc] at hk
+      rw [← hkv, capAffine_some, endVtx, Option.some.injEq] at hσ
+      have hk' : ((2 * k - 7 : ℤ) : ZMod (2 * m - 1)) = (endInt ε : ZMod (2 * m - 1)) := by
+        push_cast
+        exact hσ
+      exact endInt_ne_gadget ε hε.2 hε.1 k (by omega) hk.1
+        (intCast_inj_of_small hm (by omega) (hsmall ε hε.2) hk').symm
+    refine Finset.mem_image.2 ⟨⟨g ε, hcomp⟩, Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩, rfl⟩
+    rw [factorTail_mate]
+    intro h
+    have h' := congrArg (capAffine m) h
+    obtain ⟨hne, hc1, hc2⟩ := capInt_endInt_ne_neg ε hε.2
+    obtain ⟨h0, h1, h3⟩ := endInt_bounds ε hε.2
+    have hv : ((endInt ε : ℤ) : ZMod (2 * m - 1)).valMinAbs = endInt ε :=
+      valMinAbs_eq_of_eq rfl (by omega) (by omega)
+    have hz : ((endInt ε : ℤ) : ZMod (2 * m - 1)) ≠ 0 := by
+      rw [Ne, ← ZMod.valMinAbs_eq_zero, hv]
+      exact h0
+    rw [capAffine_factor_capCenter_mate, capAffine_capState_mate, hσ, capMatching_mate, endVtx,
+      capFn, ite_eq_right hz, hv, factor, factor_mate, mateFn_of_ne _ _ hz, Option.some.injEq] at h'
+    have h'' : ((-endInt ε : ℤ) : ZMod (2 * m - 1)) = (capInt (endInt ε) : ZMod (2 * m - 1)) := by
+      push_cast
+      rw [← h']
+      ring
+    exact hne (intCast_inj_of_small hm (by omega) ⟨hc1, hc2⟩ h'').symm
+  have hge : 10 ≤ F.card :=
+    hT ▸ (Finset.card_le_card hsub).trans Finset.card_image_le
+  omega
 
 end FactorCap
 
