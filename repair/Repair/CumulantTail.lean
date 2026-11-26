@@ -28,7 +28,8 @@ The results, in the order of the note.
 * `centralMoment_le_of_factCumulant` (Proposition 8, the inequality (H-JI*)) and
   `prob_zero_le_of_factCumulant` (Proposition 8) : if `H ≥ 1`, `H μ ≥ 8k` and
   `|κ^f_j| ≤ j! H μ (H μ / (8k))^((j - 2)/2)` for `2 ≤ j ≤ 2k`, then
-  `E(X - μ)^(2k) ≤ (4e H k μ)^k` and `P(X = 0) ≤ (4e H k / μ)^k`.
+  `E(X - μ)^(2k) ≤ (4e H k μ)^k` and `P(X = 0) ≤ (4e H k / μ)^k`. The Chebyshev step alone,
+  `E(X - μ)^(2k) ≤ (C μ)^k ⇒ P(X = 0) ≤ (C / μ)^k`, is `prob_zero_le_of_centralMoment_le`.
 
 The general power-series facts used on the way are `coeff_subst_eq_sum` (coefficients of a
 substitution as a finite sum), `abs_coeff_pow_le` (coefficientwise majorants pass to powers),
@@ -43,7 +44,8 @@ open PowerSeries Finset SizeBias Nat
 
 section Series
 
-/-- `[s^n] b^d = 0` for `n < d` when `b` has no constant term. -/
+/-- `[s^n] b^d = 0` for `n < d` when `b` has no constant term.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_pow_eq_zero_of_lt {b : ℝ⟦X⟧} (hb : constantCoeff b = 0) {n d : ℕ} (h : n < d) :
     coeff n (b ^ d) = 0 := by
   obtain ⟨c, rfl⟩ := X_dvd_iff.mpr hb
@@ -53,7 +55,7 @@ theorem coeff_pow_eq_zero_of_lt {b : ℝ⟦X⟧} (hb : constantCoeff b = 0) {n d
   · rfl
 
 /-- The coefficients of a substitution `f(b)` with `b(0) = 0`, as a finite sum:
-`[s^n] f(b) = ∑_(d ≤ n) [z^d] f · [s^n] b^d`. -/
+`[s^n] f(b) = ∑_(d ≤ n) [z^d] f · [s^n] b^d`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_subst_eq_sum {b : ℝ⟦X⟧} (hb : constantCoeff b = 0) (f : ℝ⟦X⟧) (n : ℕ) :
     coeff n (f.subst b) = ∑ d ∈ range (n + 1), coeff d f * coeff n (b ^ d) := by
   rw [coeff_subst' (HasSubst.of_constantCoeff_zero' hb),
@@ -65,7 +67,8 @@ theorem coeff_subst_eq_sum {b : ℝ⟦X⟧} (hb : constantCoeff b = 0) (f : ℝ�
     by_contra h
     exact hd (by rw [coeff_pow_eq_zero_of_lt hb (by omega), smul_zero])
 
-/-- Powers of a series with nonnegative coefficients have nonnegative coefficients. -/
+/-- Powers of a series with nonnegative coefficients have nonnegative coefficients.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_pow_nonneg {g : ℝ⟦X⟧} (hg : ∀ i, 0 ≤ coeff i g) (b i : ℕ) :
     0 ≤ coeff i (g ^ b) := by
   induction b generalizing i with
@@ -77,7 +80,8 @@ theorem coeff_pow_nonneg {g : ℝ⟦X⟧} (hg : ∀ i, 0 ≤ coeff i g) (b i : �
     exact sum_nonneg fun x _ ↦ mul_nonneg (ih _) (hg _)
 
 /-- Coefficientwise majorants pass to powers. If `|[s^i] f| ≤ [s^i] g` for `i ≤ n` and `g` has
-nonnegative coefficients, then `|[s^i] f^b| ≤ [s^i] g^b` for `i ≤ n`. -/
+nonnegative coefficients, then `|[s^i] f^b| ≤ [s^i] g^b` for `i ≤ n`.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem abs_coeff_pow_le {f g : ℝ⟦X⟧} {n : ℕ} (hfg : ∀ i ≤ n, |coeff i f| ≤ coeff i g)
     (hg : ∀ i, 0 ≤ coeff i g) (b : ℕ) : ∀ i ≤ n, |coeff i (f ^ b)| ≤ coeff i (g ^ b) := by
   induction b with
@@ -95,7 +99,7 @@ theorem abs_coeff_pow_le {f g : ℝ⟦X⟧} {n : ℕ} (hfg : ∀ i ≤ n, |coeff
       (coeff_pow_nonneg hg _ _)
 
 /-- `[s^n] (s^e (1 - As)^(-1))^(d + 1) = A^(n - e(d + 1)) C(d + n - e(d + 1), d)` when
-`e(d + 1) ≤ n`, and `0` otherwise. -/
+`e(d + 1) ≤ n`, and `0` otherwise. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_X_pow_mul_rescale_pow (e : ℕ) (A : ℝ) (d n : ℕ) :
     coeff n ((X ^ e * rescale A (mk 1 : ℝ⟦X⟧)) ^ (d + 1)) =
       if e * (d + 1) ≤ n then A ^ (n - e * (d + 1)) * ((d + (n - e * (d + 1))).choose d : ℝ)
@@ -105,18 +109,18 @@ theorem coeff_X_pow_mul_rescale_pow (e : ℕ) (A : ℝ) (d n : ℕ) :
   · rw [coeff_rescale, coeff_mk]
   · rfl
 
-/-- `e^f(0) = 1` when `f(0) = 0`. -/
+/-- `e^f(0) = 1` when `f(0) = 0`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem constantCoeff_exp_subst {f : ℝ⟦X⟧} (hf : constantCoeff f = 0) :
     constantCoeff ((exp ℝ).subst f) = 1 := by
   rw [constantCoeff_eq, constantCoeff_subst_of_constantCoeff_zero hf, constantCoeff_exp, map_one]
 
-/-- `(e^f)' = e^f f'` when `f(0) = 0`. -/
+/-- `(e^f)' = e^f f'` when `f(0) = 0`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem derivative_exp_subst {f : ℝ⟦X⟧} (hf : constantCoeff f = 0) :
     d⁄dX ((exp ℝ).subst f) = (exp ℝ).subst f * d⁄dX f := by
   rw [derivative_subst (HasSubst.of_constantCoeff_zero' hf), derivative_exp]
 
 /-- Uniqueness for `Y' = hY`. Two series with `Y' = hY`, `Z' = hZ` and `Y(0) = Z(0) = 1` are
-equal. -/
+equal. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem eq_of_derivative_eq_mul {h Y Z : ℝ⟦X⟧} (hY : d⁄dX Y = h * Y) (hZ : d⁄dX Z = h * Z)
     (hY0 : constantCoeff Y = 1) (hZ0 : constantCoeff Z = 1) : Y = Z := by
   have : HasUniqueDiv ℝ := .of_module_rat ℝ
@@ -133,7 +137,8 @@ theorem eq_of_derivative_eq_mul {h Y Z : ℝ⟦X⟧} (hY : d⁄dX Y = h * Y) (hZ
   calc Y = Y * ⅟Z * Z := by rw [mul_assoc, hZZ, mul_one]
     _ = Z := by rw [key, one_mul]
 
-/-- `e^(f + g) = e^f e^g` when `f(0) = g(0) = 0`. -/
+/-- `e^(f + g) = e^f e^g` when `f(0) = g(0) = 0`.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem exp_subst_add {f g : ℝ⟦X⟧} (hf : constantCoeff f = 0) (hg : constantCoeff g = 0) :
     (exp ℝ).subst (f + g) = (exp ℝ).subst f * (exp ℝ).subst g := by
   have hfg : constantCoeff (f + g) = 0 := by rw [map_add, hf, hg, add_zero]
@@ -144,7 +149,7 @@ theorem exp_subst_add {f g : ℝ⟦X⟧} (hf : constantCoeff f = 0) (hg : consta
     ring
   · rw [map_mul, constantCoeff_exp_subst hf, constantCoeff_exp_subst hg, one_mul]
 
-/-- `e^(log f) = f` when `f(0) = 1`. -/
+/-- `e^(log f) = f` when `f(0) = 1`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem exp_subst_logOf {f : ℝ⟦X⟧} (hf : constantCoeff f = 1) :
     (exp ℝ).subst (logOf f) = f := by
   have h1 : HasSubst (f - 1) := HasSubst.of_constantCoeff_zero' (by rw [map_sub, hf, map_one,
@@ -153,7 +158,8 @@ theorem exp_subst_logOf {f : ℝ⟦X⟧} (hf : constantCoeff f = 1) :
     subst_X h1, ← coe_substAlgHom h1, map_one]
   ring
 
-/-- `log f(u) = (log f)(u)` when `f(0) = 1` and `u(0) = 0`. -/
+/-- `log f(u) = (log f)(u)` when `f(0) = 1` and `u(0) = 0`.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem logOf_subst {f u : ℝ⟦X⟧} (hf : constantCoeff f = 1) (hu : constantCoeff u = 0) :
     logOf (f.subst u) = (logOf f).subst u := by
   have h1 : HasSubst (f - 1) := HasSubst.of_constantCoeff_zero' (by rw [map_sub, hf, map_one,
@@ -162,7 +168,8 @@ theorem logOf_subst {f u : ℝ⟦X⟧} (hf : constantCoeff f = 1) (hu : constant
   rw [logOf_eq, logOf_eq, subst_comp_subst_apply h1 hu', subst_sub hu', ← coe_substAlgHom hu',
     map_one]
 
-/-- `[s^n] s^e (1 - As)^(-1) = A^(n - e)` for `e ≤ n`, and `0` otherwise. -/
+/-- `[s^n] s^e (1 - As)^(-1) = A^(n - e)` for `e ≤ n`, and `0` otherwise.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_X_pow_mul_rescale (e : ℕ) (A : ℝ) (n : ℕ) :
     coeff n (X ^ e * rescale A (mk 1 : ℝ⟦X⟧)) = if e ≤ n then A ^ (n - e) else 0 := by
   rw [coeff_X_pow_mul']
@@ -170,11 +177,11 @@ theorem coeff_X_pow_mul_rescale (e : ℕ) (A : ℝ) (n : ℕ) :
   · rw [coeff_rescale, coeff_mk, Pi.one_apply, mul_one]
   · rfl
 
-/-- `[s^n] e^(as) = a^n / n!`. -/
+/-- `[s^n] e^(as) = a^n / n!`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_rescale_exp (a : ℝ) (n : ℕ) : coeff n (rescale a (exp ℝ)) = a ^ n / n ! := by
   rw [coeff_rescale, coeff_exp, map_div₀, map_one, map_natCast, mul_one_div]
 
-/-- `[s^1] log f = [s^1] f` when `f(0) = 1`. -/
+/-- `[s^1] log f = [s^1] f` when `f(0) = 1`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_one_logOf {f : ℝ⟦X⟧} (hf : constantCoeff f = 1) : coeff 1 (logOf f) = coeff 1 f := by
   have h1 : constantCoeff (f - 1) = 0 := by rw [map_sub, hf, map_one, sub_self]
   rw [logOf_eq, coeff_subst_eq_sum h1, sum_range_succ, sum_range_one, pow_zero, pow_one,
@@ -187,19 +194,22 @@ section Laws
 
 variable {p : ℕ → ℝ} {N : ℕ}
 
-/-- The moment generating function `E e^(sX) = ∑_k p k e^(ks)` of a law on `[0, N]`. -/
+/-- The moment generating function `E e^(sX) = ∑_k p k e^(ks)` of a law on `[0, N]`.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 noncomputable def mgf (p : ℕ → ℝ) (N : ℕ) : ℝ⟦X⟧ :=
   ∑ k ∈ range (N + 1), p k • rescale (k : ℝ) (exp ℝ)
 
-/-- The factorial moment generating function `E (1 + z)^X = ∑_k p k (1 + z)^k`. -/
+/-- The factorial moment generating function `E (1 + z)^X = ∑_k p k (1 + z)^k`.
+Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 noncomputable def fmgf (p : ℕ → ℝ) (N : ℕ) : ℝ⟦X⟧ :=
   ∑ k ∈ range (N + 1), p k • (1 + X) ^ k
 
-/-- The central moment generating function `E e^(s(X - μ))`. -/
+/-- The central moment generating function `E e^(s(X - μ))`.
+Used for Lemma 6 of `hybrid-assembly.md`. -/
 noncomputable def cmgf (p : ℕ → ℝ) (N : ℕ) : ℝ⟦X⟧ :=
   ∑ k ∈ range (N + 1), p k • rescale ((k : ℝ) - partialMean p N) (exp ℝ)
 
-/-- The cumulant `κ_r = r! [s^r] log E e^(sX)`. -/
+/-- The cumulant `κ_r = r! [s^r] log E e^(sX)`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 noncomputable def cumulant (p : ℕ → ℝ) (N r : ℕ) : ℝ :=
   (r ! : ℝ) * coeff r (logOf (mgf p N))
 
@@ -207,11 +217,11 @@ noncomputable def cumulant (p : ℕ → ℝ) (N r : ℕ) : ℝ :=
 noncomputable def factCumulant (p : ℕ → ℝ) (N j : ℕ) : ℝ :=
   (j ! : ℝ) * coeff j (logOf (fmgf p N))
 
-/-- The central moment `E (X - μ)^n`. -/
+/-- The central moment `E (X - μ)^n`. Used for Lemma 6 and Proposition 8 of `hybrid-assembly.md`. -/
 noncomputable def centralMoment (p : ℕ → ℝ) (N n : ℕ) : ℝ :=
   ∑ k ∈ range (N + 1), p k * ((k : ℝ) - partialMean p N) ^ n
 
-/-- `[s^n] E e^(sX) = E X^n / n!`. -/
+/-- `[s^n] E e^(sX) = E X^n / n!`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_mgf (n : ℕ) :
     coeff n (mgf p N) = (∑ k ∈ range (N + 1), p k * (k : ℝ) ^ n) / n ! := by
   rw [mgf, map_sum, div_eq_mul_inv, sum_mul]
@@ -219,29 +229,29 @@ theorem coeff_mgf (n : ℕ) :
   rw [coeff_smul, coeff_rescale_exp, smul_eq_mul]
   ring
 
-/-- `[s^n] E e^(s(X - μ)) = E (X - μ)^n / n!`. -/
+/-- `[s^n] E e^(s(X - μ)) = E (X - μ)^n / n!`. Used for Lemma 6 of `hybrid-assembly.md`. -/
 theorem coeff_cmgf (n : ℕ) : coeff n (cmgf p N) = centralMoment p N n / n ! := by
   rw [cmgf, centralMoment, map_sum, div_eq_mul_inv, sum_mul]
   refine sum_congr rfl fun k _ ↦ ?_
   rw [coeff_smul, coeff_rescale_exp, smul_eq_mul]
   ring
 
-/-- `E e^(sX)` has constant term `1`. -/
+/-- `E e^(sX)` has constant term `1`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem constantCoeff_mgf (hp : IsLaw p N) : constantCoeff (mgf p N) = 1 := by
   rw [← coeff_zero_eq_constantCoeff_apply, coeff_mgf]
   simp [hp.sum_eq_one]
 
-/-- `[s^1] E e^(sX) = μ`. -/
+/-- `[s^1] E e^(sX) = μ`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem coeff_one_mgf : coeff 1 (mgf p N) = partialMean p N := by
   rw [coeff_mgf, partialMean]
   simp [mul_comm]
 
-/-- `E (1 + z)^X` has constant term `1`. -/
+/-- `E (1 + z)^X` has constant term `1`. Used for Lemma 7 of `hybrid-assembly.md`. -/
 theorem constantCoeff_fmgf (hp : IsLaw p N) : constantCoeff (fmgf p N) = 1 := by
   rw [fmgf, map_sum]
   simp [hp.sum_eq_one]
 
-/-- `E e^(sX) = E (1 + (e^s - 1))^X`. -/
+/-- `E e^(sX) = E (1 + (e^s - 1))^X`. Used for Lemma 7 of `hybrid-assembly.md`. -/
 theorem fmgf_subst : (fmgf p N).subst (exp ℝ - 1) = mgf p N := by
   have hu : HasSubst (exp ℝ - 1) := HasSubst.exp_sub_one
   rw [fmgf, ← coe_substAlgHom hu, map_sum]
@@ -255,7 +265,7 @@ theorem logOf_mgf_eq_subst (hp : IsLaw p N) :
     logOf (mgf p N) = (logOf (fmgf p N)).subst (exp ℝ - 1) := by
   rw [← fmgf_subst, logOf_subst (constantCoeff_fmgf hp) (by simp [constantCoeff_exp])]
 
-/-- `κ_1 = μ`. -/
+/-- `κ_1 = μ`. Used for Lemmas 6 and 7 of `hybrid-assembly.md`. -/
 theorem cumulant_one (hp : IsLaw p N) : cumulant p N 1 = partialMean p N := by
   rw [cumulant, coeff_one_logOf (constantCoeff_mgf hp), coeff_one_mgf, factorial_one, cast_one,
     one_mul]
@@ -270,7 +280,8 @@ theorem factCumulant_one (hp : IsLaw p N) : factCumulant p N 1 = partialMean p N
   rw [factCumulant, ← h]
   simp
 
-/-- The majorant `s / (1 - s)` of `e^s - 1`: `|[s^i] (e^s - 1)| ≤ [s^i] s (1 - s)^(-1)`. -/
+/-- The majorant `s / (1 - s)` of `e^s - 1`: `|[s^i] (e^s - 1)| ≤ [s^i] s (1 - s)^(-1)`.
+Used for Lemma 7 of `hybrid-assembly.md`. -/
 theorem abs_coeff_exp_sub_one_le (i : ℕ) :
     |coeff i (exp ℝ - 1 : ℝ⟦X⟧)| ≤ coeff i (X ^ 1 * rescale (1 : ℝ) (mk 1 : ℝ⟦X⟧)) := by
   rw [coeff_X_pow_mul_rescale, map_sub, coeff_exp, coeff_one, map_div₀, map_one, map_natCast]
@@ -350,7 +361,7 @@ theorem abs_cumulant_le (hp : IsLaw p N) {H A : ℝ} (hH : 1 ≤ H) (hA : 1 ≤ 
         rw [hB, show s + 2 - 1 = s + 1 by omega, show s + 2 - 2 = s by omega]
         ring
 
-/-- `E e^(s(X - μ)) = e^(log E e^(sX) - μ s)`. -/
+/-- `E e^(s(X - μ)) = e^(log E e^(sX) - μ s)`. Used for Lemma 6 of `hybrid-assembly.md`. -/
 theorem cmgf_eq_exp_subst (hp : IsLaw p N) :
     cmgf p N = (exp ℝ).subst (logOf (mgf p N) + (-partialMean p N) • X) := by
   rw [exp_subst_add (constantCoeff_logOf (constantCoeff_mgf hp)) (by simp),
@@ -359,7 +370,8 @@ theorem cmgf_eq_exp_subst (hp : IsLaw p N) :
   rw [smul_mul_assoc, exp_mul_exp_eq_exp_add, sub_eq_add_neg]
 
 /-- The majorant of the centered cumulant series. If `|κ_r| ≤ r! a A^(r - 2)` for
-`2 ≤ r ≤ n`, then `|[s^i] (log E e^(sX) - μ s)| ≤ [s^i] a s² (1 - As)^(-1)` for `i ≤ n`. -/
+`2 ≤ r ≤ n`, then `|[s^i] (log E e^(sX) - μ s)| ≤ [s^i] a s² (1 - As)^(-1)` for `i ≤ n`.
+Used for Lemma 6 of `hybrid-assembly.md`. -/
 theorem abs_coeff_centCum_le (hp : IsLaw p N) {a A : ℝ} {n : ℕ}
     (hκ : ∀ r, 2 ≤ r → r ≤ n → |cumulant p N r| ≤ r ! * a * A ^ (r - 2)) {i : ℕ} (hi : i ≤ n) :
     |coeff i (logOf (mgf p N) + (-partialMean p N) • X)| ≤
@@ -548,7 +560,8 @@ theorem centralMoment_le_of_factCumulant (hp : IsLaw p N) {H : ℝ} {k : ℕ} (h
         rw [← Real.exp_one_pow, ← mul_pow]
         ring
 
-/-- Chebyshev at order `2k`: `P(X = 0) μ^(2k) ≤ E(X - μ)^(2k)`. -/
+/-- Chebyshev at order `2k`: `P(X = 0) μ^(2k) ≤ E(X - μ)^(2k)`.
+The Chebyshev step of Proposition 8 of `hybrid-assembly.md`. -/
 theorem prob_zero_mul_le_centralMoment (hp : IsLaw p N) (k : ℕ) :
     p 0 * partialMean p N ^ (2 * k) ≤ centralMoment p N (2 * k) := by
   have h := single_le_sum (f := fun j ↦ p j * ((j : ℝ) - partialMean p N) ^ (2 * k))
@@ -556,6 +569,19 @@ theorem prob_zero_mul_le_centralMoment (hp : IsLaw p N) (k : ℕ) :
     (mem_range.mpr (Nat.succ_pos N))
   simp only [cast_zero, zero_sub] at h
   rwa [pow_mul, neg_sq, ← pow_mul] at h
+
+/-- The Chebyshev step of Proposition 8 of `hybrid-assembly.md`. If `μ > 0` and
+`E(X - μ)^(2k) ≤ (C μ)^k`, then `P(X = 0) ≤ (C / μ)^k`. With `C = 4e H k` this turns (H-JI*) into
+the lower tail. -/
+theorem prob_zero_le_of_centralMoment_le (hp : IsLaw p N) (hμ : 0 < partialMean p N) {C : ℝ}
+    {k : ℕ} (h : centralMoment p N (2 * k) ≤ (C * partialMean p N) ^ k) :
+    p 0 ≤ (C / partialMean p N) ^ k := by
+  have h' := (prob_zero_mul_le_centralMoment hp k).trans h
+  have hpos : 0 < partialMean p N ^ (2 * k) := by positivity
+  rw [← le_div_iff₀ hpos] at h'
+  refine h'.trans_eq ?_
+  rw [div_pow, pow_mul, mul_pow C, sq, mul_pow]
+  field_simp
 
 /-- Proposition 8 of `hybrid-assembly.md` ((H-JI) ⇒ Poisson-like moments ⇒ the lower tail). Let
 `X` have law `p` on `[0, N]` with mean `μ > 0`, and let `H ≥ 1` and `k ≥ 1` with `H μ ≥ 8k`. If
@@ -565,15 +591,8 @@ theorem prob_zero_le_of_factCumulant (hp : IsLaw p N) {H : ℝ} {k : ℕ} (hH : 
     (hk : 1 ≤ k) (hμ : 0 < partialMean p N) (hHμ : 8 * k ≤ H * partialMean p N)
     (hκ : ∀ j, 2 ≤ j → j ≤ 2 * k → |factCumulant p N j| ≤
       j ! * H * partialMean p N * Real.sqrt (H * partialMean p N / (8 * k)) ^ (j - 2)) :
-    p 0 ≤ (4 * Real.exp 1 * H * k / partialMean p N) ^ k := by
-  have h := (prob_zero_mul_le_centralMoment hp k).trans
-    (centralMoment_le_of_factCumulant hp hH hk hμ hHμ hκ)
-  have hpos : 0 < partialMean p N ^ (2 * k) := by positivity
-  rw [← le_div_iff₀ hpos] at h
-  refine h.trans_eq ?_
-  rw [div_pow, pow_mul, mul_pow (4 * Real.exp 1 * H * k), sq, mul_pow]
-  field_simp
-  ring
+    p 0 ≤ (4 * Real.exp 1 * H * k / partialMean p N) ^ k :=
+  prob_zero_le_of_centralMoment_le hp hμ (centralMoment_le_of_factCumulant hp hH hk hμ hHμ hκ)
 
 end Laws
 
