@@ -471,3 +471,13 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.exp_neg_sqrt_le_hamLaw_zero_of_le_palmGap
 #print axioms RoundRobin.Canonical.exp_neg_sqrt_sub_le_hamLaw_zero_of_le_palmGap
 #print axioms RoundRobin.Canonical.hamLaw_zero_le_exp_neg_sqrt
+#print axioms SizeBias.IsLaw.cdf_zero_mul_pow_mul_prod_le
+#print axioms SizeBias.IsLaw.cdf_zero_le_div
+#print axioms RoundRobin.Canonical.partialMean_hamLaw_eq
+#print axioms RoundRobin.Canonical.hamLaw_zero_mul_pow_mul_prod_le
+#print axioms RoundRobin.Canonical.hamLaw_zero_le_of_le_hamBottomRatio
+#print axioms RoundRobin.Canonical.one_le_hamLaw_zero_mul
+#print axioms RoundRobin.Canonical.not_repairBound_of_le_hamBottomRatio
+#print axioms RoundRobin.Canonical.not_boundedRadius_of_le_hamBottomRatio
+#print axioms RoundRobin.Canonical.prod_hamBottomRatio_le
+#print axioms RoundRobin.Canonical.exists_hamBottomRatio_le
