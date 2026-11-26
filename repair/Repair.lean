@@ -14,3 +14,5 @@ import Repair.BoundedRadius
 import Repair.Automorphism
 import Repair.ExceptionalSix
 import Repair.TripleUnion
+import Repair.CumulantTail
+import Repair.HybridConditional
