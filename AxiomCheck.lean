@@ -581,3 +581,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.ballIso_honeycomb
 #print axioms RoundRobin.Canonical.ballIso_some_of_not_isDefect
 #print axioms RoundRobin.Canonical.exists_ballIso_equiv
+#print axioms RoundRobin.Canonical.ham_factor_two_zero
+#print axioms RoundRobin.Canonical.chord_mem_ladderSquare
+#print axioms RoundRobin.Canonical.ladder_ends

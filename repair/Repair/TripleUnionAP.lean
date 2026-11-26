@@ -1,3 +1,4 @@
+import Repair.FactorCap.Scale
 import Repair.TripleUnion
 
 /-!
@@ -14,6 +15,10 @@ Put `n = 2m - 1`. This file completes Lemma M (a) and (d) for the progression (A
   `tripleUnionIsoHalf : G_{1/2} ≃g G_2` is `x ↦ 2x`, both affine automorphisms of `𝓕`.
   `card_fourCycles_neg_one`, `card_fourCycles_of_two_mul_eq_one` and `card_fourCycles_of_isAP` :
   for `n` coprime to `15` every AP triple has exactly `m - 2` 4-cycles, the squares of its ladder.
+* (d), the ladder of `{0, 1, 2}`. `ham_factor_two_zero` : `F_0 ∪ F_2` is one cycle.
+  `chord_mem_ladderSquare` : `Q_v` and `Q_{v+2}` share the `F_1`-chord `{-v, v + 2}`.
+  `ladder_ends` : the ladder closes through the two triangles, `Q_3` sharing the chord `{-1, 3}`
+  with `T_2` and `Q_2` sharing the chord `{0, 2}` with the triangle `{∞, 0, 2}`.
 
 Source: `results/k3-workaround-spike.md` §2.1, Lemma M.
 -/
@@ -330,6 +335,50 @@ theorem card_fourCycles_of_isAP {r : ZMod (2 * m - 1)} (hAP : IsAP r)
   rcases hAP with rfl | rfl | hr
   exacts [card_fourCycles_two h hm, card_fourCycles_neg_one h hm,
     card_fourCycles_of_two_mul_eq_one hr h hm]
+
+/-- **Lemma M (d)**, the cycle. `F_0 ∪ F_2` is one cycle, the image of the cycle `F_0 ∪ F_1` under
+the affine automorphism `x ↦ 2x` (`results/k3-workaround-spike.md`, Lemma M (d)). -/
+theorem ham_factor_two_zero : Ham (factor m 2) (factor m 0) := by
+  have h := (ham_smul (scale m isUnit_two'.unit) (factor m 1) (factor m 0)).2 (ham_factor_one m)
+  rwa [scale_smul_factor, scale_smul_factor, IsUnit.unit_spec, mul_one, mul_zero] at h
+
+/-- **Lemma M (d)**, the chords. For `v ≠ -1`, `{-v, v + 2}` is an edge of `F_1` lying on both
+`Q_v` and `Q_{v+2}`, so consecutive squares of the ladder are glued along `F_1`-chords
+(`results/k3-workaround-spike.md`, Lemma M (d)). -/
+theorem chord_mem_ladderSquare {v : ZMod (2 * m - 1)} (hv : v ≠ -1) :
+    (factor m 1).toGraph.Adj (some (-v)) (some (v + 2)) ∧
+      s(some (-v), some (v + 2)) ∈ ladderSquare m v ∧
+      s(some (-v), some (v + 2)) ∈ ladderSquare m (v + 2) := by
+  have u2 := isUnit_two' (m := m)
+  refine ⟨factor_adj_some.2 ⟨fun h ↦ hv (eq_neg_of_add_eq_zero_left
+    (u2.mul_right_eq_zero.1 (by lcpm h))), by ring⟩, by simp [ladderSquare, fourCycleEdges], ?_⟩
+  simp only [ladderSquare, fourCycleEdges, Finset.mem_insert, Finset.mem_singleton]
+  right; right; right
+  rw [show (2 : ZMod (2 * m - 1)) - (v + 2) = -v by ring]
+
+/-- **Lemma M (d)**, the ends of the ladder. The ladder of `G_2` closes through the two triangles of
+Lemma M (a): `Q_3` contains the `F_1`-chord `{-1, 3}` of the rainbow triangle `T_2 = {-1, 1, 3}`,
+and `Q_2` contains the `F_1`-chord `{0, 2}` of the triangle `{∞, 0, 2}`
+(`results/k3-workaround-spike.md`, Lemma M (d)). -/
+theorem ladder_ends :
+    s(some (-1), some 3) ∈ ladderSquare m 3 ∧ some (-1) ∈ rainbow m 2 ∧ some 3 ∈ rainbow m 2 ∧
+      s(some 0, some 2) ∈ ladderSquare m 2 ∧ some 0 ∈ apTriangle m 2 ∧
+      some 2 ∈ apTriangle m 2 := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simp only [ladderSquare, fourCycleEdges, Finset.mem_insert, Finset.mem_singleton]
+    right; right; right
+    rw [show (2 : ZMod (2 * m - 1)) - 3 = -1 by ring]
+  · simp only [rainbow, Finset.mem_insert, Finset.mem_singleton, Option.some_inj]
+    left
+    ring
+  · simp only [rainbow, Finset.mem_insert, Finset.mem_singleton, Option.some_inj]
+    right; right
+    ring
+  · simp only [ladderSquare, fourCycleEdges, Finset.mem_insert, Finset.mem_singleton]
+    right; right; right
+    rw [sub_self]
+  · simp [apTriangle]
+  · simp [apTriangle]
 
 end RoundRobin.Canonical
 
