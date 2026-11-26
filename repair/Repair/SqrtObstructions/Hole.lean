@@ -32,8 +32,8 @@ Round-robin part.
 
 The source bounds `|B_K(T0)|` by `A_K(m) ≤ (K + 1)(2K + 1)(2K + 3)(2K + 5)(2m)^K` and cites
 `card_ball_eq`. That lemma counts the dual ball, the tails near a fixed matching. Here the ball of
-matchings near a tail is bounded directly through `card_defect_le`, which costs a factor
-`(2m)^3` and leaves NG-A(c) and (d) unchanged.
+matchings near a tail is bounded directly through `card_defect_le`, which costs a polynomial
+factor of order `(2m)^3` in `δ_K`. NG-A(c) and (d) are not formalized.
 -/
 
 namespace Pairing
