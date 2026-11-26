@@ -389,3 +389,10 @@ open Pairing PerfectMatching
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_pairInfo_of_reweight_harmonic
 #print axioms ChainRule.div_le_neg_log_prob_avoid_of_reweight'
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_reweight'
+#print axioms FactorCap.farey_param
+#print axioms FactorCap.form_pos_of_endpoints
+#print axioms FactorCap.not_farey_hit
+#print axioms FactorCap.Cell.check_sound
+#print axioms FactorCap.cells_check_of_lemmas
+#print axioms FactorCap.exists_checked_cell
+#print axioms FactorCap.cell_facts
