@@ -32,8 +32,9 @@ is determined by its colour word.
 
 Source: `results/k3-workaround-spike.md` §2.2, Proposition U, built on Lemma M (§2.1). The source
 assumes `4H`-genericity. Its proof treats the balls at `∞`, at `T_r` and at vertices away from the
-`O(H²)` sites `a + b r`, which is `ballIso_none` and `ballIso_honeycomb` at `4H`. It does not treat
-the balls at the sites `a + b r` themselves. They are matched here through `ballIso_formal`, which
+`O(H²)` sites `a + b r`. For `∞` and for those vertices this is `ballIso_none` and
+`ballIso_honeycomb`, at `4H`. The proof does not treat the balls at the sites `a + b r` themselves,
+which include `T_r`. They are matched here through `ballIso_formal`, which
 needs the larger constant `8H + 4`, so the global statement is proved for `(8H + 4)`-generic `r`.
 That is still all `r` outside `O(H²)` exceptional values.
 -/
@@ -42,7 +43,7 @@ namespace Pairing
 
 section ColourWords
 
-variable {X Y Z : Type*}
+variable {X Y : Type*}
 
 /-- The endpoint of the colour word `w` from `x`, for the partner maps `μ c` of a 3-edge-colouring.
 The word `c :: w` follows `w` and then the edge of colour `c` (`results/k3-workaround-spike.md`,
