@@ -54,3 +54,4 @@ import Repair.Cover.NCycle
 import Repair.Cover.Lane
 import Repair.Cover.HybridLaw
 import Repair.Reflection
+import Repair.Translation
