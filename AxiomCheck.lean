@@ -572,3 +572,14 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.context_common_edge
 #print axioms RoundRobin.Canonical.lt_of_context_mate_neg_eq
 #print axioms RoundRobin.Canonical.lattice_of_common_edge
+#print axioms contract_smul
+#print axioms jointCount_congr
+#print axioms commonCount_congr
+#print axioms RoundRobin.Canonical.context_scale
+#print axioms RoundRobin.Canonical.sum_pairJoint_scale
+#print axioms RoundRobin.Canonical.sum_pairCommon_scale
+#print axioms RoundRobin.Canonical.sum_pairJoint_eq_of_mul_eq
+#print axioms RoundRobin.Canonical.sum_pairCommon_eq_of_mul_eq
+#print axioms RoundRobin.Canonical.sum_pairJoint_normal_form
+#print axioms RoundRobin.Canonical.sum_pairJoint_comm
+#print axioms RoundRobin.Canonical.sum_pairCommon_comm
