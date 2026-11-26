@@ -712,3 +712,12 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.ham_factor_two_zero
 #print axioms RoundRobin.Canonical.chord_mem_ladderSquare
 #print axioms RoundRobin.Canonical.ladder_ends
+#print axioms card_defect_le_tailDist_add
+#print axioms tailDist_le_card_keptEdges_add
+#print axioms card_keptEdges_le
+#print axioms RoundRobin.Canonical.card_sdiff_factorTail
+#print axioms RoundRobin.Canonical.nearHybrid_kept
+#print axioms RoundRobin.Canonical.nearHybrid_defects
+#print axioms RoundRobin.Canonical.nearHybrid_majority
+#print axioms RoundRobin.Canonical.nearHybrid_certLength
+#print axioms RoundRobin.Canonical.exists_nearHybrid
