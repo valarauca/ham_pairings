@@ -22,9 +22,8 @@ vertices that `T₀` and `T` pair alike is `shared2 T₀ T = 2J` (`Repair.PairLe
 * `RoundRobin.Canonical.card_filter_repair_le` : the P5 count for a set of tails. At most
   `Z_m (K + 1)(2m)^K` tails of a six-vertex gadget have a zero state within `K`.
 * `RoundRobin.Canonical.half_mul_le_of_hybrid_rescue` (Corollary 2(c)) : if, for `j = 0` and
-  `j = 1`, a fraction `η` of the tails with `J = j` (the random hybrid `H(M - j)`) have `ρ ≤ K`,
-  then
-  `(η/2)(2m - 7)!! ≤ Z_m (K + 1)(2m)^K`.
+  `j = 1`, a fraction `η` of the tails with `J = j` (the random hybrid `H(M - j)`, read as
+  `shared2 T₀ T = 2j`) have `ρ ≤ K`, then `(η/2)(2m - 7)!! ≤ Z_m (K + 1)(2m)^K`.
 -/
 
 namespace Pairing
