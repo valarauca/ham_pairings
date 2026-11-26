@@ -924,3 +924,4 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.reflection_repair_tail
 #print axioms RoundRobin.Canonical.exists_zeroState_of_hasReflCover
 #print axioms RoundRobin.Canonical.repairBound_of_hasReflCover
+#print axioms RoundRobin.Canonical.repairBound_of_window_reflCover
