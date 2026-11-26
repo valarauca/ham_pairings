@@ -15,3 +15,4 @@ import Repair.Automorphism
 import Repair.ExceptionalSix
 import Repair.TripleUnion
 import Repair.TripleUnionAP
+import Repair.TripleUnionLocal
