@@ -8,3 +8,4 @@ import Spin.Reduction
 import Spin.Monomials
 import Spin.Existence
 import Spin.Witness
+import Spin.BasisFree
