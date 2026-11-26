@@ -554,3 +554,6 @@ open Pairing PerfectMatching
 #print axioms PerfectMatching.two_switch
 #print axioms PerfectMatching.insertion_cycleCount
 #print axioms PerfectMatching.insertion_ham_iff
+#print axioms PerfectMatching.exists_context_extension
+#print axioms PerfectMatching.free_defects
+#print axioms PerfectMatching.free_defects_of_closedCount_eq_zero

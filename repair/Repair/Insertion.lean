@@ -581,7 +581,8 @@ theorem insertion_cycleCount (hy : yp ≠ ym) (R : PerfectMatching V) (a b : low
   have hRa' : R.mate a = yp := by rw [← hRa, mate_mate]
   have hRb' : R.mate b = ym := by rw [← hRb, mate_mate]
   have hRba : Rm.mate b = a := by rw [← hRab, mate_mate]
-  have hab : a ≠ b := fun h ↦ hy (hRa'.symm.trans ((congrArg (fun z : lowerSet yp ym ↦ R.mate z) h).trans hRb'))
+  have hab : a ≠ b := fun h ↦
+    hy (hRa'.symm.trans ((congrArg (fun z : lowerSet yp ym ↦ R.mate z) h).trans hRb'))
   have hpq : p ≠ q := (Cm.mate_ne p).symm
   have hqp : Cm.mate q = p := Cm.mate_mate p
   have hCent : C.mate ent = p := by rw [← hCp, mate_mate]
@@ -610,7 +611,8 @@ theorem insertion_cycleCount (hy : yp ≠ ym) (R : PerfectMatching V) (a b : low
   have C0L : ∀ v : (lowerSet yp ym), v ≠ p → v ≠ q → C0.mate v = Cm.mate v := fun v h1 h2 ↦ by
     rw [C0o v (fun h ↦ h1 (Subtype.ext h)) (fun h ↦ h2 (Subtype.ext h)) (neL v).1 (neL v).2,
       hC v h1 h2]
-  have RL : ∀ v : (lowerSet yp ym), v ≠ a → v ≠ b → R.mate v = Rm.mate v := fun v h1 h2 ↦ (hRm v h1 h2).symm
+  have RL : ∀ v : (lowerSet yp ym), v ≠ a → v ≠ b → R.mate v = Rm.mate v :=
+    fun v h1 h2 ↦ (hRm v h1 h2).symm
   have hD := fourSet_closed C0 p ent
   have memD : ∀ v, v ∈ fourSet C0 p ent ↔ v = p ∨ v = q ∨ v = ent ∨ v = ext := by
     intro v
@@ -623,7 +625,8 @@ theorem insertion_cycleCount (hy : yp ≠ ym) (R : PerfectMatching V) (a b : low
   have hdich := fun h ↦ switchCut_reachable_iff (R := R) (C := C0) (p := p) (e := ent) hpent
     (by rwa [C0ent]) h
   rw [C0ent] at hdich
-  let π : V → (lowerSet yp ym) := fun v ↦ if h : v ∈ (lowerSet yp ym) then ⟨v, h⟩ else if v = yp then a else b
+  let π : V → (lowerSet yp ym) := fun v ↦
+    if h : v ∈ (lowerSet yp ym) then ⟨v, h⟩ else if v = yp then a else b
   have πL : ∀ v : (lowerSet yp ym), π v = v := fun v ↦ by simp [π, v.2]
   have πyp : π yp = a := by
     have : yp ∉ (lowerSet yp ym) := fun h ↦ (mem_lowerSet.mp h).1 rfl
@@ -649,7 +652,8 @@ theorem insertion_cycleCount (hy : yp ≠ ym) (R : PerfectMatching V) (a b : low
     exact h1.reachable.trans (h2.reachable.trans h3.reachable)
   have hfix : ∀ (G : SimpleGraph V) (G' : SimpleGraph (lowerSet yp ym)),
       (∀ (v : lowerSet yp ym) (w : V), G.Adj v w → G'.Reachable v (π w)) →
-      (∀ v w : V, v ∉ (lowerSet yp ym) → w ∉ (lowerSet yp ym) → G.Adj v w → G'.Reachable (π v) (π w)) →
+      (∀ v w : V, v ∉ (lowerSet yp ym) → w ∉ (lowerSet yp ym) → G.Adj v w →
+        G'.Reachable (π v) (π w)) →
       ∀ v w, G.Adj v w → G'.Reachable (π v) (π w) := by
     intro G G' hL1 hL2 v w hvw
     by_cases hv : v ∈ (lowerSet yp ym)
