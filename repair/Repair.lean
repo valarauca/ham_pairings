@@ -11,3 +11,4 @@ import Repair.Covering.Basic
 import Repair.Covering.Witness
 import Repair.DensityGlue
 import Repair.BoundedRadius
+import Repair.Automorphism
