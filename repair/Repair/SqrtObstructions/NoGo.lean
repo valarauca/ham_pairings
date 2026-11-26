@@ -323,7 +323,7 @@ theorem certPerm_smul (P : PerfectMatching (Vertex m)) {g : Equiv.Perm (Vertex m
     {t t' : ZMod (2 * m - 1)} (h : g • factor m t = factor m t') :
     certPerm (g • P) t' = g * certPerm P t * g⁻¹ := by
   rw [certPerm, certPerm, ← h]
-  show g * P.mate * g⁻¹ * (g * (factor m t).mate * g⁻¹) = _
+  change g * P.mate * g⁻¹ * (g * (factor m t).mate * g⁻¹) = _
   group
 
 /-- Short certificates are carried by automorphisms (`sqrt-m-obstructions.md` §1.2, `Z_2(θm)` is

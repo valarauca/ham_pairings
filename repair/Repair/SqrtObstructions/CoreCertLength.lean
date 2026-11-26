@@ -101,9 +101,10 @@ theorem not_sameCycle_mate_left (a b : PerfectMatching V) (y : V) :
 /-- A set closed under two perfect matchings `a, b` holds whole cycles of `a ∪ b`: every `y ∈ C`
 has `σ^r y = y` with `σ = a b`, `1 ≤ r` and `2r ≤ |C|` (`factor-tail-L-test.md`, Theorem C′: a
 closed alternating cycle on at most `2L` vertices has at most `L` edges of `a`). -/
-theorem exists_pow_eq_of_closed [Fintype V] [DecidableEq V] (a b : PerfectMatching V)
+theorem exists_pow_eq_of_closed [Finite V] (a b : PerfectMatching V)
     {C : Finset V} (ha : ∀ v ∈ C, a.mate v ∈ C) (hb : ∀ v ∈ C, b.mate v ∈ C) {y : V}
     (hy : y ∈ C) : ∃ r, 1 ≤ r ∧ 2 * r ≤ C.card ∧ ((a.mate * b.mate) ^ r) y = y := by
+  classical
   set σ := a.mate * b.mate with hσ
   have hper : Function.IsPeriodicPt σ (orderOf σ) y := by
     rw [Function.IsPeriodicPt, Function.IsFixedPt, Equiv.Perm.iterate_eq_pow,
