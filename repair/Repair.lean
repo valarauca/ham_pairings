@@ -44,4 +44,13 @@ import Repair.PairRecursion
 import Repair.PairVariance
 import Repair.PairFormula
 import Repair.PairLevelOne
+import Repair.Barrier.LevelWeight
+import Repair.Barrier.Contamination
+import Repair.Barrier.Transfer
+import Repair.Barrier.MeanStopped
+import Repair.Barrier.CappedVariance
+import Repair.Cover.Hybrid
+import Repair.Cover.NCycle
+import Repair.Cover.Lane
+import Repair.Cover.HybridLaw
 import Repair.Reflection
