@@ -551,3 +551,15 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.cliqueFinset_tripleUnion_six_three
 #print axioms RoundRobin.Canonical.card_fourCyclesThrough_six_three
 #print axioms RoundRobin.Canonical.card_fourCycles_six_two
+#print axioms fourCycles_congr
+#print axioms card_fourCycles_congr
+#print axioms RoundRobin.Canonical.none_mem_apTriangle
+#print axioms RoundRobin.Canonical.apTriangle_isClique
+#print axioms RoundRobin.Canonical.cliqueFinset_tripleUnion_of_isAP
+#print axioms RoundRobin.Canonical.card_cliqueFinset_tripleUnion_of_isAP
+#print axioms RoundRobin.Canonical.tripleUnionIso
+#print axioms RoundRobin.Canonical.tripleUnionIsoNegOne
+#print axioms RoundRobin.Canonical.tripleUnionIsoHalf
+#print axioms RoundRobin.Canonical.card_fourCycles_neg_one
+#print axioms RoundRobin.Canonical.card_fourCycles_of_two_mul_eq_one
+#print axioms RoundRobin.Canonical.card_fourCycles_of_isAP
