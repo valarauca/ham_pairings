@@ -396,3 +396,12 @@ open Pairing PerfectMatching
 #print axioms FactorCap.cells_check_of_lemmas
 #print axioms FactorCap.exists_checked_cell
 #print axioms FactorCap.cell_facts
+#print axioms RoundRobin.Canonical.scale_smul_factor
+#print axioms RoundRobin.Canonical.isZeroState_affine_smul_iff
+#print axioms RoundRobin.Canonical.zigPos_factor_zero
+#print axioms RoundRobin.Canonical.zigPos_factor_half
+#print axioms RoundRobin.Canonical.zigPos_injective
+#print axioms RoundRobin.Canonical.not_ham_of_segments
+#print axioms FactorCap.Cell.ent_facts
+#print axioms FactorCap.zigPos_entry
+#print axioms FactorCap.zigPos_exit

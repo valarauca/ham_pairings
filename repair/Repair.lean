@@ -6,3 +6,4 @@ import Repair.PartialCore
 import Repair.NearCore
 import Repair.DensityFloor
 import Repair.FactorCap.Cover
+import Repair.FactorCap.Bridge
