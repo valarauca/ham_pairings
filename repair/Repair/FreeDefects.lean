@@ -845,7 +845,7 @@ theorem exists_context_extension (B R : PerfectMatching V) (n : ℕ) :
     have k2 := cycleCount_eq_of_forall_mem hall R (glue B A hA C') (contract B R A hA) C'
       (fun a ↦ contract_mate_of_mem B R A hA a (hall _)) (fun a ↦ (glue_mate_coe B A hA C' a).symm)
     refine ⟨glue B A hA C', ?_, contract_glue B A hA C', Or.inr (by rw [k2]; omega)⟩
-    rw [ham_iff_cycleCount_eq_one, k1, ← ham_iff_cycleCount_eq_one]
+    rw [ham_iff_cycleCount_eq_one', k1, ← ham_iff_cycleCount_eq_one']
     exact hH
   | succ n ih =>
     intro A hA hcard C' hH
@@ -869,8 +869,8 @@ theorem exists_context_extension (B R : PerfectMatching V) (n : ℕ) :
       intro ent hent p
       have hH' : Ham (restrict B (grow B A yp) (grow_closed B hA))
           (insertCtx B hA hyp C' p hent) := by
-        rw [ham_iff_cycleCount_eq_one, cycleCount_insert B hA hyp C' p hent _
-          (restrict B A hA) rfl (fun _ ↦ rfl), ← ham_iff_cycleCount_eq_one]
+        rw [ham_iff_cycleCount_eq_one', cycleCount_insert B hA hyp C' p hent _
+          (restrict B A hA) rfl (fun _ ↦ rfl), ← ham_iff_cycleCount_eq_one']
         exact hH
       obtain ⟨C, hC1, hC2, hC3⟩ := ih (grow B A yp) (grow_closed B hA) hcard' _ hH'
       exact ⟨C, hC1, contract_insert B hA hyp C' p hent C hC2, hC3⟩
@@ -885,13 +885,13 @@ theorem exists_context_extension (B R : PerfectMatching V) (n : ℕ) :
       omega
     · simp only [hd, ↓reduceIte, add_zero] at hcl
       by_cases hH1 : Ham (contract B R A hA) C'
-      · have hk1 := (ham_iff_cycleCount_eq_one _ _).mp hH1
+      · have hk1 := (ham_iff_cycleCount_eq_one' _ _).mp hH1
         rcases ham_insert_nondeg B R hA hyp C' p₀ hd hH1 with h | h
         · obtain ⟨C, hC1, hC2, hC3⟩ := ext yp (Or.inl rfl) p₀
-          rw [(ham_iff_cycleCount_eq_one _ _).mp h] at hC3
+          rw [(ham_iff_cycleCount_eq_one' _ _).mp h] at hC3
           exact ⟨C, hC1, hC2, by omega⟩
         · obtain ⟨C, hC1, hC2, hC3⟩ := ext (B.mate yp) (Or.inr rfl) p₀
-          rw [(ham_iff_cycleCount_eq_one _ _).mp h] at hC3
+          rw [(ham_iff_cycleCount_eq_one' _ _).mp h] at hC3
           exact ⟨C, hC1, hC2, by omega⟩
       · obtain ⟨a', b, ha', -, -, -⟩ := contract_step_nondeg B R hA hyp hd
         obtain ⟨p, hp⟩ : ∃ p : A,
@@ -943,7 +943,7 @@ theorem free_defects (B R : PerfectMatching V) (A : Finset V) (hA : ∀ v ∈ A,
     exact Nat.card_pos
   have h2 : 2 ≤ cycleCount R C := by
     by_contra h
-    exact hnH ((ham_iff_cycleCount_eq_one R C).mpr (by omega))
+    exact hnH ((ham_iff_cycleCount_eq_one' R C).mpr (by omega))
   have h1 : n + 2 ≤ cycleCount (contract B R A hA) C' + closedCount R B A := by omega
   refine ⟨h1, ?_⟩
   have hk := two_mul_cycleCount_le (contract B R A hA) C'

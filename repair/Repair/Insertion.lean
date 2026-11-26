@@ -1,10 +1,11 @@
 import Clifford.Contraction
+import Repair.CycleCount
 
 /-!
 # One-defect insertion (Lemma 5 and Corollary 5.1 of the joint-incoherence spike)
 
-`cycleCount P Q = κ(P ∪ Q)` is the number of cycles of the union of two perfect matchings,
-that is the number of connected components of the union graph.
+`cycleCount P Q = κ(P ∪ Q)` (from `Repair.CycleCount`) is the number of cycles of the union of
+two perfect matchings, that is the number of connected components of the union graph.
 
 * `card_sup_edge_of_reachable`, `card_sup_edge_add_one` : adding an edge keeps the component
   count when its ends are already joined and lowers it by one otherwise.
@@ -206,29 +207,20 @@ namespace PerfectMatching
 
 variable {V : Type*}
 
-/-- `κ(P ∪ Q)`, the number of cycles of the union of two perfect matchings, counted as the
-connected components of the union graph. A common edge is a doubled `2`-cycle
-(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
-noncomputable def cycleCount (P Q : PerfectMatching V) : ℕ :=
-  Nat.card (P.toGraph ⊔ Q.toGraph).ConnectedComponent
-
-/-- `κ(P ∪ Q) = κ(Q ∪ P)`.
+/-- `κ(P ∪ Q) = κ(Q ∪ P)`, for the cycle count `cycleCount` of `Repair.CycleCount`
 (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem cycleCount_comm (P Q : PerfectMatching V) : cycleCount P Q = cycleCount Q P := by
   rw [cycleCount, cycleCount, sup_comm]
 
-/-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1`.
-(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
-theorem ham_iff_cycleCount_eq_one (P Q : PerfectMatching V) :
+/-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1`, without assuming `V` nonempty. It extends
+`ham_iff_cycleCount_eq_one` of `Repair.CycleCount` to the empty vertex set, where both sides
+fail (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
+theorem ham_iff_cycleCount_eq_one' (P Q : PerfectMatching V) :
     Ham P Q ↔ cycleCount P Q = 1 := by
-  rw [cycleCount, Nat.card_eq_one_iff_unique, Ham, SimpleGraph.connected_iff]
-  constructor
-  · rintro ⟨hp, ⟨v⟩⟩
-    exact ⟨hp.subsingleton_connectedComponent, ⟨(P.toGraph ⊔ Q.toGraph).connectedComponentMk v⟩⟩
-  · rintro ⟨hs, ⟨c⟩⟩
-    refine ⟨fun a b ↦ SimpleGraph.ConnectedComponent.exact (Subsingleton.elim _ _), ?_⟩
-    induction c using SimpleGraph.ConnectedComponent.ind with
-    | h v => exact ⟨v⟩
+  rcases isEmpty_or_nonempty V with hV | hV
+  · rw [cycleCount_of_isEmpty]
+    exact ⟨fun h ↦ isEmptyElim (Classical.choice h.nonempty), fun h ↦ absurd h (by omega)⟩
+  · exact ham_iff_cycleCount_eq_one P Q
 
 section Off
 
@@ -864,7 +856,7 @@ theorem insertion_ham_iff (hy : yp ≠ ym) (R : PerfectMatching V) (a b : lowerS
     (h2p : C₂.mate p = ym) (h2q : C₂.mate (Cm.mate p) = yp)
     (h2 : ∀ v, v ≠ p → v ≠ Cm.mate p → C₂.mate v = Cm.mate v)
     (hH : Ham Rm Cm) : Ham R C₁ ↔ ¬Ham R C₂ := by
-  have hκ := (ham_iff_cycleCount_eq_one Rm Cm).mp hH
+  have hκ := (ham_iff_cycleCount_eq_one' Rm Cm).mp hH
   have hr : (Rm.toGraph ⊔ Cm.toGraph).Reachable p a := hH.preconnected p a
   obtain ⟨-, h1', h3⟩ := insertion_cycleCount hy R a b hRa hRb Rm hRab hRm Cm p C₁
     (Or.inl ⟨rfl, rfl⟩) h1p h1q h1
@@ -873,7 +865,7 @@ theorem insertion_ham_iff (hy : yp ≠ ym) (R : PerfectMatching V) (a b : lowerS
   have e1 := h1' hr a hRa.symm
   have e2 := h2' hr b hRb.symm
   have hd := h3 hr
-  rw [ham_iff_cycleCount_eq_one, ham_iff_cycleCount_eq_one]
+  rw [ham_iff_cycleCount_eq_one', ham_iff_cycleCount_eq_one']
   by_cases ha : (cutGraph Rm Cm a b p).Reachable p a
   · rw [e1.1 ha, e2.2 (hd.mp ha), hκ]
     simp
