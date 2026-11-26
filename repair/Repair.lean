@@ -12,3 +12,4 @@ import Repair.Covering.Witness
 import Repair.DensityGlue
 import Repair.BoundedRadius
 import Repair.Automorphism
+import Repair.ExceptionalSix
