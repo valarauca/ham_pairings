@@ -356,12 +356,16 @@ open Pairing PerfectMatching
 #print axioms FactorCap.capMatching_of_ne_endVtx
 #print axioms FactorCap.not_ham_capMatching_zero
 #print axioms FactorCap.not_ham_capMatching
+#print axioms FactorCap.not_ham_capMatching_of_not_isUnit
 #print axioms FactorCap.isZeroState_capMatching
+#print axioms FactorCap.isZeroState_capMatching_of_coprime
 #print axioms FactorCap.factorTail_mate
 #print axioms FactorCap.capAffine_smul_factor
 #print axioms FactorCap.isZeroState_capState
+#print axioms FactorCap.isZeroState_capState_of_coprime
 #print axioms FactorCap.tailDist_capState_le
 #print axioms FactorCap.factorTail_cap
+#print axioms FactorCap.factorTail_cap_of_coprime
 #print axioms FactorCap.tailDist_capState
 #print axioms RoundRobin.Covering.factor_subordinate
 #print axioms RoundRobin.Covering.pullback_invariant

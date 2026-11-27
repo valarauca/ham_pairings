@@ -16,14 +16,17 @@ of `F_0` and rematches their ends by
 * `capMatching_endVtx` : `P_q` maps each end `ε` to its `Q`-partner, an end `ε'` with
   `(ε, ε')` or `(ε', ε)` in `qPairs`.
 * `capMatching_of_ne_endVtx` : off the sixteen ends `P_q` agrees with `F_0`.
-* `isZeroState_capMatching` : for prime `n = 2m - 1 ≥ 17`, `P_q ∪ F_u` is never one cycle. For
-  `u = 0` the edge `∞0` is a closed `2`-cycle. For `u ≠ 0` the scaling by `λ = (2u)⁻¹` sends
+* `isZeroState_capMatching_of_coprime` : for `n = 2m - 1 ≥ 17` coprime to `105`, `P_q ∪ F_u`
+  is never one cycle. For a unit `u` (`not_ham_capMatching`) the scaling by `λ = (2u)⁻¹` sends
   `F_0` to itself and `F_u` to `F_{1/2}`, the cell containing `λ.val / n` gives the level order
   of the scaled ends and a proper end set `Z` closed under `Q` and the context, and
-  `not_ham_of_segments` turns `Z` into a closed union of zig-zag segments.
+  `not_ham_of_segments` turns `Z` into a closed union of zig-zag segments. For a non-unit `u`
+  (`not_ham_capMatching_of_not_isUnit`) put `g = gcd(u, n) > 1`. Every prime factor of `g` is at
+  least `11`, so `∞` and the multiples of `g` form a proper set that avoids the sixteen ends and
+  is closed under `P_q` and `F_u`. `isZeroState_capMatching` is the case of prime `n`.
 
-Source: `results/cod-186-archive-cap-check.md` (the construction of `P_q` and the 80-cell
-check) and `results/lean-scope-p9-p10.md` §1, steps 1 to 6.
+Source: `results/cod-186-archive-cap-check.md` (the construction of `P_q`, the 80-cell check
+and the gcd ≥ 9 argument) and `results/lean-scope-p9-p10.md` §1, steps 1 to 6.
 -/
 
 namespace Pairing
@@ -186,23 +189,22 @@ theorem not_ham_capMatching_zero (hm : 9 ≤ m) : ¬Ham (capMatching m hm) (fact
   · rintro v (rfl | rfl) <;> simp [factor]
   · simp [h1]
 
-/-- `P_q` blocks `F_u` for `u ≠ 0` when `n = 2m - 1 ≥ 17` is prime. With `λ = (2u)⁻¹` the
+/-- `P_q` blocks `F_u` for every unit `u`, for every `n = 2m - 1 ≥ 17`. With `λ = (2u)⁻¹` the
 scaled positions `zigPos (λ v)` put `F_u` on the zig-zag as `F_{1/2}` (`scale_mate_factor`), the
 cell containing `λ.val / n` orders the levels of the sixteen scaled ends, and its end set `Z`
 selects a proper union of segments closed under `P_q` and `F_u` (steps 2 to 6 of
-`lean-scope-p9-p10.md` §1). -/
-theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2 * m - 1)}
-    (hu : u ≠ 0) : ¬Ham (capMatching m hm) (factor m u) := by
-  have := Fact.mk hp
-  have h2 : (2 : ZMod (2 * m - 1)) ≠ 0 := (isUnit_two (modulus_odd m)).ne_zero
-  set lam : ZMod (2 * m - 1) := (2 * u)⁻¹ with hlam_def
-  have hlam : lam ≠ 0 := inv_ne_zero (mul_ne_zero h2 hu)
-  set a : (ZMod (2 * m - 1))ˣ := Units.mk0 lam hlam with ha
-  have hau : (a : ZMod (2 * m - 1)) * u = m := by
-    rw [ha, Units.val_mk0, hlam_def, mul_inv, mul_assoc, inv_mul_cancel₀ hu, mul_one]
-    exact (eq_inv_of_mul_eq_one_right two_mul_natCast_self).symm
-  obtain ⟨c, -, hchk, hcont⟩ :=
-    exists_checked_cell hp (by omega) (ZMod.val_pos.2 hlam) (ZMod.val_lt lam)
+`lean-scope-p9-p10.md` §1). Since `λ` is a unit, `λ.val` is coprime to `n`, which is all that the
+covering by the 80 cells needs. -/
+theorem not_ham_capMatching (hm : 9 ≤ m) {u : ZMod (2 * m - 1)} (hu : IsUnit u) :
+    ¬Ham (capMatching m hm) (factor m u) := by
+  have h2 : IsUnit (2 : ZMod (2 * m - 1)) := isUnit_two (modulus_odd m)
+  obtain ⟨a, hau⟩ : ∃ a : (ZMod (2 * m - 1))ˣ, (a : ZMod (2 * m - 1)) * u = m :=
+    ⟨(h2.mul hu).unit⁻¹, h2.mul_left_cancel (by
+      rw [two_mul_natCast_self, ← (h2.mul hu).val_inv_mul]
+      ring)⟩
+  obtain ⟨c, -, hchk, hcont⟩ := exists_checked_cell (ZMod.val_coe_unit_coprime a).symm
+    (by omega) (ZMod.val_lt (a : ZMod (2 * m - 1)))
+  generalize hlam : (a : ZMod (2 * m - 1)) = lam at hau hchk hcont
   obtain ⟨hent, hmono, hcov, hlt16, hctx⟩ := Cell.ent_facts hchk hcont
   obtain ⟨hz0, hz16, ⟨εo, hεo, hεoz⟩, hzcl⟩ := Cell.z_sound hchk
   have hN : ((2 * m - 1 : ℕ) : ℤ) = 2 * m - 1 := by
@@ -219,11 +221,11 @@ theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2
   set pos : Vertex m → ℤ := fun v ↦ zigPos m (scale m a v) with hpos
   have hposEntry : ∀ r (hr : r < 8), pos (endVtx m (c.ent r).entryEnd) = 2 * L ⟨r, hr⟩ := by
     intro r hr
-    simp only [hpos, endVtx, scale_some, ha, Units.val_mk0, endInt_entryEnd]
+    simp only [hpos, endVtx, scale_some, hlam, endInt_entryEnd]
     exact zigPos_entry lam _ (hbd r hr).1 (hbd r hr).2
   have hposExit : ∀ r (hr : r < 8), pos (endVtx m (c.ent r).exitEnd) = 2 * L ⟨r, hr⟩ + 1 := by
     intro r hr
-    simp only [hpos, endVtx, scale_some, ha, Units.val_mk0, endInt_exitEnd]
+    simp only [hpos, endVtx, scale_some, hlam, endInt_exitEnd]
     exact zigPos_exit lam _ (hbd r hr).1 (hbd r hr).2
   have hinj : ∀ v w, pos v = pos w → v = w := fun v w h ↦
     (scale m a).injective (zigPos_injective h)
@@ -252,7 +254,7 @@ theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2
     ((hkey ε1 (hz16 ε1 hε1)).2 hε1) fun h ↦ hεoz ((hkey εo hεo).1 h)
   · intro v
     simp only [hpos]
-    rw [scale_mate_factor, hau]
+    rw [scale_mate_factor, hlam, hau]
     exact zigPos_factor_half (by omega) _
   · intro v hv
     have hne : ∀ ε < 16, v ≠ endVtx m ε := by
@@ -274,15 +276,100 @@ theorem not_ham_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) {u : ZMod (2
       have hε := (hlt16 r r.2).2
       exact hclose _ hε ((hkey _ hε).1 hSv)
 
+/-- If `n = 2m - 1` is coprime to `105` and `g ≠ 1` divides `n`, no end label `±1, …, ±8` is a
+multiple of `g`. A divisor `g ≤ 8` of `n` other than `1` would be even or divisible by `3`, `5`
+or `7`. -/
+theorem not_dvd_endInt (hcop : Nat.Coprime (2 * m - 1) 105) {g : ℕ} (hg : g ∣ 2 * m - 1)
+    (hg1 : g ≠ 1) {ε : ℕ} (hε : ε < 16) : ¬(g : ℤ) ∣ endInt ε := by
+  intro h
+  obtain ⟨h0, h1, h2⟩ := endInt_bounds ε hε
+  have hpos : 0 < g := Nat.pos_of_dvd_of_pos hg (by have := NeZero.pos m; omega)
+  have hle : (g : ℤ) ≤ 8 :=
+    (Int.le_of_dvd (abs_pos.2 h0) ((dvd_abs _ _).2 h)).trans (abs_le.2 ⟨h1, h2⟩)
+  have hodd : Odd g := Odd.of_dvd_nat (modulus_odd m) hg
+  have hc : Nat.Coprime g 105 := Nat.Coprime.coprime_dvd_left hg hcop
+  have hg8 : g ≤ 8 := by exact_mod_cast hle
+  interval_cases g
+  all_goals first | exact hg1 rfl | exact absurd hodd (by decide) | exact absurd hc (by decide)
+
+/-- `P_q` blocks `F_u` for every non-unit `u`, including `u = 0`, when `n = 2m - 1 ≥ 17` is
+coprime to `105`. Put `g = gcd(u, n)`, so `g ≠ 1`. No end is a multiple of `g`
+(`not_dvd_endInt`), so `P_q` agrees with `F_0` on the multiples of `g`. The set of `∞` and the
+multiples of `g` is then closed under `P_q` and `F_u`, and it misses `1`. This is the gcd ≥ 9 case
+of `cod-186-archive-cap-check.md`: the component of `∞` meets no vertex of `D`. -/
+theorem not_ham_capMatching_of_not_isUnit (hcop : Nat.Coprime (2 * m - 1) 105) (hm : 9 ≤ m)
+    {u : ZMod (2 * m - 1)} (hu : ¬IsUnit u) : ¬Ham (capMatching m hm) (factor m u) := by
+  have hgn : Nat.gcd u.val (2 * m - 1) ∣ 2 * m - 1 := Nat.gcd_dvd_right _ _
+  have hg1 : Nat.gcd u.val (2 * m - 1) ≠ 1 := fun h ↦ hu (by
+    rw [← ZMod.natCast_zmod_val u, ZMod.isUnit_iff_coprime]
+    exact h)
+  set g := Nat.gcd u.val (2 * m - 1) with hg
+  set π := ZMod.castHom hgn (ZMod g) with hπ
+  have hπu : π u = 0 := by
+    rw [← ZMod.natCast_zmod_val u, map_natCast, CharP.cast_eq_zero_iff (ZMod g) g]
+    exact Nat.gcd_dvd_left _ _
+  set B : Set (Vertex m) := {v | ∀ x, v = some x → π x = 0} with hB_def
+  have hB : ∀ x, some x ∈ B ↔ π x = 0 := fun x ↦
+    ⟨fun h ↦ h x rfl, fun h y hy ↦ Option.some_inj.1 hy ▸ h⟩
+  have hB0 : none ∈ B := fun _ h ↦ (Option.some_ne_none _ h.symm).elim
+  refine not_ham_of_closed _ _ B ?_ ?_ (u := none) (w := some 1) hB0 ?_
+  · rintro (_ | x) hx
+    · rw [capMatching_mate]
+      exact (hB 0).2 (map_zero π)
+    have hx' := (hB x).1 hx
+    have hne : ∀ ε < 16, some x ≠ endVtx m ε := by
+      rintro ε hε h
+      rw [endVtx, Option.some_inj] at h
+      rw [h, map_intCast, CharP.intCast_eq_zero_iff (ZMod g) g] at hx'
+      exact not_dvd_endInt hcop hgn hg1 hε hx'
+    rw [capMatching_of_ne_endVtx hm hne, factor, factor_mate]
+    by_cases h0 : x = 0
+    · rw [h0, mateFn_self]
+      exact hB0
+    · rw [mateFn_of_ne _ _ h0]
+      exact (hB _).2 (by simp [hx'])
+  · rintro (_ | x) hx
+    · rw [factor, factor_mate, mateFn_none]
+      exact (hB u).2 hπu
+    have hx' := (hB x).1 hx
+    rw [factor, factor_mate]
+    by_cases hxu : x = u
+    · rw [hxu, mateFn_self]
+      exact hB0
+    · rw [mateFn_of_ne _ _ hxu]
+      exact (hB _).2 (by simp [hx', hπu])
+  · intro h
+    have h1 : ((1 : ℕ) : ZMod g) = 0 := by
+      rw [Nat.cast_one, ← map_one π]
+      exact (hB 1).1 h
+    exact hg1 (Nat.dvd_one.1 ((CharP.cast_eq_zero_iff (ZMod g) g 1).1 h1))
+
+/-- P9 in the coordinate `x = 2v - 7`. For `n = 2m - 1 ≥ 17` coprime to `105`, `P_q` is a zero
+state: no `P_q ∪ F_u` is one cycle. Units `u` are handled by the 80 cells
+(`not_ham_capMatching`) and the other `u` by the gcd argument
+(`not_ham_capMatching_of_not_isUnit`). This is the zero-state half of claim C1 of
+`cod-186-archive-cap-check.md` beyond prime `n`. -/
+theorem isZeroState_capMatching_of_coprime (hcop : Nat.Coprime (2 * m - 1) 105) (hm : 9 ≤ m) :
+    IsZeroState (factor m) (capMatching m hm) := fun u ↦
+  if hu : IsUnit u then not_ham_capMatching hm hu
+  else not_ham_capMatching_of_not_isUnit hcop hm hu
+
+/-- A prime `n ≥ 17` is coprime to `105 = 3 · 5 · 7`. -/
+theorem coprime_105_of_prime {n : ℕ} (hp : n.Prime) (hn : 17 ≤ n) : Nat.Coprime n 105 := by
+  refine (Nat.Prime.coprime_iff_not_dvd hp).2 fun h ↦ ?_
+  rw [show 105 = 3 * 5 * 7 by norm_num] at h
+  rcases hp.dvd_mul.1 h with h | h
+  · rcases hp.dvd_mul.1 h with h | h
+    · exact absurd (Nat.le_of_dvd (by norm_num) h) (by omega)
+    · exact absurd (Nat.le_of_dvd (by norm_num) h) (by omega)
+  · exact absurd (Nat.le_of_dvd (by norm_num) h) (by omega)
+
 /-- P9 in the coordinate `x = 2v - 7`. For prime `n = 2m - 1 ≥ 17`, `P_q` is a zero state:
 no `P_q ∪ F_u` is one cycle. This is the zero-state half of claim C1 of
-`cod-186-archive-cap-check.md`. -/
+`cod-186-archive-cap-check.md`. It is `isZeroState_capMatching_of_coprime` at a prime. -/
 theorem isZeroState_capMatching (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) :
-    IsZeroState (factor m) (capMatching m hm) := by
-  intro u
-  rcases eq_or_ne u 0 with rfl | hu
-  · exact not_ham_capMatching_zero hm
-  · exact not_ham_capMatching hp hm hu
+    IsZeroState (factor m) (capMatching m hm) :=
+  isZeroState_capMatching_of_coprime (coprime_105_of_prime hp (by omega)) hm
 
 end FactorCap
 

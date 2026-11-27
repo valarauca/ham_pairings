@@ -229,14 +229,17 @@ theorem exists_contains {μ n : ℤ} (hμn : μ < n) :
         exact ⟨e, List.mem_cons_of_mem _ he, hc⟩
 
 /-- Covering. For a chain of cells from `0/1` to `1/1` with left denominators in `[1, 16]`,
-every `μ/n` with `n > 16` prime and `0 < μ < n` lies strictly inside one of the cells. -/
-theorem exists_contains_of_prime {c : Cell} {cs : List Cell} (hw : walkOK (c :: cs) = true)
-    (hp : c.p = 0) (hq : c.q = 1) (hd : denomOK (c :: cs) = true) {n μ : ℕ} (hn : n.Prime)
-    (h16 : 16 < n) (hμ0 : 0 < μ) (hμn : μ < n) : ∃ d ∈ c :: cs, d.Contains μ n := by
+every `μ/n` with `n > 16` coprime to `μ` and `μ < n` lies strictly inside one of the cells. -/
+theorem exists_contains_of_coprime {c : Cell} {cs : List Cell} (hw : walkOK (c :: cs) = true)
+    (hp : c.p = 0) (hq : c.q = 1) (hd : denomOK (c :: cs) = true) {n μ : ℕ}
+    (hcop : Nat.Coprime n μ) (h16 : 16 < n) (hμn : μ < n) : ∃ d ∈ c :: cs, d.Contains μ n := by
+  have hμ0 : 0 < μ := Nat.pos_of_ne_zero fun h ↦ by
+    rw [h, Nat.coprime_zero_right] at hcop
+    omega
   simp only [denomOK, List.all_eq_true, Bool.and_eq_true, decide_eq_true_eq] at hd
   refine exists_contains (by exact_mod_cast hμn) c cs hw (by rw [hp, hq]; push_cast; omega) ?_
   intro d hdm
-  have h := not_farey_hit (p := d.p) hn h16 hμ0 hμn (hd d (List.mem_cons_of_mem _ hdm)).1
+  have h := not_farey_hit_of_coprime (p := d.p) hcop h16 (hd d (List.mem_cons_of_mem _ hdm)).1
     (hd d (List.mem_cons_of_mem _ hdm)).2
   exact_mod_cast h
 

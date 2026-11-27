@@ -11,14 +11,15 @@ Put `n = 2m - 1`. The default gadget is `G0 = {1, …, 6}`, and its three edges 
 The coordinate `x = 2v - 7` (`capAffine`) sends `F_{s0}` to `F_0` and `G0` to the ends
 `±1, ±3, ±5`. `capState` is `P_q` pulled back to the original labels.
 
-* `isZeroState_capState` : `P_q` is a zero state at every prime `n ≥ 17`, by
-  `isZeroState_capMatching` and `isZeroState_affine_smul_iff`.
+* `isZeroState_capState_of_coprime` : `P_q` is a zero state at every `n ≥ 17` coprime to `105`,
+  by `isZeroState_capMatching_of_coprime` and `isZeroState_affine_smul_iff`.
+  `isZeroState_capState` is the case of prime `n`.
 * `tailDist_capState_le` : `|T(n) ∖ P_q| ≤ 5`. By `two_mul_tailDist` this is the count of tail
   vertices that `T(n)` and `P_q` pair differently. Such a vertex is an end of `D` outside the
   gadget, and there are `16 - 6 = 10` of them. `tailDist_capState` : all ten differ, so
   `|T(n) ∖ P_q| = 5` exactly.
-* `factorTail_cap` : P9. For prime `n = 2m - 1 ≥ 17` some zero state is within 5 edges of
-  `T(n)`, so `ρ(T(n)) ≤ 5`.
+* `factorTail_cap_of_coprime` : P9. For `n = 2m - 1 ≥ 17` coprime to `105` some zero state is
+  within 5 edges of `T(n)`, so `ρ(T(n)) ≤ 5`. `factorTail_cap` is the case of prime `n`.
 
 Source: `results/cod-186-archive-cap-check.md` (claim C1 and the construction of `P_q`),
 `results/cod-186-direct-construction-spike.md` (Lemma 4 and the factor tail `T(n)`), and
@@ -110,14 +111,20 @@ theorem capAffine_capState_mate (hm : 9 ≤ m) (v : Vertex m) :
   rw [capState, smul_mate, inv_inv]
   simp
 
-/-- `P_q` is a zero state for prime `n = 2m - 1 ≥ 17`. -/
-theorem isZeroState_capState (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) :
+/-- `P_q` is a zero state for `n = 2m - 1 ≥ 17` coprime to `105`. -/
+theorem isZeroState_capState_of_coprime (hcop : Nat.Coprime (2 * m - 1) 105) (hm : 9 ≤ m) :
     IsZeroState (factor m) (capState m hm) := by
   refine (isZeroState_affine_smul_iff m (isUnit_two (modulus_odd m)).unit (-7) _).1 ?_
   have h : capAffine m • capState m hm = capMatching m hm := smul_inv_smul _ _
   rw [capAffine] at h
   rw [h]
-  exact isZeroState_capMatching hp hm
+  exact isZeroState_capMatching_of_coprime hcop hm
+
+/-- `P_q` is a zero state for prime `n = 2m - 1 ≥ 17`. It is `isZeroState_capState_of_coprime`
+at a prime. -/
+theorem isZeroState_capState (hp : (2 * m - 1).Prime) (hm : 9 ≤ m) :
+    IsZeroState (factor m) (capState m hm) :=
+  isZeroState_capState_of_coprime (coprime_105_of_prime hp (by omega)) hm
 
 /-- The six gadget ends `±1, ±3, ±5` are the images of `1, …, 6` under `x = 2v - 7`. -/
 theorem exists_capAffine_eq_endVtx {ε : ℕ} (hε : ε < 6) :
@@ -166,12 +173,20 @@ theorem tailDist_capState_le (hm : 9 ≤ m) :
   rw [← hεu]
   simp
 
+/-- P9, the factor-tail cap. For every `n = 2m - 1 ≥ 17` coprime to `105` the zero state `P_q` is
+within 5 edges of the factor tail `T(n)` of the default gadget, so `ρ(T(n)) ≤ 5`. This is claim
+C1 of `cod-186-archive-cap-check.md` for every such `n`, prime or composite. -/
+theorem factorTail_cap_of_coprime (hcop : Nat.Coprime (2 * m - 1) 105) (hn : 17 ≤ 2 * m - 1) :
+    ∃ P : ZeroState m, tailDist P.1 (factorTail m (by omega)) ≤ 5 :=
+  ⟨⟨capState m (by omega), isZeroState_capState_of_coprime hcop (by omega)⟩,
+    tailDist_capState_le (by omega)⟩
+
 /-- P9, the factor-tail cap. For every prime `n = 2m - 1 ≥ 17` the zero state `P_q` is within 5
 edges of the factor tail `T(n)` of the default gadget, so `ρ(T(n)) ≤ 5`. This is claim C1 of
-`cod-186-archive-cap-check.md` at prime `n`. -/
+`cod-186-archive-cap-check.md` at prime `n`, and `factorTail_cap_of_coprime` at a prime. -/
 theorem factorTail_cap (hp : (2 * m - 1).Prime) (hn : 17 ≤ 2 * m - 1) :
     ∃ P : ZeroState m, tailDist P.1 (factorTail m (by omega)) ≤ 5 :=
-  ⟨⟨capState m (by omega), isZeroState_capState hp (by omega)⟩, tailDist_capState_le (by omega)⟩
+  factorTail_cap_of_coprime (coprime_105_of_prime hp hn) hn
 
 /-- Integers in `[-8, 8]` are determined by their residues mod `2m - 1` for `m ≥ 9`. -/
 theorem intCast_inj_of_small (hm : 9 ≤ m) {a b : ℤ} (ha : -8 ≤ a ∧ a ≤ 8) (hb : -8 ≤ b ∧ b ≤ 8)

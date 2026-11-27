@@ -21,6 +21,11 @@ example : True := by
   have := FactorCap.factorTail_cap (m := 9) (by decide) (by norm_num)
   trivial
 
+-- X1b P9 cap at the composite n = 121 = 11²
+example : True := by
+  have := FactorCap.factorTail_cap_of_coprime (m := 61) (by decide) (by norm_num)
+  trivial
+
 -- X2 FamilyRepairBound of the true family is RepairBound
 example (m : ℕ) [NeZero m] (G : Finset (Vertex m)) (K : ℕ) :
     FamilyRepairBound (hamEvent m) G K ↔ RepairBound m G K :=
