@@ -296,3 +296,34 @@ example : Module.finrank F₂ (fpSpan fun t : Fin 15 ↦ factor 8 ((t : ℕ) : Z
 example : hamCount 5 (oneQ 5 le_rfl) = 1 := hamCount_oneQ le_rfl
 
 end VacuityCheck.Ladder
+
+namespace VacuityCheck.LowerBound
+
+open Pairing PerfectMatching RoundRobin.Canonical
+
+-- B1 sameCycle_of_arcs for the translation `y ↦ y + 1` of ℤ/5 with one jump point
+example : (Equiv.addRight (1 : ZMod 5)).SameCycle 0 3 :=
+  LowerBound.sameCycle_of_arcs (n := 5) (r := 0) _ (fun v ↦ (v : ZMod 5))
+    (fun v k ↦ by simp [show (5 : ZMod 5) = 0 from rfl]) (fun y ↦ ⟨y.val, by simp⟩)
+    (fun v w h ↦ (ZMod.intCast_eq_intCast_iff_dvd_sub w v 5).mp h.symm) ![0]
+    (fun a b h ↦ absurd h (by rw [Fin.lt_def]; omega)) (by simp) id (fun v _ ↦ by simp)
+    (fun i ↦ by simp) (fun j ↦ ⟨0, Fin.ext (by omega)⟩) 0 3
+
+-- B2 coverGoal_of_involution for the gadget matching {1, 2}, {3, 4}, {5, 6}
+example : LowerBound.CoverGoal 0 ![1, 0, 3, 2, 5, 4] :=
+  LowerBound.coverGoal_of_involution 0 (by decide) (by decide)
+
+-- B3 exists_ham_of_agree at n = 11 with P = F_{s0}, s0 = 9
+example : ∃ t, Ham (RoundRobin.factor (n := 11) ⟨5, rfl⟩ 9) (RoundRobin.factor ⟨5, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree ⟨5, rfl⟩ le_rfl (by decide) fun _ _ ↦ rfl
+
+-- B4 one_le_tailDist_factorTail at m = 6, where a zero state exists
+example : ∃ P : ZeroState 6, 1 ≤ tailDist P.1 (FactorCap.factorTail 6 (by norm_num)) :=
+  let ⟨P⟩ := nonempty_zeroState (m := 6) le_rfl
+  ⟨P, one_le_tailDist_factorTail le_rfl P⟩
+
+-- B5 not_repairBound_zero at m = 6 and at the composite n = 15
+example : ¬RepairBound 6 (FactorCap.gadget 6) 0 := not_repairBound_zero le_rfl
+example : ¬RepairBound 8 (FactorCap.gadget 8) 0 := not_repairBound_zero (by norm_num)
+
+end VacuityCheck.LowerBound
