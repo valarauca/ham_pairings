@@ -61,6 +61,9 @@ import Repair.RandomFamily.RepairBound
 import Repair.RandomFamily.FirstMoment
 import Repair.RandomFamily.TheoremA
 import Repair.RandomFamily.TheoremAPrime
+import Repair.RandomFamily.PairRatio
+import Repair.RandomFamily.SecondMoment
+import Repair.RandomFamily.Nonvacuity
 import Repair.LowerBound.Arc
 import Repair.LowerBound.ZeroCore
 import Repair.LowerBound.Lattice
