@@ -252,3 +252,47 @@ example : Module.finrank (ZMod 2) (W (Fin (2 * 3))) = 4 :=
   (finrank_W_eq 3 (by norm_num)).trans (by norm_num)
 
 end VacuityCheck.Spin
+
+namespace VacuityCheck.Ladder
+
+open Pairing PerfectMatching RoundRobin.Canonical
+
+-- L1 finrank_rrSpan_of_five_le at the composite n = 15
+example : Module.finrank F₂ (rrSpan 8) = 15 :=
+  finrank_rrSpan_of_five_le (m := 8) (by norm_num)
+
+-- L2 the ladder hypotheses of ker_fpCoeff_le_of_ladder hold for the P* translates at n = 15
+example : 14 ≤ Module.finrank F₂ (rrSpan 8) :=
+  card_sub_one_le_finrank_fpSpan_of_ladder (n := 15) (by norm_num) _
+    (ham_shift_pStar_ladder (m := 8) (by norm_num))
+
+-- L3 rank_pairingMatrix_of_ladder for the P* translates at n = 15
+example : (pairingMatrix (fun s : ZMod (2 * 8 - 1) ↦ shift 8 (s - ((8 : ℕ) - 1)) • pStar 8)
+    (factor 8)).rank = 14 :=
+  rank_pairingMatrix_of_ladder (n := 15) (by norm_num) _
+    (ham_shift_pStar_ladder (m := 8) (by norm_num))
+
+-- L4 the biorthogonal hypothesis holds for the Q translates at n = 15
+example : Module.finrank F₂ (rrSpan 8) = 15 := by
+  have h := finrank_fpSpan_eq_card_of_biorthogonal (F := factor 8)
+    (fun s : ZMod (2 * 8 - 1) ↦ shift 8 (s - ((8 : ℕ) + 2)) • oneQ 8 (by norm_num)) (Equiv.refl _)
+    (ham_shift_oneQ_biorthogonal (m := 8) (by norm_num))
+  rwa [ZMod.card] at h
+
+-- L5 the triangular hypotheses hold on Fin 15 for the Q translates
+example : Module.finrank F₂ (fpSpan fun t : Fin 15 ↦ factor 8 ((t : ℕ) : ZMod (2 * 8 - 1))) =
+    15 := by
+  have hQ := ham_shift_oneQ_biorthogonal (m := 8) (by norm_num)
+  have hinj : ∀ s t : Fin 15,
+      ((t : ℕ) : ZMod (2 * 8 - 1)) = ((s : ℕ) : ZMod (2 * 8 - 1)) → t = s := fun s t h ↦
+    Fin.ext (natCast_injOn (m := 8) (by have := t.isLt; omega) (by have := s.isLt; omega) h)
+  have h := finrank_fpSpan_eq_card_of_triangular
+    (F := fun t : Fin 15 ↦ factor 8 ((t : ℕ) : ZMod (2 * 8 - 1)))
+    (fun s ↦ shift 8 (((s : ℕ) : ZMod (2 * 8 - 1)) - ((8 : ℕ) + 2)) • oneQ 8 (by norm_num))
+    (fun s ↦ (hQ _ _).mpr rfl) (fun s t hts h' ↦ hts.ne (hinj s t ((hQ _ _).mp h')))
+  rwa [Fintype.card_fin] at h
+
+-- L6 the P* and Q Hamiltonian sets at m = 5, the smallest m covered by Proposition Q
+example : hamCount 5 (oneQ 5 le_rfl) = 1 := hamCount_oneQ le_rfl
+
+end VacuityCheck.Ladder

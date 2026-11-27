@@ -55,3 +55,4 @@ import Repair.Cover.HybridLaw
 import Repair.Reflection
 import Repair.Translation
 import Repair.RoundRobinSpan
+import Repair.DualOrbit
