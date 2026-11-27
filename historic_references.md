@@ -16,6 +16,9 @@ All names are in namespace `Pairing`. `PM` abbreviates `PerfectMatching` and `RR
 `RoundRobin.Canonical`. Paths under `core/` and `clifford/` are in ham-spin, all others in
 ham_pairings.
 
+The last section, "Risky items", records the second pass on branch `review-risky`. It keeps a
+`@[deprecated]` alias only where a results file or the frontier cites the old name.
+
 ## Renamed (deprecated alias kept)
 
 | old name | new name | new location | last old form |
@@ -73,3 +76,87 @@ ham_pairings.
 | name | location | last old form |
 |---|---|---|
 | `unit5`, `unit7` (private, unused) | `repair/Repair/TripleUnion.lean` | `81fccb6:repair/Repair/TripleUnion.lean:368`, `:373` |
+
+## Risky items (COD-245, branch `review-risky`)
+
+The items of `REVIEW.md` that were left for the user, done on ham_pairings only, from main
+`7168bcb`. Every "last old form" is at main `7168bcb`. The changes are in `8ba5211` (duplicate
+endpoints, D5 to D7), `70612aa` (dead lemmas, U6) and `a84cdde` (P9 for `n` coprime to `105`, O7
+and O8). The names below were checked against ham_pairings, ham-spin (`a2e8996`) and
+`organize-archive/results/` before removal. A removed name without an alias is cited by none of
+them.
+
+### Removed duplicates
+
+| old name | use instead | last old form |
+|---|---|---|
+| `ChainRule.div_le_neg_log_prob_avoid_of_reweight` | `ChainRule.div_le_neg_log_prob_avoid` (same statement) | `7168bcb:suppression/Suppression/Reweighted.lean:1313` |
+| `ChainRule.neg_log_prob_avoid_le_div_of_reweight` | `ChainRule.neg_log_prob_avoid_le_div` (same statement) | `7168bcb:suppression/Suppression/Reweighted.lean:1358` |
+| `ChainRule.div_le_neg_log_prob_avoid_of_pairInfo_of_reweight` | `ChainRule.div_le_neg_log_prob_avoid_of_pairInfo` (same statement) | `7168bcb:suppression/Suppression/Reweighted.lean:1415` |
+| `ChainRule.neg_log_prob_avoid_le_div_of_pairInfo_of_reweight` | `ChainRule.neg_log_prob_avoid_le_div_of_pairInfo` (same statement) | `7168bcb:suppression/Suppression/Reweighted.lean:1424` |
+| `ChainRule.div_le_neg_log_prob_avoid_of_reweight'` | `ChainRule.div_le_neg_log_prob_avoid` (same statement) | `7168bcb:suppression/Suppression/VMinus.lean:636` |
+| `ChainRule.neg_log_prob_avoid_le_div_of_reweight'` | `ChainRule.neg_log_prob_avoid_le_div` (same statement) | `7168bcb:suppression/Suppression/VMinus.lean:654` |
+| `Tilt.sbRatio_le` | `Tilt.sbRatio_le_of_pairDeficit_le` (without `p 0 > 0`, `p k > 0`) | `7168bcb:suppression/Suppression/Tilt.lean:629` |
+| `Tilt.pair_criterion_weak` | `Tilt.exp_neg_div_le_of_pairDeficit_le` (without `p 0 > 0`, `p k > 0`) | `7168bcb:suppression/Suppression/Tilt.lean:701` |
+| `RRC.fano_hamLaw'` | `RRC.fano_hamLaw` (same type now) | `7168bcb:suppression/Suppression/Tilt.lean:777` |
+
+"Same statement" means the same hypotheses and conclusion with the implicit and instance binders
+in another order. The `_of_reweight` forms proved Theorem 7 of COD-196 through Theorem 3 of
+COD-198. That route stays in the `_harmonic` forms of `suppression/Suppression/VMinus.lean`.
+
+### Deprecated aliases
+
+Each alias has the type of its target, so its statement is the old one with weaker hypotheses.
+
+| old name | alias of | hypotheses dropped | last old form |
+|---|---|---|---|
+| `Tilt.fano_criterion` | `Tilt.exp_neg_div_le_of_fano_le` | `p 0 > 0`, `p k > 0` | `7168bcb:suppression/Suppression/Tilt.lean:470` |
+| `Tilt.pair_criterion` | `Tilt.exp_neg_mul_log_le_of_pairDeficit_le` | `p 0 > 0`, `p k > 0` | `7168bcb:suppression/Suppression/Tilt.lean:678` |
+| `SizeBias.upper_reduction` | `SizeBias.upper_reduction_of_le_add_two` | `(1 + ε) μ ≤ J` becomes `≤ J + 2` | `7168bcb:suppression/Suppression/SizeBias.lean:292` |
+| `SizeBias.upper_reduction_sqrt` | `SizeBias.upper_reduction_sqrt_of_le_add_two` | `(1 + ε) μ ≤ J` becomes `≤ J + 2` | `7168bcb:suppression/Suppression/SizeBias.lean:321` |
+
+### Same name, weaker hypotheses
+
+| name | change | location | last old form |
+|---|---|---|---|
+| `Tilt.le_exp_neg_of_fano_nonneg` | drops `p 0 > 0`, `p k > 0` | `suppression/Suppression/Tilt.lean` | `7168bcb:suppression/Suppression/Tilt.lean:505` |
+| `RRC.fano_hamLaw` | drops `∃ P, Ham P (factor m 0)`, now the proof of `fano_hamLaw'` | `suppression/Suppression/Tilt.lean` | `7168bcb:suppression/Suppression/Tilt.lean:819` |
+| `FactorCap.exists_checked_cell`, `FactorCap.cell_facts` | `n.Prime` and `0 < μ` become `Nat.Coprime n μ` | `repair/Repair/FactorCap/Cover.lean` | `7168bcb:repair/Repair/FactorCap/Cover.lean:24`, `:32` |
+| `FactorCap.not_ham_capMatching` | `(2m - 1).Prime` and `u ≠ 0` become `IsUnit u` | `repair/Repair/FactorCap/Construction.lean` | `7168bcb:repair/Repair/FactorCap/Construction.lean:194` |
+
+### Renamed
+
+| old name | new name | location | last old form |
+|---|---|---|---|
+| `FactorCap.exists_contains_of_prime` | `FactorCap.exists_contains_of_coprime` (`n.Prime` and `0 < μ` become `Nat.Coprime n μ`, no alias) | `repair/Repair/FactorCap/Checker.lean` | `7168bcb:repair/Repair/FactorCap/Checker.lean:233` |
+
+### Same statement, new proof
+
+| name | now proved from | location | last old proof |
+|---|---|---|---|
+| `FactorCap.isZeroState_capMatching` | `FactorCap.isZeroState_capMatching_of_coprime` | `repair/Repair/FactorCap/Construction.lean` | `7168bcb:repair/Repair/FactorCap/Construction.lean:280` |
+| `FactorCap.isZeroState_capState` | `FactorCap.isZeroState_capState_of_coprime` | `repair/Repair/FactorCap/Tail.lean` | `7168bcb:repair/Repair/FactorCap/Tail.lean:114` |
+| `FactorCap.factorTail_cap` | `FactorCap.factorTail_cap_of_coprime` | `repair/Repair/FactorCap/Tail.lean` | `7168bcb:repair/Repair/FactorCap/Tail.lean:172` |
+
+### New generalized forms
+
+| name | generalizes | location |
+|---|---|---|
+| `FactorCap.factorTail_cap_of_coprime` | `factorTail_cap` (prime `n` becomes `Nat.Coprime n 105`) | `repair/Repair/FactorCap/Tail.lean` |
+| `FactorCap.isZeroState_capState_of_coprime` | `isZeroState_capState` (the same) | `repair/Repair/FactorCap/Tail.lean` |
+| `FactorCap.isZeroState_capMatching_of_coprime` | `isZeroState_capMatching` (the same) | `repair/Repair/FactorCap/Construction.lean` |
+| `FactorCap.not_ham_capMatching_of_not_isUnit` | the non-unit factors, including `u = 0` | `repair/Repair/FactorCap/Construction.lean` |
+| `FactorCap.not_dvd_endInt`, `FactorCap.coprime_105_of_prime` | helpers of the above | `repair/Repair/FactorCap/Construction.lean` |
+
+### Removed dead lemmas
+
+Item U6 of `REVIEW.md`, used nowhere and cited nowhere.
+
+| name | location | last old form |
+|---|---|---|
+| `RRC.coe_autEquiv`, `RRC.coe_autGroupMulEquiv` | `repair/Repair/Automorphism.lean` | `7168bcb:repair/Repair/Automorphism.lean:325`, `:405` |
+| `RRC.PSL211.mem_symZero` | `repair/Repair/ExceptionalSix.lean` | `7168bcb:repair/Repair/ExceptionalSix.lean:323` |
+| `PM.coe_liftEquiv` | `repair/Repair/FreeDefects.lean` | `7168bcb:repair/Repair/FreeDefects.lean:670` |
+| `PM.cycleOf_eq_iff_mem` | `repair/Repair/PairRecursion.lean` | `7168bcb:repair/Repair/PairRecursion.lean:648` |
+| `IsFourCycle.reverse` | `repair/Repair/TripleUnion.lean` | `7168bcb:repair/Repair/TripleUnion.lean:120` |
+| `PM.cycleCount_comm` | `repair/Repair/CycleCount.lean` | `7168bcb:repair/Repair/CycleCount.lean:61` |
