@@ -1,3 +1,4 @@
+import Pairing.Affine
 import Repair.Forcing
 
 /-!
@@ -89,21 +90,6 @@ theorem forall_exists_four {a b c d r n s : ℕ} (had : a + d = s) (hbc : b + c 
   · exact ⟨a, by simp, by omega, by omega⟩
 
 variable {m : ℕ} [NeZero m]
-
-/-- `2m ≡ 1` in `ℤ/(2m-1)`, so `m` inverts `2`. -/
-theorem two_mul_natCast_self : (2 : ZMod (2 * m - 1)) * m = 1 := by
-  have hm := NeZero.pos m
-  have h : ((2 * m - 1 + 1 : ℕ) : ZMod (2 * m - 1)) = 1 := by
-    rw [Nat.cast_add, ZMod.natCast_self, zero_add, Nat.cast_one]
-  rw [show 2 * m - 1 + 1 = 2 * m by omega] at h
-  exact_mod_cast h
-
-omit [NeZero m] in
-/-- Labels below `2m - 1` are distinct in `ℤ/(2m-1)`. -/
-theorem natCast_injOn {x y : ℕ} (hx : x < 2 * m - 1) (hy : y < 2 * m - 1)
-    (h : (x : ZMod (2 * m - 1)) = y) : x = y := by
-  have h' := congrArg ZMod.val h
-  rwa [ZMod.val_natCast_of_lt hx, ZMod.val_natCast_of_lt hy] at h'
 
 /-- A set `C` of finite vertices that is a union of edges of `A`, and that `x ↦ 2t - x` maps
 into itself without fixed points, blocks `F_t`. -/

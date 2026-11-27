@@ -1,4 +1,5 @@
 import Mathlib.Algebra.BigOperators.Field
+import Pairing.Affine
 import Pairing.RoundRobin
 import Suppression.SizeBias
 import Suppression.Prob
@@ -9,8 +10,9 @@ import Suppression.Prob
 For a perfect matching `P` of `V_m`, `hamCount m P = X(P)` is the number of canonical factors
 `F_t` for which `P ∪ F_t` is one cycle, and `A_t` is the event `Ham P F_t`. Put `n = 2m - 1`.
 
-* `shift m b` : the translation `v ↦ v + b` of `V_m`, fixing `∞`. `shift_smul_factor` : it maps
-  `F_t` to `F_{t + b}`, and `hamCount_shift_smul` : it preserves `X`.
+* `shift m b` : the translation `v ↦ v + b` of `V_m`, fixing `∞`, and `shift_smul_factor` : it
+  maps `F_t` to `F_{t + b}`. Both are in ham-spin `core/Pairing/Affine.lean` (ham-spin c1941cf).
+  `hamCount_shift_smul` : the translation preserves `X`.
 * `card_ham_and_eq` : `#{P | A_t ∧ q (X P)}` does not depend on `t`, for any predicate `q`.
 * `card_ham_and` : `n · #{P | A_0 ∧ q (X P)} = ∑_{P | q (X P)} X P`, by double counting the
   pairs `(P, t)` with `A_t`.
@@ -35,45 +37,6 @@ namespace Pairing
 namespace RoundRobin.Canonical
 
 open PerfectMatching
-
-/-- The translation `v ↦ v + b` of `V_m`, fixing `∞`. -/
-def shift (m : ℕ) (b : ZMod (2 * m - 1)) : Equiv.Perm (Vertex m) :=
-  Equiv.optionCongr (Equiv.addRight b)
-
-/-- The translation fixes `∞`. -/
-@[simp]
-theorem shift_none (m : ℕ) (b : ZMod (2 * m - 1)) : shift m b none = none :=
-  rfl
-
-/-- The translation sends `x` to `x + b`. -/
-@[simp]
-theorem shift_some (m : ℕ) (b x : ZMod (2 * m - 1)) :
-    shift m b (some x) = some (x + b) :=
-  rfl
-
-/-- The inverse translation fixes `∞`. -/
-@[simp]
-theorem shift_inv_none (m : ℕ) (b : ZMod (2 * m - 1)) : (shift m b)⁻¹ none = none := by
-  rw [Equiv.Perm.inv_eq_iff_eq, shift_none]
-
-/-- The inverse translation sends `x` to `x - b`. -/
-@[simp]
-theorem shift_inv_some (m : ℕ) (b x : ZMod (2 * m - 1)) :
-    (shift m b)⁻¹ (some x) = some (x - b) := by
-  rw [Equiv.Perm.inv_eq_iff_eq, shift_some, sub_add_cancel]
-
-/-- The translation by `b` maps `F_t` to `F_{t + b}`. -/
-theorem shift_smul_factor (m : ℕ) [NeZero m] (b t : ZMod (2 * m - 1)) :
-    shift m b • factor m t = factor m (t + b) := by
-  refine PerfectMatching.ext (Equiv.ext fun v ↦ ?_)
-  rcases v with _ | y
-  · simp [factor]
-  rcases eq_or_ne y (t + b) with rfl | hy
-  · simp [factor]
-  have h : y - b ≠ t := fun h ↦ hy (by rw [← h, sub_add_cancel])
-  simp only [smul_mate, shift_inv_some, factor, factor_mate, mateFn_of_ne _ _ h,
-    mateFn_of_ne _ _ hy, shift_some, Option.some_inj]
-  ring
 
 /-- `X(P) = #{t | Ham P F_t}`, the number of canonical factors that close one cycle with `P`. -/
 def hamCount (m : ℕ) [NeZero m] (P : PerfectMatching (Vertex m)) : ℕ :=
