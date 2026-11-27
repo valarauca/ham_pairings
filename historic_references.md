@@ -80,11 +80,11 @@ The last section, "Risky items", records the second pass on branch `review-risky
 ## Risky items (COD-245, branch `review-risky`)
 
 The items of `REVIEW.md` that were left for the user, done on ham_pairings only, from main
-`7168bcb`. Every "last old form" is at main `7168bcb`. The changes are in `8ba5211` (duplicate
-endpoints, D5 to D7), `70612aa` (dead lemmas, U6) and `a84cdde` (P9 for `n` coprime to `105`, O7
-and O8). The names below were checked against ham_pairings, ham-spin (`a2e8996`) and
-`organize-archive/results/` before removal. A removed name without an alias is cited by none of
-them.
+`7168bcb`. Every "last old form" is at main `7168bcb` unless stated. The changes are in `8ba5211`
+(duplicate endpoints, D5 to D7), `70612aa` (dead lemmas, U6), `a84cdde` (P9 for `n` coprime to
+`105`, O7 and O8) and `19ef46a` (the cycle count taken from ham-spin `fd082bf`). The names below
+were checked against ham_pairings, ham-spin (`a2e8996`) and `organize-archive/results/` before
+removal. A removed name without an alias is cited by none of them.
 
 ### Removed duplicates
 
@@ -159,4 +159,18 @@ Item U6 of `REVIEW.md`, used nowhere and cited nowhere.
 | `PM.coe_liftEquiv` | `repair/Repair/FreeDefects.lean` | `7168bcb:repair/Repair/FreeDefects.lean:670` |
 | `PM.cycleOf_eq_iff_mem` | `repair/Repair/PairRecursion.lean` | `7168bcb:repair/Repair/PairRecursion.lean:648` |
 | `IsFourCycle.reverse` | `repair/Repair/TripleUnion.lean` | `7168bcb:repair/Repair/TripleUnion.lean:120` |
-| `PM.cycleCount_comm` | `repair/Repair/CycleCount.lean` | `7168bcb:repair/Repair/CycleCount.lean:61` |
+| `PM.cycleCount_comm` | `repair/Repair/CycleCount.lean` (ham-spin `core/Pairing/Union.lean` at `fd082bf` still declares it) | `7168bcb:repair/Repair/CycleCount.lean:61` |
+
+### Module moved to ham-spin
+
+Done in `19ef46a`, which requires ham-spin at `fd082bf`. Every declaration name is unchanged, so
+there are no aliases. Its importers now import `Pairing.Union`.
+
+| old module | new module | last old form |
+|---|---|---|
+| `Repair.CycleCount` (`repair/Repair/CycleCount.lean`) | ham-spin `Pairing.Union` (`core/Pairing/Union.lean`, `fd082bf`) | `ea9376f:repair/Repair/CycleCount.lean`, and `7168bcb:repair/Repair/CycleCount.lean`, the version ham-spin copied |
+
+The ham-spin copy is the `7168bcb` file, so `PM.cycleCount_comm`, removed here in `70612aa`, is
+still declared there. The endpoints `PM.ham_iff_cycleCount_eq_one`, `PM.cycleCount_le_contractAt`,
+`PM.cycleCount_le_contractAt_add_one` and `PM.sum_pow_cycleCount_le` moved from this
+`AxiomCheck.lean` to the ham-spin `AxiomCheck.lean` (`fd082bf`).
