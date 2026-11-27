@@ -1,3 +1,4 @@
+import Pairing.InvolutionProduct
 import Repair.Automorphism
 import Repair.SqrtObstructions.Defect
 
@@ -406,49 +407,36 @@ theorem certLength_bound_edges (hp : (2 * m - 1).Prime) (P : PerfectMatching (Ve
 
 /-- For a zero state every cycle of `P ∪ F_t`, `t ≠ s`, meets the defect `X = defect F_s P`
 (`factor-tail-L-test.md`, proof of Theorem C′, by Theorem B(i) of
-`cod-149-core-sharpening.md`). So a cycle with `r` edges of `P` gives one through `X`. -/
+`cod-149-core-sharpening.md`). So a cycle with `r` edges of `P` gives one through `X`. The
+component of `y` is the closed set, and its vertices lie in the `σ_t`-cycle of `y` or of their
+`P`-partners (`reachable_iff_sameCycle`, ham-spin `core/Pairing/InvolutionProduct.lean`,
+fe1f6bf). -/
 theorem exists_defect_of_cycle (hp : (2 * m - 1).Prime) {P : PerfectMatching (Vertex m)}
     (hP : IsZeroState (factor m) P) {s t : ZMod (2 * m - 1)} (hts : t ≠ s) {y : Vertex m}
     {r : ℕ} (hcyc : (certPerm P t ^ r) y = y) :
     ∃ y' ∈ defect (factor m s) P, (certPerm P t ^ r) y' = y' := by
   set σ := certPerm P t with hσ
-  have hσapp : ∀ v, σ v = P.mate ((factor m t).mate v) := fun _ ↦ rfl
   have hfix : ∀ v, σ.SameCycle y v → (σ ^ r) v = v := by
     rintro v ⟨i, rfl⟩
     rw [← Equiv.Perm.mul_apply, ← zpow_natCast, ← zpow_add, add_comm (r : ℤ) i, zpow_add,
       Equiv.Perm.mul_apply, zpow_natCast, hcyc]
-  set B : Set (Vertex m) := {v | σ.SameCycle y v ∨ σ.SameCycle y ((factor m t).mate v)} with hB
+  set B : Set (Vertex m) := {v | (P.toGraph ⊔ (factor m t).toGraph).Reachable y v} with hB
   by_contra hno
   push Not at hno
   have hout : ∀ v ∈ B, v ∉ defect (factor m s) P := by
-    rintro v (hv | hv) hX
+    intro v hv hX
+    rcases (reachable_iff_sameCycle P (factor m t)).mp hv with hv | hv
     · exact hno v hX (hfix v hv)
-    · refine hno (P.mate v) (mate_mem_defect _ P hX) (hfix _ ?_)
-      have h : P.mate v = σ ((factor m t).mate v) := by rw [hσapp, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_apply_right]
-      exact hv
-  have hBt : ∀ v ∈ B, (factor m t).mate v ∈ B := by
-    rintro v (hv | hv)
-    · exact Or.inr (by rwa [mate_mate])
-    · exact Or.inl hv
-  have hBP : ∀ v ∈ B, P.mate v ∈ B := by
-    rintro v (hv | hv)
-    · refine Or.inr ?_
-      have h : (factor m t).mate (P.mate v) = σ.symm v := by
-        rw [Equiv.eq_symm_apply, hσapp, mate_mate, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_symm_apply_right]
-      exact hv
-    · refine Or.inl ?_
-      have h : P.mate v = σ ((factor m t).mate v) := by rw [hσapp, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_apply_right]
-      exact hv
+    · exact hno (P.mate v) (mate_mem_defect _ P hX) (hfix _ hv)
+  have hBt : ∀ v ∈ B, (factor m t).mate v ∈ B := fun v hv ↦ hv.trans (reachable_mate_right _ _ v)
+  have hBP : ∀ v ∈ B, P.mate v ∈ B := fun v hv ↦ hv.trans (reachable_mate_left _ _ v)
   have hBs : ∀ v ∈ B, (factor m s).mate v ∈ B := by
     intro v hv
     have h := hout v hv
     rw [mem_defect, not_not] at h
     rw [← h]
     exact hBP v hv
-  have hyB : y ∈ B := Or.inl (Equiv.Perm.SameCycle.refl σ y)
+  have hyB : y ∈ B := SimpleGraph.Reachable.refl y
   by_cases hall : ∀ w, w ∈ B
   · have hPs : P = factor m s := PerfectMatching.ext (Equiv.ext fun w ↦ by
       have h := hout w (hall w)

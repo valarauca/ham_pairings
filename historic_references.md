@@ -233,3 +233,4 @@ main `77d3de5`.
 | `RRC.exists_walkEnd_mem` | `RRC.exists_walkEnd_mem_of_agree` (the two proofs were the same walk) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:288` |
 | `PM.sameCycle_of_sameCycle_mate` | `PM.sameCycle_mate_right_iff` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:258` |
 | `PM.sameCycle_or_of_ham` | `PM.ham_iff_forall_sameCycle` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:269` |
+| `RRC.exists_defect_of_cycle` | `PM.reachable_iff_sameCycle` (the closed set is the component of `y`) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:396` |
