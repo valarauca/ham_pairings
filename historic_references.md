@@ -240,6 +240,8 @@ main `77d3de5`.
 | `PM.jointCount_of_card_eq_two` | `PM.ham_iff_partition` with `P P = 1` | `repair/Repair/PairRecursion.lean` | `77d3de5:repair/Repair/PairRecursion.lean:1477` |
 | `PM.two_mul_cycleCount_le` | `PM.two_mul_cycleCount` (`2 κ` parts of a partition of the vertex count) | `repair/Repair/FreeDefects.lean` | `77d3de5:repair/Repair/FreeDefects.lean:903` |
 | `RoundRobin.Covering.reachable_of_mem_altWalk` | `PM.reachable_mate_right`, `PM.reachable_mate_left` | `repair/Repair/Covering/Witness.lean` | `77d3de5:repair/Repair/Covering/Witness.lean:72` |
+| `RRC.ham_factor_factor_zero` | `RRC.ham_factor_of_isUnit_sub` (not the bridge, a duplicate) | `repair/Repair/HybridPair/MeanCount.lean` | `77d3de5:repair/Repair/HybridPair/MeanCount.lean:149` |
+| `RRC.ham_factor_two_zero` | `RRC.ham_factor_of_isUnit_sub` (not the bridge, a duplicate) | `repair/Repair/TripleUnionAP.lean` | `77d3de5:repair/Repair/TripleUnionAP.lean:342` |
 
 ### Deprecated aliases
 

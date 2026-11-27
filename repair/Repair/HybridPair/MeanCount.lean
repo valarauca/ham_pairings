@@ -145,11 +145,11 @@ theorem expect_hamCount_glue (P : PerfectMatching (Vertex m)) (A : Finset (Verte
 
 /-- `F_t ∪ F_0` is one cycle for every unit `t`: the scaling by `t` maps `F_1 ∪ F_0` onto it.
 This is the "if" half of the gcd law, used in `results/ulzd-longcycle-spike.md` ("at prime `n`
-every `t ≠ 0` is live for `F_0 ∖ E`, since `F_0 ∪ F_t` is one cycle"). -/
+every `t ≠ 0` is live for `F_0 ∖ E`, since `F_0 ∪ F_t` is one cycle"). It is the case `t = 0`
+of `ham_factor_of_isUnit_sub`. -/
 theorem ham_factor_factor_zero (u : (ZMod (2 * m - 1))ˣ) :
-    Ham (factor m u) (factor m 0) := by
-  have h := (ham_smul (scale m u) (factor m 1) (factor m 0)).mpr (ham_factor_one m)
-  rwa [scale_smul_factor, scale_smul_factor, mul_one, mul_zero] at h
+    Ham (factor m u) (factor m 0) :=
+  ham_factor_of_isUnit_sub m (by rw [sub_zero]; exact u.isUnit)
 
 open Classical in
 /-- At prime `n = 2m - 1`, the live set of a proper nonempty union `A` of `F_0`-edges is
