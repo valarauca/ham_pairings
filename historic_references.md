@@ -231,3 +231,5 @@ main `77d3de5`.
 |---|---|---|---|
 | `PM.exists_pow_eq_of_closed` | `PM.card_reachable_eq_two_mul` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:104` |
 | `RRC.exists_walkEnd_mem` | `RRC.exists_walkEnd_mem_of_agree` (the two proofs were the same walk) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:288` |
+| `PM.sameCycle_of_sameCycle_mate` | `PM.sameCycle_mate_right_iff` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:258` |
+| `PM.sameCycle_or_of_ham` | `PM.ham_iff_forall_sameCycle` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:269` |

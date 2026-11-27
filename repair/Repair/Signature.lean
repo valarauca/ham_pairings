@@ -254,42 +254,22 @@ theorem sameSig_of_manyCycles {M Q : PerfectMatching V} (h : ManyCycles M Q) (a 
     | exact hyz (key _ _ _ hy hz)
 
 /-- `Φ` reversed: if `Mv` and `Mv′` share a `Φ`-orbit, so do `v` and `v′`, since `M` conjugates
-`Φ = Q M` to `Φ⁻¹` (`sl5-contra.md` Remark O5). -/
+`Φ = Q M` to `Φ⁻¹` (`sl5-contra.md` Remark O5). This is `sameCycle_mate_right_iff` of the bridge,
+ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf). -/
 theorem sameCycle_of_sameCycle_mate (M Q : PerfectMatching V) {v v' : V}
     (h : (Q.mate * M.mate).SameCycle (M.mate v) (M.mate v')) :
-    (Q.mate * M.mate).SameCycle v v' := by
-  obtain ⟨z, hz⟩ := h
-  refine ⟨-z, ?_⟩
-  have h' := congrArg M.mate hz
-  rw [mate_zpow_apply Q M z, mate_mate, mate_mate] at h'
-  exact h'
+    (Q.mate * M.mate).SameCycle v v' :=
+  (sameCycle_mate_right_iff Q M).mp h
 
 /-- If `M ∪ Q` is one cycle, every vertex lies in the `Φ`-orbit of `a₀` or of `M a₀`'s partner
-side: `Φ` has the two orbits `O` and `M(O)` (`sl5-kill.md` §1, `Φ_σ` has `2c(σ)` orbits). -/
+side: `Φ` has the two orbits `O` and `M(O)` (`sl5-kill.md` §1, `Φ_σ` has `2c(σ)` orbits). This is
+`ham_iff_forall_sameCycle` of the bridge, ham-spin `core/Pairing/InvolutionProduct.lean`
+(fe1f6bf), with `Q u = Φ (M u)`. -/
 theorem sameCycle_or_of_ham {M Q : PerfectMatching V} (hH : Ham M Q) (a₀ u : V) :
     (Q.mate * M.mate).SameCycle a₀ u ∨ (Q.mate * M.mate).SameCycle a₀ (M.mate u) := by
-  set Φ := Q.mate * M.mate with hΦ
-  by_contra hno
-  push Not at hno
-  set B : Set V := {u | Φ.SameCycle a₀ u ∨ Φ.SameCycle a₀ (M.mate u)} with hB
-  have hMB : ∀ v ∈ B, M.mate v ∈ B := by
-    rintro v (hv | hv)
-    · exact Or.inr (by rwa [mate_mate])
-    · exact Or.inl hv
-  have hQB : ∀ v ∈ B, Q.mate v ∈ B := by
-    rintro v (hv | hv)
-    · refine Or.inr ?_
-      have hstep : ∀ x, Φ x = Q.mate (M.mate x) := fun _ ↦ rfl
-      have h : M.mate (Q.mate v) = Φ.symm v := by
-        rw [Equiv.eq_symm_apply, hstep, mate_mate, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_symm_apply_right]
-      exact hv
-    · refine Or.inl ?_
-      have h : Q.mate v = Φ (M.mate v) := by rw [hΦ, Equiv.Perm.mul_apply, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_apply_right]
-      exact hv
-  exact not_ham_of_closed M Q B hMB hQB (Or.inl (Equiv.Perm.SameCycle.refl Φ a₀))
-    (fun h ↦ (h.elim hno.1 hno.2)) hH
+  have h : Q.mate u = (Q.mate * M.mate) (M.mate u) := by rw [Equiv.Perm.mul_apply, mate_mate]
+  rw [← Equiv.Perm.sameCycle_apply_right (y := M.mate u), ← h]
+  exact ((ham_iff_forall_sameCycle Q M).mp ((ham_comm M Q).mp hH)).2 a₀ u
 
 open Classical in
 /-- The one-bit signature of `v` under `Q` with base point `a₀` (`sl5-kill.md` §1): whether `v`
