@@ -79,6 +79,10 @@ theorem shift_smul_factor (m : ℕ) [NeZero m] (b t : ZMod (2 * m - 1)) :
 def hamCount (m : ℕ) [NeZero m] (P : PerfectMatching (Vertex m)) : ℕ :=
   (Finset.univ.filter fun t ↦ Ham P (factor m t)).card
 
+/-- The round-robin event `A_t = {P | P ∪ F_t is one cycle}`, so `X(P) = #{t | P ∈ A_t}`. -/
+def hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) : Set (PerfectMatching (Vertex m)) :=
+  {P | Ham P (factor m t)}
+
 /-- `X(P) ≤ n`. -/
 theorem hamCount_le (m : ℕ) [NeZero m] (P : PerfectMatching (Vertex m)) :
     hamCount m P ≤ 2 * m - 1 :=

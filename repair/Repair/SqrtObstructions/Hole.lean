@@ -10,7 +10,7 @@ Theorem NG-A(b). Put `n = 2m - 1` and let `G = Aut(𝓕)` (`autGroup m`), which 
 
 An event family is `A : ℤ/n → Set PM(V_m)`. Its zero set is `Z(𝓐) = {P | ∀ t, P ∉ A_t}`. It lies
 in `𝔈_m` (`IsEquivFamily`) when `g • A_t = A_{g(t)}` for every `g ∈ G`, where `g • F_t = F_{g(t)}`.
-The true family is `A_t = {P | P ∪ F_t is one cycle}` (`hamFamily`), and its zero set is the set
+The true family is `A_t = {P | P ∪ F_t is one cycle}` (`hamEvent`), and its zero set is the set
 of zero states.
 
 Abstract part (namespace `Obstruction`).
@@ -109,14 +109,17 @@ open PerfectMatching Obstruction ChainRule
 
 variable {m : ℕ} [NeZero m]
 
-/-- The true event family `A_t = {P | P ∪ F_t is one cycle}` (`sqrt-m-obstructions.md` §0). -/
-def hamFamily (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) : Set (PerfectMatching (Vertex m)) :=
-  {P | Ham P (factor m t)}
+@[deprecated hamEvent (since := "2026-11-26")]
+alias hamFamily := hamEvent
 
-/-- The zero set of the true family is the set of zero states (`sqrt-m-obstructions.md` §0). -/
-theorem mem_zeroSet_hamFamily {P : PerfectMatching (Vertex m)} :
-    P ∈ zeroSet (hamFamily m) ↔ IsZeroState (factor m) P :=
+/-- The zero set of the true family `hamEvent` is the set of zero states
+(`sqrt-m-obstructions.md` §0). -/
+theorem mem_zeroSet_hamEvent {P : PerfectMatching (Vertex m)} :
+    P ∈ zeroSet (hamEvent m) ↔ IsZeroState (factor m) P :=
   Iff.rfl
+
+@[deprecated mem_zeroSet_hamEvent (since := "2026-11-26")]
+alias mem_zeroSet_hamFamily := mem_zeroSet_hamEvent
 
 /-- Membership in `𝔈_m` (`sqrt-m-obstructions.md` §0): `g • A_t = A_{g(t)}` for every
 `g ∈ Aut(𝓕)`, where `g • F_t = F_{g(t)}`. -/
@@ -124,10 +127,13 @@ def IsEquivFamily (A : ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))) : 
   ∀ g ∈ autGroup m, ∀ t s, g • factor m t = factor m s → ∀ P, g • P ∈ A s ↔ P ∈ A t
 
 /-- The true family lies in `𝔈_m` (`sqrt-m-obstructions.md` §0). -/
-theorem isEquivFamily_hamFamily : IsEquivFamily (hamFamily m) := by
+theorem isEquivFamily_hamEvent : IsEquivFamily (hamEvent m) := by
   intro g _ t s h P
-  simp only [hamFamily, Set.mem_ofPred_eq]
+  simp only [hamEvent, Set.mem_ofPred_eq]
   rw [← h, ham_smul]
+
+@[deprecated isEquivFamily_hamEvent (since := "2026-11-26")]
+alias isEquivFamily_hamFamily := isEquivFamily_hamEvent
 
 /-- The zero set of a family in `𝔈_m` is `Aut(𝓕)`-invariant (`sqrt-m-obstructions.md` §1.2). -/
 theorem IsEquivFamily.smul_mem_zeroSet_iff {A : ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))}
@@ -174,7 +180,7 @@ theorem smul_mem_ballOrbit_iff {G : Finset (Vertex m)}
 /-- The set `Rem = (Z ∖ 𝒵) ∩ ⋃_{g ∈ G} g • B_K(T0)` of NG-A(b) (`sqrt-m-obstructions.md` §1.2). -/
 def holeSet (𝒵 : Set (PerfectMatching (Vertex m))) {G : Finset (Vertex m)}
     (T0 : PerfectMatching (Gᶜ : Finset (Vertex m))) (K : ℕ) : Set (PerfectMatching (Vertex m)) :=
-  zeroSet (hamFamily m) ∩ 𝒵ᶜ ∩ ballOrbit T0 K
+  zeroSet (hamEvent m) ∩ 𝒵ᶜ ∩ ballOrbit T0 K
 
 /-- `Rem` is `Aut(𝓕)`-invariant when `𝒵` is (`sqrt-m-obstructions.md` §1.2, NG-A(b)). -/
 theorem smul_mem_holeSet_iff {𝒵 : Set (PerfectMatching (Vertex m))}
@@ -183,24 +189,24 @@ theorem smul_mem_holeSet_iff {𝒵 : Set (PerfectMatching (Vertex m))}
     (hg : g ∈ autGroup m) (P : PerfectMatching (Vertex m)) :
     g • P ∈ holeSet 𝒵 T0 K ↔ P ∈ holeSet 𝒵 T0 K := by
   simp only [holeSet, Set.mem_inter_iff, Set.mem_compl_iff,
-    isEquivFamily_hamFamily.smul_mem_zeroSet_iff hg, h𝒵G g hg, smul_mem_ballOrbit_iff T0 K hg]
+    isEquivFamily_hamEvent.smul_mem_zeroSet_iff hg, h𝒵G g hg, smul_mem_ballOrbit_iff T0 K hg]
 
 /-- **NG-A(b), the hole lemma** (`sqrt-m-obstructions.md` §1.2). Let `𝒵` be an
 `Aut(𝓕)`-invariant set of zero states and `T0` a tail with `ρ_𝒵(T0) > K`. Put
 `A′_t = A_t ∪ Rem` with `Rem = holeSet 𝒵 T0 K`. Then `𝓐′ ∈ 𝔈_m`, `Z(𝓐′) = Z ∖ Rem`,
 `𝒵 ⊆ Z(𝓐′)`, and every zero state of `𝓐′` is more than `K` edges from `T0`, so
 `N_m(𝓐′) ≥ ρ_{Z(𝓐′)}(T0) > K`. -/
-theorem hole {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamFamily m))
+theorem hole {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamEvent m))
     (h𝒵G : ∀ g ∈ autGroup m, ∀ P, g • P ∈ 𝒵 ↔ P ∈ 𝒵) {G : Finset (Vertex m)}
     {T0 : PerfectMatching (Gᶜ : Finset (Vertex m))} {K : ℕ}
     (hT0 : ∀ P ∈ 𝒵, K < tailDist P T0) :
-    IsEquivFamily (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)) ∧
-      zeroSet (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)) =
-        zeroSet (hamFamily m) \ holeSet 𝒵 T0 K ∧
-      𝒵 ⊆ zeroSet (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)) ∧
-      ∀ P ∈ zeroSet (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)), K < tailDist P T0 := by
-  have hZ := zeroSet_holeFamily (hamFamily m) (holeSet 𝒵 T0 K)
-  refine ⟨isEquivFamily_hamFamily.hole fun g hg P ↦ smul_mem_holeSet_iff h𝒵G T0 K hg P, hZ,
+    IsEquivFamily (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)) ∧
+      zeroSet (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)) =
+        zeroSet (hamEvent m) \ holeSet 𝒵 T0 K ∧
+      𝒵 ⊆ zeroSet (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)) ∧
+      ∀ P ∈ zeroSet (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)), K < tailDist P T0 := by
+  have hZ := zeroSet_holeFamily (hamEvent m) (holeSet 𝒵 T0 K)
+  refine ⟨isEquivFamily_hamEvent.hole fun g hg P ↦ smul_mem_holeSet_iff h𝒵G T0 K hg P, hZ,
     fun P hP ↦ ?_, fun P hP ↦ ?_⟩
   · rw [hZ]
     exact ⟨h𝒵 hP, fun h ↦ h.1.2 hP⟩
@@ -283,8 +289,8 @@ event `E` on profiles has `|U(Y′ ∈ E) - U(Y ∈ E)| ≤ δ_K`, with
 theorem abs_prob_profile_hole_le {G : Finset (Vertex m)} (hG : G.card = 6)
     (𝒵 : Set (PerfectMatching (Vertex m))) (T0 : PerfectMatching (Gᶜ : Finset (Vertex m)))
     (K : ℕ) (E : Set (ZMod (2 * m - 1) → Prop)) :
-    |prob (unifWeight m) {P | (fun t ↦ P ∈ holeFamily (hamFamily m) (holeSet 𝒵 T0 K) t) ∈ E} -
-        prob (unifWeight m) {P | (fun t ↦ P ∈ hamFamily m t) ∈ E}| ≤
+    |prob (unifWeight m) {P | (fun t ↦ P ∈ holeFamily (hamEvent m) (holeSet 𝒵 T0 K) t) ∈ E} -
+        prob (unifWeight m) {P | (fun t ↦ P ∈ hamEvent m t) ∈ E}| ≤
       (Nat.card (autGroup m) * ((K + 4) * (2 * m) ^ (K + 3)) : ℝ) /
         Nat.doubleFactorial (2 * m - 1) :=
   (abs_prob_profile_sub_le (isProb_unifWeight m) _ _ E).trans (prob_holeSet_le hG 𝒵 T0 K)
@@ -294,8 +300,8 @@ within `K` of the tail `T`, then `Z(𝓐′) ∩ B_K(T) = Z ∩ B_K(T)`. -/
 theorem coverage_eq_of_far {𝒵 : Set (PerfectMatching (Vertex m))} {G : Finset (Vertex m)}
     (T0 T : PerfectMatching (Gᶜ : Finset (Vertex m))) (K : ℕ)
     (hT : ∀ P ∈ holeSet 𝒵 T0 K, K < tailDist P T) :
-    {P | P ∈ zeroSet (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)) ∧ tailDist P T ≤ K} =
-      {P | P ∈ zeroSet (hamFamily m) ∧ tailDist P T ≤ K} := by
+    {P | P ∈ zeroSet (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)) ∧ tailDist P T ≤ K} =
+      {P | P ∈ zeroSet (hamEvent m) ∧ tailDist P T ≤ K} := by
   ext P
   rw [Set.mem_ofPred_eq, Set.mem_ofPred_eq, zeroSet_holeFamily, Set.mem_sdiff]
   constructor

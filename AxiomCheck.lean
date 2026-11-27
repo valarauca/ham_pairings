@@ -554,7 +554,7 @@ open Pairing PerfectMatching
 #print axioms Obstruction.zeroSet_holeFamily
 #print axioms Obstruction.abs_prob_profile_sub_le
 #print axioms Obstruction.prob_profile_ne_le
-#print axioms RoundRobin.Canonical.isEquivFamily_hamFamily
+#print axioms RoundRobin.Canonical.isEquivFamily_hamEvent
 #print axioms RoundRobin.Canonical.IsEquivFamily.smul_mem_zeroSet_iff
 #print axioms RoundRobin.Canonical.IsEquivFamily.hole
 #print axioms RoundRobin.Canonical.smul_mem_ballOrbit_iff

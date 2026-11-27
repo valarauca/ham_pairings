@@ -112,20 +112,20 @@ noncomputable def coverChange (G : Finset (Vertex m))
 radius-`K′` coverage sets differ from those of `Z` on at most `δ (2m - 7)!!` tails. -/
 def IsRobust (G : Finset (Vertex m)) (δ : ℝ) (K' : ℕ)
     (H : (ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))) → Prop) : Prop :=
-  ∀ A', IsEquivFamily A' → profileDist (hamFamily m) A' ≤ δ →
-    ((coverChange G (hamFamily m) A' K').card : ℝ) ≤ δ * Nat.doubleFactorial (2 * m - 7) → H A'
+  ∀ A', IsEquivFamily A' → profileDist (hamEvent m) A' ≤ δ →
+    ((coverChange G (hamEvent m) A' K').card : ℝ) ≤ δ * Nat.doubleFactorial (2 * m - 7) → H A'
 
 /-- **Law-level facts are robust** (`sqrt-m-obstructions.md` §0, Lemma R). If
 `|U(Y ∈ E) - c| + δ ≤ ε` for the true family, the hypothesis `|U(Y′ ∈ E) - c| ≤ ε` is
 `δ`-robust. -/
 theorem isRobust_law (G : Finset (Vertex m)) (K' : ℕ) (E : Set (ZMod (2 * m - 1) → Prop))
     {c ε δ : ℝ}
-    (h : |prob (unifWeight m) {P | (fun t ↦ P ∈ hamFamily m t) ∈ E} - c| + δ ≤ ε) :
+    (h : |prob (unifWeight m) {P | (fun t ↦ P ∈ hamEvent m t) ∈ E} - c| + δ ≤ ε) :
     IsRobust G δ K' fun A' ↦ |prob (unifWeight m) {P | (fun t ↦ P ∈ A' t) ∈ E} - c| ≤ ε := by
   intro A' _ hδ _
-  have hR := abs_prob_profile_sub_le_ne (isProb_unifWeight m) (hamFamily m) A' E
+  have hR := abs_prob_profile_sub_le_ne (isProb_unifWeight m) (hamEvent m) A' E
   have htri := abs_sub_le (prob (unifWeight m) {P | (fun t ↦ P ∈ A' t) ∈ E})
-    (prob (unifWeight m) {P | (fun t ↦ P ∈ hamFamily m t) ∈ E}) c
+    (prob (unifWeight m) {P | (fun t ↦ P ∈ hamEvent m t) ∈ E}) c
   rw [profileDist] at hδ
   linarith
 
@@ -137,25 +137,25 @@ theorem isRobust_coverage (G : Finset (Vertex m)) (K' : ℕ)
     (Q : Set (PerfectMatching (Vertex m)) → Prop) {c δ : ℝ}
     (h : (c + δ) * Nat.doubleFactorial (2 * m - 7) ≤
       ((Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
-        Q (coverage (hamFamily m) T K')).card : ℝ)) :
+        Q (coverage (hamEvent m) T K')).card : ℝ)) :
     IsRobust G δ K' fun A' ↦ c * Nat.doubleFactorial (2 * m - 7) ≤
       ((Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
         Q (coverage A' T K')).card : ℝ) := by
   intro A' _ _ hch
   have hsub : (Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
-        Q (coverage (hamFamily m) T K')) ⊆
+        Q (coverage (hamEvent m) T K')) ⊆
       (Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
-        Q (coverage A' T K')) ∪ coverChange G (hamFamily m) A' K' := by
+        Q (coverage A' T K')) ∪ coverChange G (hamEvent m) A' K' := by
     intro T hT
     have hQ := (Finset.mem_filter.mp hT).2
-    by_cases hT' : coverage A' T K' = coverage (hamFamily m) T K'
+    by_cases hT' : coverage A' T K' = coverage (hamEvent m) T K'
     · exact Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _, hT' ▸ hQ⟩)
     · exact Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _, hT'⟩)
   have hc := (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
   have hc' : ((Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
-        Q (coverage (hamFamily m) T K')).card : ℝ) ≤
+        Q (coverage (hamEvent m) T K')).card : ℝ) ≤
       ((Finset.univ.filter fun T : PerfectMatching (Gᶜ : Finset (Vertex m)) ↦
-        Q (coverage A' T K')).card : ℝ) + ((coverChange G (hamFamily m) A' K').card : ℝ) := by
+        Q (coverage A' T K')).card : ℝ) + ((coverChange G (hamEvent m) A' K').card : ℝ) := by
     exact_mod_cast hc
   nlinarith
 
@@ -203,7 +203,7 @@ of zero states, `T0` a tail and `𝓐′` the hole family `A_t ∪ Rem`. If
 `δ (2m - 7)!! ≥ |Aut(𝓕)| ∑_{j ≤ K + K′ + 3} C(m - 3, j)(2j - 1)!!`, then every `δ`-robust
 hypothesis at radius `K′` holds for `𝓐′`. -/
 theorem hole_isRobust {G : Finset (Vertex m)} (hG : G.card = 6)
-    {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamFamily m))
+    {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamEvent m))
     (h𝒵G : ∀ g ∈ autGroup m, ∀ P, g • P ∈ 𝒵 ↔ P ∈ 𝒵)
     (T0 : PerfectMatching (Gᶜ : Finset (Vertex m))) {K K' : ℕ} (hT0 : ∀ P ∈ 𝒵, K < tailDist P T0)
     {δ : ℝ}
@@ -213,10 +213,10 @@ theorem hole_isRobust {G : Finset (Vertex m)} (hG : G.card = 6)
       (m - 3).choose j * Nat.doubleFactorial (2 * j - 1) : ℕ) : ℝ) ≤
         δ * Nat.doubleFactorial (2 * m - 7))
     {H : (ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))) → Prop}
-    (hH : IsRobust G δ K' H) : H (holeFamily (hamFamily m) (holeSet 𝒵 T0 K)) := by
+    (hH : IsRobust G δ K' H) : H (holeFamily (hamEvent m) (holeSet 𝒵 T0 K)) := by
   obtain ⟨hequiv, hZ, -, -⟩ := hole h𝒵 h𝒵G hT0
   refine hH _ hequiv ?_ ?_
-  · exact (prob_profile_ne_le (isProb_unifWeight m) (hamFamily m) (holeSet 𝒵 T0 K)).trans
+  · exact (prob_profile_ne_le (isProb_unifWeight m) (hamEvent m) (holeSet 𝒵 T0 K)).trans
       ((prob_holeSet_le hG 𝒵 T0 K).trans hδ1)
   · refine le_trans ?_ hδ2
     refine Nat.cast_le.mpr ((Finset.card_le_card fun T hT ↦ ?_).trans
@@ -239,7 +239,7 @@ theorem hole_isRobust {G : Finset (Vertex m)} (hG : G.card = 6)
 `T0` a tail with `ρ_𝒵(T0) > K`. For `δ` as in `hole_isRobust` and every `δ`-robust hypothesis
 `H` at radius `K′`, some `𝓐′ ∈ 𝔈_m` has `𝒵 ⊆ Z(𝓐′)`, satisfies `H`, and has `N(𝓐′) > K`. -/
 theorem ngA_relativized {G : Finset (Vertex m)} (hG : G.card = 6)
-    {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamFamily m))
+    {𝒵 : Set (PerfectMatching (Vertex m))} (h𝒵 : 𝒵 ⊆ zeroSet (hamEvent m))
     (h𝒵G : ∀ g ∈ autGroup m, ∀ P, g • P ∈ 𝒵 ↔ P ∈ 𝒵)
     {T0 : PerfectMatching (Gᶜ : Finset (Vertex m))} {K K' : ℕ}
     (hT0 : ∀ P ∈ 𝒵, K < tailDist P T0) {δ : ℝ}
@@ -262,7 +262,7 @@ zero states with `|𝒵| (K + 1)(2m)^K < (2m - 7)!!`, the finite form of NG-A(a)
 two bounds of `hole_isRobust` and `H` be `δ`-robust at radius `K′`. Then no derivation valid for
 every `𝓐′ ∈ 𝔈_m` from `𝒵 ⊆ Z(𝓐′)` and `H(𝓐′)` concludes `N(𝓐′) ≤ K`. -/
 theorem ngA_c {G : Finset (Vertex m)} (hG : G.card = 6)
-    {𝒵 : Finset (PerfectMatching (Vertex m))} (h𝒵 : ↑𝒵 ⊆ zeroSet (hamFamily m))
+    {𝒵 : Finset (PerfectMatching (Vertex m))} (h𝒵 : ↑𝒵 ⊆ zeroSet (hamEvent m))
     (h𝒵G : ∀ g ∈ autGroup m, ∀ P, g • P ∈ 𝒵 ↔ P ∈ 𝒵) {K K' : ℕ}
     (hdens : 𝒵.card * ((K + 1) * (2 * m) ^ K) < Nat.doubleFactorial (2 * m - 7)) {δ : ℝ}
     (hδ1 : (Nat.card (autGroup m) * ((K + 4) * (2 * m) ^ (K + 3)) : ℝ) /
@@ -356,8 +356,8 @@ theorem smul_mem_certTwoClass_iff (e : ℕ) {g : Equiv.Perm (Vertex m)} (hg : g 
     Finset.card_equiv π fun t ↦ by
       simp only [Finset.mem_filter, Finset.mem_univ, true_and, shortCert_smul_iff P (hπ t)]
   simp only [certTwoClass, Finset.mem_filter, Finset.mem_univ, true_and, ← hcard]
-  rw [← mem_zeroSet_hamFamily, ← mem_zeroSet_hamFamily,
-    isEquivFamily_hamFamily.smul_mem_zeroSet_iff hg]
+  rw [← mem_zeroSet_hamEvent, ← mem_zeroSet_hamEvent,
+    isEquivFamily_hamEvent.smul_mem_zeroSet_iff hg]
 
 /-- **NG-A(c) for `𝒵 = Z ∩ Z_2(e)`** (`sqrt-m-obstructions.md` §1.2, instance table row 1, as
 corrected in `review-sqrt-m-obstructions.md` §1.4: the class is `Z ∩ Z_2(θm)`, not `Z_2(θm)`).

@@ -2041,10 +2041,6 @@ namespace RoundRobin.Canonical
 
 open Finset ChainRule PerfectMatching
 
-/-- The round-robin event `A_t = {P | P ∪ F_t is one cycle}`. -/
-def hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) : Set (PerfectMatching (Vertex m)) :=
-  {P | Ham P (factor m t)}
-
 /-- The round-robin instance: `U(A_t) = U(A_0)` for every `t`, the common probability `p`. -/
 theorem prob_hamEvent (m : ℕ) [NeZero m] (t : ZMod (2 * m - 1)) :
     prob (unifWeight m) (hamEvent m t) = prob (unifWeight m) (hamEvent m 0) := by
