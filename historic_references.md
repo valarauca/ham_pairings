@@ -235,6 +235,7 @@ main `77d3de5`.
 | `PM.sameCycle_or_of_ham` | `PM.ham_iff_forall_sameCycle` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:269` |
 | `RRC.exists_defect_of_cycle` | `PM.reachable_iff_sameCycle` (the closed set is the component of `y`) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:396` |
 | `RRC.certPerm_smul` | `PM.smul_mate_mul_smul_mate` | `repair/Repair/SqrtObstructions/NoGo.lean` | `77d3de5:repair/Repair/SqrtObstructions/NoGo.lean:328` |
+| `PM.mem_cycleOf_self_iff` | `PM.reachable_iff_sameCycle` with `A A = 1` | `repair/Repair/PairLevelOne.lean` | `77d3de5:repair/Repair/PairLevelOne.lean:294` |
 
 ### Deprecated aliases
 
