@@ -25,10 +25,19 @@ is determined by its colour word.
   `a + b r` and `a + b r'` are isomorphic, `|a|, |b| ≤ 2H + 1`.
 * `honeyStep` : the 3-edge-coloured honeycomb on `ℤ² × {±1}`. `IsDefect K r v` : `v = a + b r` with
   `|a|, |b| ≤ K`, and `card_isDefect_le` : there are at most `(2K + 1)²` such `v`.
-  `ballIso_honeycomb` : for `4H`-generic `r` every vertex `v` that is not `(2H + 1)`-defect has the
-  honeycomb `H`-ball, and `ballIso_some_of_not_isDefect` compares two such vertices.
+  `ballIso_honeycomb` : for `H ≥ 1` and `4H`-generic `r` every vertex `v` that is not
+  `(2H + 1)`-defect has the honeycomb `H`-ball, and `ballIso_some_of_not_isDefect` compares two
+  such vertices.
 * `exists_ballIso_equiv` : **Proposition U**. For `(8H + 4)`-generic `r, r'` there is a bijection
   `ψ` of `V_m` with every `H`-ball of `G_r` at `x` isomorphic to the `H`-ball of `G_{r'}` at `ψ x`.
+* The `(2H + 2)` form (Theorem U′). `HexSmall K p` : the hex norm `max(|a|, |b|, |a + b|)` of
+  `p = (a, b)` is at most `K`, and `IsHexDefect K r v` : `v = a + b r` with `HexSmall K (a, b)`.
+  `ballIso_honeycomb_hex` : for `H`-generic `r` every `v` that is not a hex site of size `H + 1` has
+  the honeycomb `H`-ball, and `ballIso_some_of_not_isHexDefect` compares two such vertices.
+  `ballIso_formal_hex` : the formal ball at a point of size `K` needs only
+  `max(K + H + 1, 2H + 1)`-genericity. `ballIso_none_hex` (`2H + 1`) and `ballIso_ev_hex`
+  (`2H + 2`, `|a|, |b| ≤ H + 1`). `exists_ballIso_equiv_hex` : **Proposition U** for
+  `(2H + 2)`-generic `r, r'`, and `exists_ballIso_equiv` is a case of it.
 
 Source: `results/k3-workaround-spike.md` §2.2, Proposition U, built on Lemma M (§2.1). The source
 assumes `4H`-genericity. Its proof treats the balls at `∞`, at `T_r` and at vertices away from the
@@ -37,6 +46,13 @@ assumes `4H`-genericity. Its proof treats the balls at `∞`, at `T_r` and at ve
 which include `T_r`. They are matched here through `ballIso_formal`, which
 needs the larger constant `8H + 4`, so the global statement is proved for `(8H + 4)`-generic `r`.
 That is still all `r` outside `O(H²)` exceptional values.
+
+`results/symmetry-audit-extend.md` §3 (organize-archive bf3fe60) replaces the two coordinate bounds
+behind `8H + 4` by hex-norm bounds. Honeycomb positions after `ℓ` steps have hex norm about `ℓ/2`
+(Lemma Y), even differences are halved since `2` is a unit, and a walk that has met `∞` is measured
+from the colour label where it left `∞` (Lemma W). That gives `exists_ballIso_equiv_hex` at
+`(2H + 2)`-genericity, hence the source's `4H` form for `H ≥ 1`. Exact computation in that file
+shows that `2H`-genericity fails for `H = 2` to `5`.
 -/
 
 namespace Pairing
@@ -344,6 +360,20 @@ private theorem small_mono {K K' : ℤ} {p : ℤ × ℤ} (h : Small K p) (hK : K
 private theorem fcol_small (c : Fin 3) : Small 1 (fcol c) := by
   fin_cases c <;> simp [Small, fcol]
 
+/-- `p = (a, b)` has hex norm `max(|a|, |b|, |a + b|)` at most `K`. The hex norm is the word metric
+of the steps `±(1, 0)`, `±(0, 1)` and `±(1, -1)`, the moves of the honeycomb over two steps
+(`results/symmetry-audit-extend.md` §3.1, organize-archive bf3fe60). -/
+def HexSmall (K : ℤ) (p : ℤ × ℤ) : Prop :=
+  |p.1| ≤ K ∧ |p.2| ≤ K ∧ |p.1 + p.2| ≤ K
+
+private theorem hexSmall_iff {K : ℤ} {p : ℤ × ℤ} :
+    HexSmall K p ↔ -K ≤ p.1 ∧ p.1 ≤ K ∧ -K ≤ p.2 ∧ p.2 ≤ K ∧ -K ≤ p.1 + p.2 ∧ p.1 + p.2 ≤ K := by
+  simp only [HexSmall, abs_le, and_assoc]
+
+private theorem fcol_corner (c : Fin 3) :
+    0 ≤ (fcol c).1 ∧ 0 ≤ (fcol c).2 ∧ (fcol c).1 + (fcol c).2 ≤ 1 := by
+  fin_cases c <;> simp [fcol]
+
 omit [NeZero m] in
 /-- For `G`-generic `r`, evaluation is injective on points whose sizes add up to at most `G`
 (`results/k3-workaround-spike.md`, Proposition U, after Lemma M). -/
@@ -495,35 +525,76 @@ theorem card_isDefect_le (K : ℕ) (r : ZMod (2 * m - 1)) :
     _ ≤ (I ×ˢ I).card := Finset.card_image_le
     _ = (2 * K + 1) ^ 2 := by rw [Finset.card_product, hIcard, sq]
 
-private theorem honey_bound : ∀ w : List (Fin 3),
-    |(wordAct honeyStep w (0, 0, 1)).1| ≤ w.length ∧
-      |(wordAct honeyStep w (0, 0, 1)).2.1| ≤ w.length ∧
-      ((wordAct honeyStep w (0, 0, 1)).2.2 = 1 ∨ (wordAct honeyStep w (0, 0, 1)).2.2 = -1)
-  | [] => by simp
-  | c :: w => by
-    have ih := honey_bound w
-    have hc := small_iff.1 (fcol_small c)
-    rw [wordAct_cons, List.length_cons]
-    generalize wordAct honeyStep w (0, 0, 1) = q at ih ⊢
-    obtain ⟨s₁, s₂, γ⟩ := q
-    simp only [honeyStep, abs_le] at ih ⊢
-    push_cast
-    omega
+omit [NeZero m] in
+private theorem isDefect_mono {K K' : ℕ} {r v : ZMod (2 * m - 1)} (h : IsDefect K r v)
+    (hK : K ≤ K') : IsDefect K' r v := by
+  obtain ⟨a, b, ha, hb, rfl⟩ := h
+  exact ⟨a, b, ha.trans (by exact_mod_cast hK), hb.trans (by exact_mod_cast hK), rfl⟩
 
-private theorem honey_commute {r v : ZMod (2 * m - 1)} {H : ℕ} (hv : ¬IsDefect (2 * H + 1) r v)
-    {q : ℤ × ℤ × ℤ} (h1 : |q.1| ≤ H) (h2 : |q.2.1| ≤ H) (h3 : q.2.2 = 1 ∨ q.2.2 = -1)
-    (c : Fin 3) : honeyEv r v (honeyStep c q) = tripleStep m r c (honeyEv r v q) := by
+/-- `v` is a hex site of size `K`, `v = a + b r` with `max(|a|, |b|, |a + b|) ≤ K`
+(`results/symmetry-audit-extend.md` §3.1, organize-archive bf3fe60). -/
+def IsHexDefect (K : ℕ) (r v : ZMod (2 * m - 1)) : Prop :=
+  ∃ a b : ℤ, HexSmall K (a, b) ∧ v = a + b * r
+
+omit [NeZero m] in
+/-- A hex site of size `K` is a `K`-defect site (`results/symmetry-audit-extend.md` §3.1,
+organize-archive bf3fe60). -/
+theorem IsHexDefect.isDefect {K : ℕ} {r v : ZMod (2 * m - 1)} (h : IsHexDefect K r v) :
+    IsDefect K r v := by
+  obtain ⟨a, b, hab, rfl⟩ := h
+  rw [hexSmall_iff] at hab
+  exact ⟨a, b, abs_le.2 ⟨hab.1, hab.2.1⟩, abs_le.2 ⟨hab.2.2.1, hab.2.2.2.1⟩, rfl⟩
+
+private def HoneyPos (ℓ : ℤ) (q : ℤ × ℤ × ℤ) : Prop :=
+  (q.2.2 = 1 ∧ HexSmall ℓ (2 * q.1, 2 * q.2.1)) ∨
+    (q.2.2 = -1 ∧ ∃ e : ℤ × ℤ, (0 ≤ e.1 ∧ 0 ≤ e.2 ∧ e.1 + e.2 ≤ 1) ∧
+      HexSmall (ℓ - 1) (2 * (q.1 - e.1), 2 * (q.2.1 - e.2)))
+
+private theorem honeyPos_zero : HoneyPos 0 (0, 0, 1) :=
+  Or.inl ⟨rfl, by simp [hexSmall_iff]⟩
+
+private theorem honeyPos_mono {ℓ ℓ' : ℤ} {q : ℤ × ℤ × ℤ} (hq : HoneyPos ℓ q) (h : ℓ ≤ ℓ') :
+    HoneyPos ℓ' q := by
+  simp only [HoneyPos, hexSmall_iff] at hq ⊢
+  rcases hq with ⟨h1, hs⟩ | ⟨h1, e, he, hs⟩
+  · exact Or.inl ⟨h1, by omega⟩
+  · exact Or.inr ⟨h1, e, he, by omega⟩
+
+private theorem honeyPos_nonneg {ℓ : ℤ} {q : ℤ × ℤ × ℤ} (hq : HoneyPos ℓ q) : 0 ≤ ℓ := by
+  simp only [HoneyPos, hexSmall_iff] at hq
+  omega
+
+private theorem honeyPos_step {ℓ : ℤ} {q : ℤ × ℤ × ℤ} (hq : HoneyPos ℓ q) (c : Fin 3) :
+    HoneyPos (ℓ + 1) (honeyStep c q) := by
   obtain ⟨s₁, s₂, γ⟩ := q
-  simp only [abs_le] at h1 h2 h3
-  have hc := small_iff.1 (fcol_small c)
+  have hc := fcol_corner c
+  simp only [HoneyPos, honeyStep, hexSmall_iff] at hq ⊢
+  rcases hq with ⟨rfl, hs⟩ | ⟨rfl, e, he, hs⟩
+  · exact Or.inr ⟨rfl, fcol c, hc, by omega⟩
+  · exact Or.inl ⟨by norm_num, by omega⟩
+
+private theorem honeyPos_word : ∀ w : List (Fin 3),
+    HoneyPos w.length (wordAct honeyStep w (0, 0, 1))
+  | [] => honeyPos_zero
+  | c :: w => by
+    rw [wordAct_cons, List.length_cons]
+    push_cast
+    exact honeyPos_step (honeyPos_word w) c
+
+private theorem honey_commute_hex {r v : ZMod (2 * m - 1)} {H : ℕ}
+    (hv : ¬IsHexDefect (H + 1) r v) {q : ℤ × ℤ × ℤ} (hq : HoneyPos H q) (c : Fin 3) :
+    honeyEv r v (honeyStep c q) = tripleStep m r c (honeyEv r v q) := by
+  obtain ⟨s₁, s₂, γ⟩ := q
+  have hc := fcol_corner c
   have hne : (γ : ZMod (2 * m - 1)) * v + 2 * s₁ + 2 * s₂ * r ≠ colour r c := by
     intro h
     rw [← ev_fcol, ev] at h
-    rcases h3 with rfl | rfl
-    · exact hv ⟨(fcol c).1 - 2 * s₁, (fcol c).2 - 2 * s₂, abs_le.2 ⟨by omega, by omega⟩,
-        abs_le.2 ⟨by omega, by omega⟩, by push_cast at h ⊢; linear_combination h⟩
-    · exact hv ⟨-((fcol c).1 - 2 * s₁), -((fcol c).2 - 2 * s₂), abs_le.2 ⟨by omega, by omega⟩,
-        abs_le.2 ⟨by omega, by omega⟩, by push_cast at h ⊢; linear_combination -h⟩
+    simp only [HoneyPos, hexSmall_iff] at hq
+    rcases hq with ⟨rfl, hs⟩ | ⟨rfl, e, he, hs⟩
+    · exact hv ⟨(fcol c).1 - 2 * s₁, (fcol c).2 - 2 * s₂, hexSmall_iff.2 (by push_cast; omega),
+        by push_cast at h ⊢; linear_combination h⟩
+    · exact hv ⟨-((fcol c).1 - 2 * s₁), -((fcol c).2 - 2 * s₂),
+        hexSmall_iff.2 (by push_cast; omega), by push_cast at h ⊢; linear_combination -h⟩
   simp only [honeyEv]
   rw [tripleStep_some, ite_eq_right hne]
   simp only [honeyStep, Option.some_inj]
@@ -532,87 +603,315 @@ private theorem honey_commute {r v : ZMod (2 * m - 1)} {H : ℕ} (hv : ¬IsDefec
   push_cast
   ring
 
-private theorem honey_inj {r v : ZMod (2 * m - 1)} {H : ℕ} (hH : 1 ≤ H)
-    (hr : IsGeneric (4 * H) r) (hv : ¬IsDefect (2 * H + 1) r v) {q q' : ℤ × ℤ × ℤ}
-    (h1 : |q.1| ≤ H + 1) (h2 : |q.2.1| ≤ H + 1) (h3 : q.2.2 = 1 ∨ q.2.2 = -1)
-    (h1' : |q'.1| ≤ H) (h2' : |q'.2.1| ≤ H) (h3' : q'.2.2 = 1 ∨ q'.2.2 = -1)
-    (h : honeyEv r v q = honeyEv r v q') : q = q' := by
+private theorem honey_inj_hex {r v : ZMod (2 * m - 1)} {H : ℕ} (hr : IsGeneric H r)
+    (hv : ¬IsHexDefect (H + 1) r v) {q q' : ℤ × ℤ × ℤ} (hq : HoneyPos (H + 1) q)
+    (hq' : HoneyPos H q') (h : honeyEv r v q = honeyEv r v q') : q = q' := by
   have u2 := isUnit_two' (m := m)
   obtain ⟨s₁, s₂, γ⟩ := q
   obtain ⟨t₁, t₂, γ'⟩ := q'
   simp only [honeyEv, Option.some_inj] at h
-  simp only [abs_le] at h1 h2 h3 h1' h2' h3'
-  rcases h3 with rfl | rfl <;> rcases h3' with rfl | rfl
+  simp only [HoneyPos, hexSmall_iff] at hq hq'
+  rcases hq with ⟨rfl, hs⟩ | ⟨rfl, e, he, hs⟩ <;> rcases hq' with ⟨rfl, ht⟩ | ⟨rfl, e', he', ht⟩
   · obtain ⟨e1, e2⟩ := hr (s₁ - t₁) (s₂ - t₂) (abs_le.2 ⟨by omega, by omega⟩)
-      (abs_le.2 ⟨by omega, by omega⟩) (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination h))
+      (abs_le.2 ⟨by omega, by omega⟩)
+      (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination h))
     simp only [Prod.mk.injEq, and_true]
     omega
-  · exact absurd ⟨t₁ - s₁, t₂ - s₂, abs_le.2 ⟨by omega, by omega⟩, abs_le.2 ⟨by omega, by omega⟩,
+  · exact absurd ⟨t₁ - s₁, t₂ - s₂, hexSmall_iff.2 (by push_cast; omega),
       sub_eq_zero.1 (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination h))⟩ hv
-  · exact absurd ⟨s₁ - t₁, s₂ - t₂, abs_le.2 ⟨by omega, by omega⟩, abs_le.2 ⟨by omega, by omega⟩,
+  · exact absurd ⟨s₁ - t₁, s₂ - t₂, hexSmall_iff.2 (by push_cast; omega),
       sub_eq_zero.1 (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination -h))⟩ hv
   · obtain ⟨e1, e2⟩ := hr (s₁ - t₁) (s₂ - t₂) (abs_le.2 ⟨by omega, by omega⟩)
-      (abs_le.2 ⟨by omega, by omega⟩) (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination h))
+      (abs_le.2 ⟨by omega, by omega⟩)
+      (u2.mul_right_eq_zero.1 (by push_cast at h ⊢; linear_combination h))
     simp only [Prod.mk.injEq, and_true]
     omega
 
-private theorem honey_words_iff {r v : ZMod (2 * m - 1)} {H : ℕ} (hH : 1 ≤ H)
-    (hr : IsGeneric (4 * H) r) (hv : ¬IsDefect (2 * H + 1) r v) (w w' : List (Fin 3))
-    (hw : w.length ≤ H + 1) (hw' : w'.length ≤ H) :
+private theorem honey_words_iff_hex {r v : ZMod (2 * m - 1)} {H : ℕ} (hr : IsGeneric H r)
+    (hv : ¬IsHexDefect (H + 1) r v) (w w' : List (Fin 3)) (hw : w.length ≤ H + 1)
+    (hw' : w'.length ≤ H) :
     wordAct honeyStep w (0, 0, 1) = wordAct honeyStep w' (0, 0, 1) ↔
       wordAct (tripleStep m r) w (some v) = wordAct (tripleStep m r) w' (some v) := by
   have h0 : honeyEv r v (0, 0, 1) = some v := by simp [honeyEv]
   rw [← h0]
   refine words_iff_of_map (honeyEv r v) (fun u hu c ↦ ?_) (fun u u' hu hu' h ↦ ?_) w w' hw hw'
-  · obtain ⟨b1, b2, b3⟩ := honey_bound u
-    have hu' : (u.length : ℤ) ≤ H := by exact_mod_cast hu
-    exact honey_commute hv (b1.trans hu') (b2.trans hu') b3 c
-  · obtain ⟨b1, b2, b3⟩ := honey_bound u
-    obtain ⟨b1', b2', b3'⟩ := honey_bound u'
-    have hu₁ : (u.length : ℤ) ≤ H + 1 := by exact_mod_cast hu
-    have hu₂ : (u'.length : ℤ) ≤ H := by exact_mod_cast hu'
-    exact honey_inj hH hr hv (b1.trans hu₁) (b2.trans hu₁) b3 (b1'.trans hu₂) (b2'.trans hu₂) b3' h
+  · exact honey_commute_hex hv (honeyPos_mono (honeyPos_word u) (by exact_mod_cast hu)) c
+  · exact honey_inj_hex hr hv (honeyPos_mono (honeyPos_word u) (by exact_mod_cast hu))
+      (honeyPos_mono (honeyPos_word u') (by exact_mod_cast hu')) h
+
+/-- **Proposition U**, honeycomb part at `H`-genericity (Theorem U′, item 1). For `H`-generic `r`
+and `v` not a hex site of size `H + 1`, the `H`-ball of `v` in `G_r` is the `H`-ball of the
+3-edge-coloured honeycomb. A honeycomb word of length `ℓ` ends at `(s, +1)` with hex norm
+`2 N(s) ≤ ℓ` or at `(s, -1)` with `2 N(s - fcol c) + 1 ≤ ℓ` (Lemma Y), which replaces the
+coordinate bound `ℓ` behind `ballIso_honeycomb` (`results/symmetry-audit-extend.md` §3.3,
+organize-archive bf3fe60). -/
+theorem ballIso_honeycomb_hex {H : ℕ} {r v : ZMod (2 * m - 1)} (hr : IsGeneric H r)
+    (hv : ¬IsHexDefect (H + 1) r v) :
+    BallIso honeyStep (tripleStep m r) (0, 0, 1) (some v) H :=
+  ballIso_of_words (honey_words_iff_hex hr hv)
+
+/-- **Proposition U**, honeycomb part, comparison at `H`-genericity. For `H`-generic `r` and `r'`,
+and vertices `v`, `v'` that are not hex sites of size `H + 1` of `G_r`, `G_{r'}`, the `H`-balls
+of `v` in `G_r` and of `v'` in `G_{r'}` are isomorphic (`results/symmetry-audit-extend.md` §3.3,
+organize-archive bf3fe60). -/
+theorem ballIso_some_of_not_isHexDefect {H : ℕ} {r r' v v' : ZMod (2 * m - 1)}
+    (hr : IsGeneric H r) (hr' : IsGeneric H r') (hv : ¬IsHexDefect (H + 1) r v)
+    (hv' : ¬IsHexDefect (H + 1) r' v') :
+    BallIso (tripleStep m r) (tripleStep m r') (some v) (some v') H :=
+  ballIso_of_words fun w w' hw hw' ↦
+    (honey_words_iff_hex hr hv w w' hw hw').symm.trans (honey_words_iff_hex hr' hv' w w' hw hw')
 
 /-- **Proposition U**, honeycomb part. For `H ≥ 1`, `4H`-generic `r` and `v` not a
 `(2H + 1)`-defect site, the `H`-ball of `v` in `G_r` is the `H`-ball of the 3-edge-coloured
-honeycomb (`results/k3-workaround-spike.md`, Proposition U, after Lemma M). -/
+honeycomb (`results/k3-workaround-spike.md`, Proposition U, after Lemma M). It is a case of
+`ballIso_honeycomb_hex`. -/
 theorem ballIso_honeycomb {H : ℕ} (hH : 1 ≤ H) {r v : ZMod (2 * m - 1)}
     (hr : IsGeneric (4 * H) r) (hv : ¬IsDefect (2 * H + 1) r v) :
     BallIso honeyStep (tripleStep m r) (0, 0, 1) (some v) H :=
-  ballIso_of_words (honey_words_iff hH hr hv)
+  ballIso_honeycomb_hex (hr.mono (by omega)) fun h ↦ hv (isDefect_mono h.isDefect (by omega))
 
 /-- **Proposition U**, honeycomb part, comparison. For `H ≥ 1`, `4H`-generic `r` and `r'`, and
 vertices `v`, `v'` that are not `(2H + 1)`-defect sites of `G_r`, `G_{r'}`, the `H`-balls of `v` in
 `G_r` and of `v'` in `G_{r'}` are isomorphic (`results/k3-workaround-spike.md`, Proposition U,
-after Lemma M). -/
+after Lemma M). It is a case of `ballIso_some_of_not_isHexDefect`. -/
 theorem ballIso_some_of_not_isDefect {H : ℕ} (hH : 1 ≤ H) {r r' v v' : ZMod (2 * m - 1)}
     (hr : IsGeneric (4 * H) r) (hr' : IsGeneric (4 * H) r') (hv : ¬IsDefect (2 * H + 1) r v)
     (hv' : ¬IsDefect (2 * H + 1) r' v') :
     BallIso (tripleStep m r) (tripleStep m r') (some v) (some v') H :=
+  ballIso_some_of_not_isHexDefect (hr.mono (by omega)) (hr'.mono (by omega))
+    (fun h ↦ hv (isDefect_mono h.isDefect (by omega)))
+    (fun h ↦ hv' (isDefect_mono h.isDefect (by omega)))
+
+/-! ### The balls at `∞` and at the sites at `(2H + 2)`-genericity -/
+
+private def FormalPos (x₀ : Option (ℤ × ℤ)) (ℓ : ℤ) : Option (ℤ × ℤ) → Prop
+  | none => ∀ p, x₀ = some p → Small ℓ p
+  | some q => (∃ p, x₀ = some p ∧ ∃ h : ℤ × ℤ × ℤ, HoneyPos ℓ h ∧
+        q = (h.2.2 * p.1 + 2 * h.1, h.2.2 * p.2 + 2 * h.2.1)) ∨
+      ∃ e : ℤ × ℤ, (0 ≤ e.1 ∧ 0 ≤ e.2 ∧ e.1 + e.2 ≤ 1) ∧ ∃ (j : ℤ) (h : ℤ × ℤ × ℤ), HoneyPos j h ∧
+        q = (h.2.2 * e.1 + 2 * h.1, h.2.2 * e.2 + 2 * h.2.1) ∧ 1 + j ≤ ℓ ∧
+        ∀ p, x₀ = some p → Small (ℓ - 1 - j) p
+
+private theorem formalPos_step {x₀ : Option (ℤ × ℤ)} {ℓ : ℤ} (hℓ : 0 ≤ ℓ) {o : Option (ℤ × ℤ)}
+    (ho : FormalPos x₀ ℓ o) (c : Fin 3) : FormalPos x₀ (ℓ + 1) (formalStep c o) := by
+  have hc := fcol_corner c
+  rcases o with _ | q
+  · refine Or.inr ⟨fcol c, hc, 0, (0, 0, 1), honeyPos_zero, by simp, by omega, fun p hp ↦ ?_⟩
+    have := ho p hp
+    rwa [show ℓ + 1 - 1 - 0 = ℓ by ring]
+  · by_cases hqc : q = fcol c
+    · simp only [formalStep, hqc, ↓reduceIte, FormalPos]
+      intro p hp
+      simp only [FormalPos] at ho
+      rcases ho with ⟨p', hp', ⟨s₁, s₂, γ⟩, hs, hq⟩ | ⟨e, he, j, h, hs, -, hj, hsm⟩
+      · rw [hp, Option.some_inj] at hp'
+        subst hp'
+        have h1 := congrArg Prod.fst (hqc.symm.trans hq)
+        have h2 := congrArg Prod.snd (hqc.symm.trans hq)
+        dsimp only at h1 h2
+        simp only [HoneyPos, hexSmall_iff] at hs
+        rw [small_iff]
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e', he', hs⟩ <;> omega
+      · have h0 := honeyPos_nonneg hs
+        have := small_iff.1 (hsm p hp)
+        rw [small_iff]
+        omega
+    · simp only [formalStep, hqc, ↓reduceIte, FormalPos]
+      simp only [FormalPos] at ho
+      rcases ho with ⟨p, hp, h, hs, rfl⟩ | ⟨e, he, j, h, hs, rfl, hj, hsm⟩
+      · refine Or.inl ⟨p, hp, honeyStep c h, honeyPos_step hs c, ?_⟩
+        simp only [honeyStep]
+        ext <;> dsimp only <;> ring
+      · refine Or.inr ⟨e, he, j + 1, honeyStep c h, honeyPos_step hs c, ?_, by omega,
+          fun p hp ↦ ?_⟩
+        · simp only [honeyStep]
+          ext <;> dsimp only <;> ring
+        · rw [show ℓ + 1 - 1 - (j + 1) = ℓ - 1 - j by ring]
+          exact hsm p hp
+
+private theorem formalPos_word (x₀ : Option (ℤ × ℤ)) :
+    ∀ w : List (Fin 3), FormalPos x₀ w.length (wordAct formalStep w x₀)
+  | [] => by
+    rcases x₀ with _ | p
+    · simp only [wordAct_nil, FormalPos]
+      intro p hp
+      cases hp
+    · exact Or.inl ⟨p, rfl, (0, 0, 1), honeyPos_zero, by simp⟩
+  | c :: w => by
+    rw [wordAct_cons, List.length_cons]
+    push_cast
+    exact formalPos_step (by positivity) (formalPos_word x₀ w) c
+private theorem formalStep_some_map_of {r : ZMod (2 * m - 1)} {q : ℤ × ℤ} {c : Fin 3}
+    (h : ev r q = ev r (fcol c) → q = fcol c) :
+    Option.map (ev r) (formalStep c (some q)) = tripleStep m r c (Option.map (ev r) (some q)) := by
+  rw [Option.map_some, tripleStep_some]
+  by_cases hpc : q = fcol c
+  · subst hpc
+    simp [formalStep, ev_fcol]
+  · have hne : ev r q ≠ colour r c := fun h' ↦ hpc (h (h'.trans (ev_fcol r c).symm))
+    simp only [formalStep, hpc, hne, ↓reduceIte, Option.map_some, Option.some_inj]
+    rw [← ev_fcol]
+    simp only [ev]
+    push_cast
+    ring
+
+omit [NeZero m] in
+private theorem eq_of_ev_eq {G : ℕ} {r : ZMod (2 * m - 1)} (hr : IsGeneric G r) {x y : ℤ × ℤ}
+    (h1 : -(G : ℤ) ≤ x.1 - y.1 ∧ x.1 - y.1 ≤ G) (h2 : -(G : ℤ) ≤ x.2 - y.2 ∧ x.2 - y.2 ≤ G)
+    (h : ev r x = ev r y) : x = y := by
+  obtain ⟨e1, e2⟩ := hr (x.1 - y.1) (x.2 - y.2) (abs_le.2 h1) (abs_le.2 h2)
+    (by simp only [ev] at h; push_cast; linear_combination h)
+  exact Prod.ext (by omega) (by omega)
+
+private theorem eq_of_two_mul_ev_eq {G : ℕ} {r : ZMod (2 * m - 1)} (hr : IsGeneric G r)
+    {x y : ℤ × ℤ} (h1 : -(G : ℤ) ≤ x.1 - y.1 ∧ x.1 - y.1 ≤ G)
+    (h2 : -(G : ℤ) ≤ x.2 - y.2 ∧ x.2 - y.2 ≤ G) (h : 2 * ev r x = 2 * ev r y) : x = y :=
+  eq_of_ev_eq hr h1 h2 ((isUnit_two' (m := m)).mul_left_cancel h)
+
+private theorem formal_words_iff_hex {G : ℕ} {r : ZMod (2 * m - 1)} (hr : IsGeneric G r)
+    {K : ℤ} {x₀ : Option (ℤ × ℤ)} (hx₀ : ∀ p, x₀ = some p → Small K p) {H : ℕ}
+    (hK : K + H + 1 ≤ G) (hG : 2 * H + 1 ≤ G) (w w' : List (Fin 3)) (hw : w.length ≤ H + 1)
+    (hw' : w'.length ≤ H) :
+    wordAct formalStep w x₀ = wordAct formalStep w' x₀ ↔
+      wordAct (tripleStep m r) w (Option.map (ev r) x₀) =
+        wordAct (tripleStep m r) w' (Option.map (ev r) x₀) := by
+  have hG' : (2 * H + 1 : ℤ) ≤ G := by exact_mod_cast hG
+  refine words_iff_of_map (Option.map (ev r)) (fun u hu c ↦ ?_) (fun u u' hu hu' h ↦ ?_) w w'
+    hw hw'
+  · have hpos := formalPos_word x₀ u
+    have hl : (u.length : ℤ) ≤ H := by exact_mod_cast hu
+    generalize wordAct formalStep u x₀ = o at hpos ⊢
+    generalize (u.length : ℤ) = ℓ at hpos hl
+    rcases o with _ | q
+    · exact formalStep_none_map r c
+    · refine formalStep_some_map_of fun hev ↦ ?_
+      have hc := fcol_corner c
+      simp only [FormalPos] at hpos
+      rcases hpos with ⟨p, hp, ⟨s₁, s₂, γ⟩, hs, rfl⟩ | ⟨e, he, j, ⟨s₁, s₂, γ⟩, hs, rfl, hj, -⟩
+      · have hpK := small_iff.1 (hx₀ p hp)
+        simp only [HoneyPos, hexSmall_iff] at hs
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e', he', hs⟩ <;>
+          exact eq_of_ev_eq hr (by dsimp only; omega) (by dsimp only; omega) hev
+      · simp only [HoneyPos, hexSmall_iff] at hs
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e', he', hs⟩ <;>
+          exact eq_of_ev_eq hr (by dsimp only; omega) (by dsimp only; omega) hev
+  · have hpos := formalPos_word x₀ u
+    have hpos' := formalPos_word x₀ u'
+    have hl : (u.length : ℤ) ≤ H + 1 := by exact_mod_cast hu
+    have hl' : (u'.length : ℤ) ≤ H := by exact_mod_cast hu'
+    generalize wordAct formalStep u x₀ = o at hpos h ⊢
+    generalize wordAct formalStep u' x₀ = o' at hpos' h ⊢
+    generalize (u.length : ℤ) = ℓ at hpos hl
+    generalize (u'.length : ℤ) = ℓ' at hpos' hl'
+    rcases o with _ | x <;> rcases o' with _ | y
+    · rfl
+    · simp at h
+    · simp at h
+    · rw [Option.map_some, Option.map_some, Option.some_inj] at h
+      congr 1
+      simp only [FormalPos] at hpos hpos'
+      rcases hpos with ⟨p, hp, ⟨s₁, s₂, γ⟩, hs, rfl⟩ | ⟨e, he, j, ⟨s₁, s₂, γ⟩, hs, rfl, hj, hsm⟩ <;>
+        rcases hpos' with ⟨p', hp', ⟨t₁, t₂, γ'⟩, ht, rfl⟩ |
+          ⟨e', he', j', ⟨t₁, t₂, γ'⟩, ht, rfl, hj', hsm'⟩
+      · rw [hp, Option.some_inj] at hp'
+        subst hp'
+        have hpK := small_iff.1 (hx₀ p hp)
+        simp only [HoneyPos, hexSmall_iff] at hs ht
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e₁, he₁, hs⟩ <;>
+          rcases ht with ⟨rfl, ht⟩ | ⟨rfl, e₂, he₂, ht⟩
+        · have := eq_of_two_mul_ev_eq (x := (s₁, s₂)) (y := (t₁, t₂)) hr
+            (by dsimp only; omega) (by dsimp only; omega)
+            (by simp only [ev] at h ⊢; push_cast at h ⊢; linear_combination h)
+          simp only [Prod.mk.injEq] at this ⊢
+          omega
+        · have := eq_of_two_mul_ev_eq (x := (p.1 + s₁, p.2 + s₂)) (y := (t₁, t₂)) hr
+            (by dsimp only; omega) (by dsimp only; omega)
+            (by simp only [ev] at h ⊢; push_cast at h ⊢; linear_combination h)
+          simp only [Prod.mk.injEq] at this ⊢
+          omega
+        · have := eq_of_two_mul_ev_eq (x := (-p.1 + s₁, -p.2 + s₂)) (y := (t₁, t₂)) hr
+            (by dsimp only; omega) (by dsimp only; omega)
+            (by simp only [ev] at h ⊢; push_cast at h ⊢; linear_combination h)
+          simp only [Prod.mk.injEq] at this ⊢
+          omega
+        · have := eq_of_two_mul_ev_eq (x := (s₁, s₂)) (y := (t₁, t₂)) hr
+            (by dsimp only; omega) (by dsimp only; omega)
+            (by simp only [ev] at h ⊢; push_cast at h ⊢; linear_combination h)
+          simp only [Prod.mk.injEq] at this ⊢
+          omega
+      · have hpK := small_iff.1 (hsm' p hp)
+        simp only [HoneyPos, hexSmall_iff] at hs ht
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e₁, he₁, hs⟩ <;>
+          rcases ht with ⟨rfl, ht⟩ | ⟨rfl, e₂, he₂, ht⟩ <;>
+          exact eq_of_ev_eq hr (by dsimp only; omega) (by dsimp only; omega) h
+      · have hpK := small_iff.1 (hsm p' hp')
+        simp only [HoneyPos, hexSmall_iff] at hs ht
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e₁, he₁, hs⟩ <;>
+          rcases ht with ⟨rfl, ht⟩ | ⟨rfl, e₂, he₂, ht⟩ <;>
+          exact eq_of_ev_eq hr (by dsimp only; omega) (by dsimp only; omega) h
+      · simp only [HoneyPos, hexSmall_iff] at hs ht
+        rcases hs with ⟨rfl, hs⟩ | ⟨rfl, e₁, he₁, hs⟩ <;>
+          rcases ht with ⟨rfl, ht⟩ | ⟨rfl, e₂, he₂, ht⟩ <;>
+          exact eq_of_ev_eq hr (by dsimp only; omega) (by dsimp only; omega) h
+
+/-- **Proposition U**, formal form at `(2H + 2)`-genericity (Theorem U′, items 3 and 4). Let `x₀`
+be `∞` or a formal point with coordinates of size at most `K`. If `r` is `G`-generic with
+`K + H + 1 ≤ G` and `2H + 1 ≤ G`, the `H`-ball of `G_r` at the evaluation of `x₀` is the formal
+`H`-ball at `x₀`. A walk from `x₀` that has not met `∞` sits at `γ x₀ + 2 s`, and one that has
+sits at `γ fcol c + 2 s`, with `(s, γ)` a honeycomb position (Lemma W), which replaces the bound
+`K + 2ℓ` behind `ballIso_formal` (`results/symmetry-audit-extend.md` §3.3, organize-archive
+bf3fe60). -/
+theorem ballIso_formal_hex {G : ℕ} {r : ZMod (2 * m - 1)} (hr : IsGeneric G r) {K : ℤ}
+    {x₀ : Option (ℤ × ℤ)} (hx₀ : ∀ p, x₀ = some p → Small K p) {H : ℕ} (hK : K + H + 1 ≤ G)
+    (hG : 2 * H + 1 ≤ G) :
+    BallIso formalStep (tripleStep m r) x₀ (Option.map (ev r) x₀) H :=
+  ballIso_of_words (formal_words_iff_hex hr hx₀ hK hG)
+
+/-- **Proposition U** at `∞`, at `(2H + 1)`-genericity (Theorem U′, item 4). For `(2H + 1)`-generic
+`r` and `r'`, the `H`-balls of `∞` in `G_r` and `G_{r'}` are isomorphic, colour by colour
+(`results/symmetry-audit-extend.md` §3.3, organize-archive bf3fe60). -/
+theorem ballIso_none_hex {H : ℕ} {r r' : ZMod (2 * m - 1)} (hr : IsGeneric (2 * H + 1) r)
+    (hr' : IsGeneric (2 * H + 1) r') : BallIso (tripleStep m r) (tripleStep m r') none none H :=
   ballIso_of_words fun w w' hw hw' ↦
-    (honey_words_iff hH hr hv w w' hw hw').symm.trans (honey_words_iff hH hr' hv' w w' hw hw')
+    (formal_words_iff_hex (K := H) (x₀ := none) hr (fun _ h ↦ by cases h) (by push_cast; omega)
+      le_rfl w w' hw hw').symm.trans
+    (formal_words_iff_hex (K := H) (x₀ := none) hr' (fun _ h ↦ by cases h) (by push_cast; omega)
+      le_rfl w w' hw hw')
+
+/-- **Proposition U** at the sites `a + b r`, at `(2H + 2)`-genericity (Theorem U′, item 3). For
+`(2H + 2)`-generic `r` and `r'` and `|a|, |b| ≤ H + 1`, the `H`-ball of `a + b r` in `G_r` is
+isomorphic to the `H`-ball of `a + b r'` in `G_{r'}` (`results/symmetry-audit-extend.md` §3.3,
+organize-archive bf3fe60). -/
+theorem ballIso_ev_hex {H : ℕ} {r r' : ZMod (2 * m - 1)} (hr : IsGeneric (2 * H + 2) r)
+    (hr' : IsGeneric (2 * H + 2) r') {p : ℤ × ℤ} (hp : Small (H + 1) p) :
+    BallIso (tripleStep m r) (tripleStep m r') (some (ev r p)) (some (ev r' p)) H :=
+  ballIso_of_words fun w w' hw hw' ↦
+    (formal_words_iff_hex (x₀ := some p) hr (fun _ h ↦ Option.some_inj.1 h ▸ hp)
+      (by push_cast; omega) (by omega) w w' hw hw').symm.trans
+    (formal_words_iff_hex (x₀ := some p) hr' (fun _ h ↦ Option.some_inj.1 h ▸ hp)
+      (by push_cast; omega) (by omega) w w' hw hw')
 
 /-! ### Proposition U -/
 
-/-- **Proposition U** (local universality). For `H ≥ 1` and `(8H + 4)`-generic `r` and `r'` there
-is a bijection `ψ` of `V_m` such that the `H`-ball of `G_r` at every vertex `x` is isomorphic, colour
-by colour, to the `H`-ball of `G_{r'}` at `ψ x`. So the rooted coloured `H`-balls of `G_r` and
-`G_{r'}` agree with multiplicity. `ψ` fixes `∞`, sends `a + b r` to `a + b r'` for
-`|a|, |b| ≤ 2H + 1`, and matches the remaining vertices, whose balls are honeycomb balls
-(`ballIso_honeycomb`). The source states this for `4H`-generic `r`; the larger constant serves the
-balls at the sites `a + b r`, and at most `(16H + 9)(16H + 8)` residues are excluded for prime `n`
-(`card_not_isGeneric_le`) (`results/k3-workaround-spike.md`, Proposition U, after Lemma M). -/
-theorem exists_ballIso_equiv {H : ℕ} (hH : 1 ≤ H) {r r' : ZMod (2 * m - 1)}
-    (hr : IsGeneric (8 * H + 4) r) (hr' : IsGeneric (8 * H + 4) r') :
+/-- **Proposition U** (local universality) at `(2H + 2)`-genericity, Theorem U′. For
+`(2H + 2)`-generic `r` and `r'` there is a bijection `ψ` of `V_m` such that the `H`-ball of `G_r` at
+every vertex `x` is isomorphic, colour by colour, to the `H`-ball of `G_{r'}` at `ψ x`. So the
+rooted coloured `H`-balls of `G_r` and `G_{r'}` agree with multiplicity. `ψ` fixes `∞`, sends
+`a + b r` to `a + b r'` for `|a|, |b| ≤ H + 1`, and matches the remaining vertices, whose balls are
+honeycomb balls (`ballIso_honeycomb_hex`). Since `2H + 2 ≤ 4H` for `H ≥ 1`, this is the source's
+`4H` form, and at most `(4H + 5)(4H + 4)` residues are excluded for prime `n`
+(`card_not_isGeneric_le`) (`results/symmetry-audit-extend.md` §3.3, organize-archive bf3fe60). -/
+theorem exists_ballIso_equiv_hex {H : ℕ} {r r' : ZMod (2 * m - 1)}
+    (hr : IsGeneric (2 * H + 2) r) (hr' : IsGeneric (2 * H + 2) r') :
     ∃ ψ : Vertex m ≃ Vertex m, ∀ x, BallIso (tripleStep m r) (tripleStep m r') x (ψ x) H := by
   classical
-  set B : Finset (ℤ × ℤ) := Finset.Icc (-(2 * H + 1 : ℤ)) (2 * H + 1) ×ˢ
-    Finset.Icc (-(2 * H + 1 : ℤ)) (2 * H + 1) with hB
-  have hBsmall : ∀ p ∈ B, Small (2 * H + 1) p := fun p hp ↦ by
+  set B : Finset (ℤ × ℤ) := Finset.Icc (-(H + 1 : ℤ)) (H + 1) ×ˢ
+    Finset.Icc (-(H + 1 : ℤ)) (H + 1) with hB
+  have hBsmall : ∀ p ∈ B, Small (H + 1) p := fun p hp ↦ by
     rw [hB, Finset.mem_product, Finset.mem_Icc, Finset.mem_Icc] at hp
     exact ⟨abs_le.2 hp.1, abs_le.2 hp.2⟩
   let g : ZMod (2 * m - 1) → Option B → Vertex m := fun s o ↦ o.map fun p ↦ ev s p.1
-  have hg : ∀ s, IsGeneric (8 * H + 4) s → Function.Injective (g s) := by
+  have hg : ∀ s, IsGeneric (2 * H + 2) s → Function.Injective (g s) := by
     intro s hs o o' h
     rcases o with _ | p <;> rcases o' with _ | p'
     · rfl
@@ -639,8 +938,8 @@ theorem exists_ballIso_equiv {H : ℕ} (hH : 1 ≤ H) {r r' : ZMod (2 * m - 1)}
         Equiv.ofInjective_apply]
     rw [hψ]
     rcases o with _ | p
-    · exact ballIso_none (hr.mono (by omega)) (hr'.mono (by omega))
-    · exact ballIso_ev hr hr' (hBsmall _ p.2)
+    · exact ballIso_none_hex (hr.mono (by omega)) (hr'.mono (by omega))
+    · exact ballIso_ev_hex hr hr' (hBsmall _ p.2)
   · have hψ : ψ x = (e₂ ⟨x, hx⟩ : Vertex m) := by
       simp only [ψ, Equiv.trans_apply, Equiv.Set.sumCompl_symm_apply_of_notMem hx,
         Equiv.sumCongr_apply, Sum.map_inr, Equiv.Set.sumCompl_apply_inr]
@@ -648,17 +947,29 @@ theorem exists_ballIso_equiv {H : ℕ} (hH : 1 ≤ H) {r r' : ZMod (2 * m - 1)}
     have hy := (e₂ ⟨x, hx⟩).2
     generalize (e₂ ⟨x, hx⟩ : Vertex m) = y at hy ⊢
     have key : ∀ (s : ZMod (2 * m - 1)) (z : Vertex m), z ∉ Set.range (g s) →
-        ∃ v, z = some v ∧ ¬IsDefect (2 * H + 1) s v := by
+        ∃ v, z = some v ∧ ¬IsHexDefect (H + 1) s v := by
       intro s z hz
       rcases z with _ | v
       · exact absurd ⟨none, rfl⟩ hz
-      · refine ⟨v, rfl, fun ⟨a, b, ha, hb, hab⟩ ↦ hz ⟨some ⟨(a, b), ?_⟩, ?_⟩⟩
+      · refine ⟨v, rfl, fun hd ↦ ?_⟩
+        obtain ⟨a, b, ha, hb, hab⟩ := hd.isDefect
+        refine hz ⟨some ⟨(a, b), ?_⟩, ?_⟩
         · rw [hB, Finset.mem_product, Finset.mem_Icc, Finset.mem_Icc]
           exact ⟨abs_le.1 (by exact_mod_cast ha), abs_le.1 (by exact_mod_cast hb)⟩
         · simp [g, ev, hab]
     obtain ⟨v, rfl, hv⟩ := key r x hx
     obtain ⟨v', rfl, hv'⟩ := key r' y hy
-    exact ballIso_some_of_not_isDefect hH (hr.mono (by omega)) (hr'.mono (by omega)) hv hv'
+    exact ballIso_some_of_not_isHexDefect (hr.mono (by omega)) (hr'.mono (by omega)) hv hv'
+
+/-- **Proposition U** (local universality). For `H ≥ 1` and `(8H + 4)`-generic `r` and `r'` there
+is a bijection `ψ` of `V_m` such that the `H`-ball of `G_r` at every vertex `x` is isomorphic, colour
+by colour, to the `H`-ball of `G_{r'}` at `ψ x`. So the rooted coloured `H`-balls of `G_r` and
+`G_{r'}` agree with multiplicity (`results/k3-workaround-spike.md`, Proposition U, after Lemma M).
+It is a case of `exists_ballIso_equiv_hex`, which needs only `(2H + 2)`-genericity. -/
+theorem exists_ballIso_equiv {H : ℕ} (hH : 1 ≤ H) {r r' : ZMod (2 * m - 1)}
+    (hr : IsGeneric (8 * H + 4) r) (hr' : IsGeneric (8 * H + 4) r') :
+    ∃ ψ : Vertex m ≃ Vertex m, ∀ x, BallIso (tripleStep m r) (tripleStep m r') x (ψ x) H :=
+  exists_ballIso_equiv_hex (hr.mono (by omega)) (hr'.mono (by omega))
 
 end RoundRobin.Canonical
 

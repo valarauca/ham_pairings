@@ -622,6 +622,13 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.card_isDefect_le
 #print axioms RoundRobin.Canonical.ballIso_honeycomb
 #print axioms RoundRobin.Canonical.ballIso_some_of_not_isDefect
+#print axioms RoundRobin.Canonical.IsHexDefect.isDefect
+#print axioms RoundRobin.Canonical.ballIso_honeycomb_hex
+#print axioms RoundRobin.Canonical.ballIso_some_of_not_isHexDefect
+#print axioms RoundRobin.Canonical.ballIso_formal_hex
+#print axioms RoundRobin.Canonical.ballIso_none_hex
+#print axioms RoundRobin.Canonical.ballIso_ev_hex
+#print axioms RoundRobin.Canonical.exists_ballIso_equiv_hex
 #print axioms RoundRobin.Canonical.exists_ballIso_equiv
 #print axioms RoundRobin.Canonical.ham_factor_two_zero
 #print axioms RoundRobin.Canonical.chord_mem_ladderSquare
