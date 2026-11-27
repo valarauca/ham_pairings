@@ -207,20 +207,8 @@ namespace PerfectMatching
 
 variable {V : Type*}
 
-/-- `κ(P ∪ Q) = κ(Q ∪ P)`, for the cycle count `cycleCount` of `Repair.CycleCount`
-(`results/hybrid-joint-incoherence.md`, Lemma 5). -/
-theorem cycleCount_comm (P Q : PerfectMatching V) : cycleCount P Q = cycleCount Q P := by
-  rw [cycleCount, cycleCount, sup_comm]
-
-/-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1`, without assuming `V` nonempty. It extends
-`ham_iff_cycleCount_eq_one` of `Repair.CycleCount` to the empty vertex set, where both sides
-fail (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
-theorem ham_iff_cycleCount_eq_one' (P Q : PerfectMatching V) :
-    Ham P Q ↔ cycleCount P Q = 1 := by
-  rcases isEmpty_or_nonempty V with hV | hV
-  · rw [cycleCount_of_isEmpty]
-    exact ⟨fun h ↦ isEmptyElim (Classical.choice h.nonempty), fun h ↦ absurd h (by omega)⟩
-  · exact ham_iff_cycleCount_eq_one P Q
+@[deprecated ham_iff_cycleCount_eq_one (since := "2026-11-26")]
+alias ham_iff_cycleCount_eq_one' := ham_iff_cycleCount_eq_one
 
 section Off
 
@@ -856,7 +844,7 @@ theorem insertion_ham_iff (hy : yp ≠ ym) (R : PerfectMatching V) (a b : lowerS
     (h2p : C₂.mate p = ym) (h2q : C₂.mate (Cm.mate p) = yp)
     (h2 : ∀ v, v ≠ p → v ≠ Cm.mate p → C₂.mate v = Cm.mate v)
     (hH : Ham Rm Cm) : Ham R C₁ ↔ ¬Ham R C₂ := by
-  have hκ := (ham_iff_cycleCount_eq_one' Rm Cm).mp hH
+  have hκ := (ham_iff_cycleCount_eq_one Rm Cm).mp hH
   have hr : (Rm.toGraph ⊔ Cm.toGraph).Reachable p a := hH.preconnected p a
   obtain ⟨-, h1', h3⟩ := insertion_cycleCount hy R a b hRa hRb Rm hRab hRm Cm p C₁
     (Or.inl ⟨rfl, rfl⟩) h1p h1q h1
@@ -865,7 +853,7 @@ theorem insertion_ham_iff (hy : yp ≠ ym) (R : PerfectMatching V) (a b : lowerS
   have e1 := h1' hr a hRa.symm
   have e2 := h2' hr b hRb.symm
   have hd := h3 hr
-  rw [ham_iff_cycleCount_eq_one', ham_iff_cycleCount_eq_one']
+  rw [ham_iff_cycleCount_eq_one, ham_iff_cycleCount_eq_one]
   by_cases ha : (cutGraph Rm Cm a b p).Reachable p a
   · rw [e1.1 ha, e2.2 (hd.mp ha), hκ]
     simp

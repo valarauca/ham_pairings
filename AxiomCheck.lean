@@ -728,7 +728,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.exists_not_sameSig_of_rho
 #print axioms jointCount_eq_sum_redCount
 #print axioms card_fiber_eq
-#print axioms not_ham_of_mate_eq_of_two_lt
 #print axioms redType_of_even
 #print axioms redType_of_odd
 #print axioms redType_of_notMem

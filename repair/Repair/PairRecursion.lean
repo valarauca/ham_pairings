@@ -16,8 +16,8 @@ shared edge.
 * `red F hvu` : the reduction of `F` by a red edge `vu`, a matching of `V ∖ {v, u}` that
   replaces `v F(v)` and `u F(u)` by `F(v) F(u)`.
 * `card_fiber_eq` : the matchings `P ∋ vu` with both unions Hamiltonian correspond to the pairs
-  counted by `jointCount (red F₀ hvu) (red F₁ hvu)`. `not_ham_of_mate_eq_of_two_lt` : the two
-  neighbours `F₀(v), F₁(v)` are forbidden.
+  counted by `jointCount (red F₀ hvu) (red F₁ hvu)`. `not_ham_of_mate_eq_of_two_lt` (now in
+  `Pairing.Basic`) : the two neighbours `F₀(v), F₁(v)` are forbidden.
 * Lemma K2 : `redType_of_even`, `redType_of_odd`, `redType_of_notMem` give the type of the
   reduced pair for `u = c_d` with `d` even, `u = c_{2x+1}`, and `u` in another cycle.
 * `jointCount_eq_k2Count` : `jointCount F₀ F₁ = k2Count (pairType F₀ F₁)`, where
@@ -573,19 +573,6 @@ theorem card_fiber_eq (F0 F1 : PerfectMatching V) {v u : V} (hvu : v ≠ u) (h0 
         rw [hxu, switch_mate_right F0 hvu, hPu]
   · intro X _
     exact restrict_glue _ _ hK X
-
-omit [DecidableEq V] in
-/-- The two neighbours `F₀(v)` and `F₁(v)` are forbidden partners of `v` once `|V| > 2`, from
-`not_ham_of_mate_eq` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem not_ham_of_mate_eq_of_two_lt {P F : PerfectMatching V} {v : V}
-    (hV : 2 < Fintype.card V) (h : P.mate v = F.mate v) : ¬Ham P F := by
-  classical
-  have hcard : #({v, F.mate v} : Finset V) < #(univ : Finset V) := by
-    rw [card_univ]
-    exact lt_of_le_of_lt card_le_two hV
-  obtain ⟨w, -, hw⟩ := exists_mem_notMem_of_card_lt_card hcard
-  simp only [mem_insert, mem_singleton, not_or] at hw
-  exact not_ham_of_mate_eq h hw.1 hw.2
 
 /-- `N` of the reduced pair by the red edge `vu`, and `0` for `u = v`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/

@@ -128,22 +128,6 @@ theorem ham_iff_contract_pairCompl {P R : PerfectMatching V} {a b : V} (hP : P.m
   rw [glue_restrict] at h
   rw [ham_comm, h, ham_comm]
 
-omit [Fintype V] [DecidableEq V] in
-/-- A matching that contains an edge `{a, P a}` of `P` closes the `2`-cycle `{a, P a}` with `P`,
-so `R ∪ P` is not one cycle once some vertex lies off it (`results/hybrid-pair-incoherence.md`,
-Lemma 2, "if `f ∈ R`"). -/
-theorem not_ham_of_mate_eq {P R : PerfectMatching V} {a w : V} (h : R.mate a = P.mate a)
-    (hwa : w ≠ a) (hwb : w ≠ P.mate a) : ¬Ham R P := by
-  have hc : ∀ X : PerfectMatching V, X.mate a = P.mate a →
-      ∀ v ∈ ({a, P.mate a} : Set V), X.mate v ∈ ({a, P.mate a} : Set V) := by
-    intro X hX v hv
-    rcases hv with rfl | hv
-    · exact Or.inr hX
-    · rw [Set.mem_singleton_iff.mp hv, ← hX, mate_mate]
-      exact Or.inl rfl
-  exact not_ham_of_closed R P _ (hc R h) (hc P rfl) (u := a) (w := w) (Or.inl rfl)
-    (by simp [hwa, hwb])
-
 section Insert
 
 variable (P : PerfectMatching V) {a b : V} (hP : P.mate a = b)

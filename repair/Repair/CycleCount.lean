@@ -45,16 +45,21 @@ theorem cycleCount_pos [Finite V] [Nonempty V] (P Q : PerfectMatching V) :
   exact Nat.card_pos
 
 /-- `P ∪ Q` is one cycle iff `κ(P ∪ Q) = 1` (`results/switching-j0-spike.md`, Identity D, where
-`A_0` is the event `κ_0 = 1`). -/
-theorem ham_iff_cycleCount_eq_one [Nonempty V] (P Q : PerfectMatching V) :
+`A_0` is the event `κ_0 = 1`). On the empty vertex set both sides fail. -/
+theorem ham_iff_cycleCount_eq_one (P Q : PerfectMatching V) :
     Ham P Q ↔ cycleCount P Q = 1 := by
   rw [Ham, cycleCount, Nat.card_eq_one_iff_unique, SimpleGraph.connected_iff]
   constructor
-  · rintro ⟨h, -⟩
+  · rintro ⟨h, ⟨v⟩⟩
     exact ⟨h.subsingleton_connectedComponent,
-      ⟨(P.toGraph ⊔ Q.toGraph).connectedComponentMk (Classical.arbitrary V)⟩⟩
-  · rintro ⟨hs, -⟩
-    exact ⟨fun u v ↦ SimpleGraph.ConnectedComponent.eq.mp (Subsingleton.elim _ _), inferInstance⟩
+      ⟨(P.toGraph ⊔ Q.toGraph).connectedComponentMk v⟩⟩
+  · rintro ⟨hs, ⟨c⟩⟩
+    exact ⟨fun u v ↦ SimpleGraph.ConnectedComponent.eq.mp (Subsingleton.elim _ _),
+      SimpleGraph.ConnectedComponent.ind (β := fun _ ↦ Nonempty V) (fun v ↦ ⟨v⟩) c⟩
+
+/-- `κ(P ∪ Q) = κ(Q ∪ P)` (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
+theorem cycleCount_comm (P Q : PerfectMatching V) : cycleCount P Q = cycleCount Q P := by
+  rw [cycleCount, cycleCount, sup_comm]
 
 /-- `κ(P ∪ Q) = 0` on the empty vertex set (`results/switching-j0-spike.md`, Identity D). -/
 theorem cycleCount_of_isEmpty [IsEmpty V] (P Q : PerfectMatching V) : cycleCount P Q = 0 := by

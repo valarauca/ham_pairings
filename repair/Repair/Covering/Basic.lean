@@ -196,19 +196,11 @@ theorem card_ham_le (ha : Odd a) (hn : Odd n) (h : a ∣ n) [NeZero a] [NeZero n
     simp only [s, Finset.mem_filter, Finset.mem_univ, true_and] at hts ⊢
     exact ham_proj ha hn h hP hts
 
-/-- `X ∪ X` is not one cycle once `V` has a third vertex. (`covering-spike.md` §1) -/
+/-- `X ∪ X` is not one cycle once `V` has a third vertex (`covering-spike.md` §1). It is
+`not_ham_of_mate_eq` at `R = P`. -/
 theorem not_ham_self {V : Type*} (X : PerfectMatching V) {u w : V} (hwu : w ≠ u)
-    (hwX : w ≠ X.mate u) : ¬Ham X X := by
-  refine not_ham_of_closed X X {u, X.mate u} (fun v hv ↦ ?_) (fun v hv ↦ ?_) (w := w)
-    (Or.inl rfl) ?_
-  · rcases hv with rfl | rfl
-    · exact Or.inr rfl
-    · exact Or.inl (X.mate_mate u)
-  · rcases hv with rfl | rfl
-    · exact Or.inr rfl
-    · exact Or.inl (X.mate_mate u)
-  · rintro (h | h)
-    exacts [hwu h, hwX h]
+    (hwX : w ≠ X.mate u) : ¬Ham X X :=
+  not_ham_of_mate_eq rfl hwu hwX
 
 /-- The "only if" half of the gcd law, from Corollary 2 (`covering-spike.md` §1). If
 `F_s ∪ F_t` is one cycle then `gcd(t - s, n) = 1`. With `d = gcd(t - s, n) > 1`, both `F_s`
