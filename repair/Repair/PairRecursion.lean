@@ -1473,7 +1473,8 @@ theorem jointCount_of_card_eq_zero (F0 F1 : PerfectMatching V) (hV : Fintype.car
   exact (Fintype.card_eq_zero_iff.mp hV).elim x
 
 /-- `N((1)) = 1`: on two vertices the only matching is Hamiltonian with itself
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
+(`results/k3-counterexample-hunt.md`, Lemma K2). Since `P P = 1` has partition `{1, 1}`, `Ham P P`
+is `ham_iff_partition` of the bridge, ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf). -/
 theorem jointCount_of_card_eq_two (F0 F1 : PerfectMatching V) (hV : Fintype.card V = 2) :
     jointCount F0 F1 = 1 := by
   have hPM : Fintype.card (PerfectMatching V) = 1 := by
@@ -1481,22 +1482,10 @@ theorem jointCount_of_card_eq_two (F0 F1 : PerfectMatching V) (hV : Fintype.card
     rfl
   have hall : ∀ P Q : PerfectMatching V, P = Q := fun P Q ↦
     Fintype.card_le_one_iff.mp hPM.le P Q
-  have hham : ∀ P : PerfectMatching V, Ham P P := by
-    intro P
-    have hx : ∀ x y : V, y = x ∨ y = P.mate x := by
-      intro x y
-      by_contra h
-      push Not at h
-      have : #({x, P.mate x, y} : Finset V) ≤ Fintype.card V := card_le_univ _
-      rw [card_insert_of_notMem (by simp [h.1.symm, (P.mate_ne x).symm]),
-        card_pair (Ne.symm h.2), hV] at this
-      omega
-    rw [Ham, SimpleGraph.connected_iff]
-    refine ⟨fun x y ↦ ?_, ?_⟩
-    · rcases hx x y with rfl | rfl
-      · exact SimpleGraph.Reachable.refl _
-      · exact (adj_mate_left _ _ x).reachable
-    · exact Fintype.card_pos_iff.mp (by omega)
+  have hham : ∀ P : PerfectMatching V, Ham P P := fun P ↦ by
+    rw [ham_iff_partition (n := 1) hV, mate_mul_self, Equiv.Perm.parts_partition,
+      Equiv.Perm.cycleType_one, Equiv.Perm.support_one, Finset.card_empty, hV]
+    rfl
   rw [jointCount, filter_true_of_mem, card_univ, hPM]
   intro P _
   rw [hall P F0, hall F1 F0]
