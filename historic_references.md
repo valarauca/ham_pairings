@@ -234,3 +234,13 @@ main `77d3de5`.
 | `PM.sameCycle_of_sameCycle_mate` | `PM.sameCycle_mate_right_iff` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:258` |
 | `PM.sameCycle_or_of_ham` | `PM.ham_iff_forall_sameCycle` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:269` |
 | `RRC.exists_defect_of_cycle` | `PM.reachable_iff_sameCycle` (the closed set is the component of `y`) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:396` |
+| `RRC.certPerm_smul` | `PM.smul_mate_mul_smul_mate` | `repair/Repair/SqrtObstructions/NoGo.lean` | `77d3de5:repair/Repair/SqrtObstructions/NoGo.lean:328` |
+
+### Deprecated aliases
+
+| old name | alias of | location | last old form |
+|---|---|---|---|
+| `RRC.cycleCount_smul` | `PM.cycleCount_smul` (same statement) | `repair/Repair/CycleStep.lean` | `77d3de5:repair/Repair/CycleStep.lean:427` |
+
+`Repair.CycleStep` imports the bridge, so its use of the alias would be ambiguous under
+`open PerfectMatching`. It names `PerfectMatching.cycleCount_smul` instead.
