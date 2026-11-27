@@ -174,3 +174,40 @@ The ham-spin copy is the `7168bcb` file, so `PM.cycleCount_comm`, removed here i
 still declared there. The endpoints `PM.ham_iff_cycleCount_eq_one`, `PM.cycleCount_le_contractAt`,
 `PM.cycleCount_le_contractAt_add_one` and `PM.sum_pow_cycleCount_le` moved from this
 `AxiomCheck.lean` to the ham-spin `AxiomCheck.lean` (`fd082bf`).
+
+## Affine maps and the automorphism group moved to ham-spin (COD-259, branch `agl-main`)
+
+Done in `760cd71`, for ham-spin branch `agl` (`c1941cf` moves the declarations, `7f4fd9b` adds the
+AGL instance of the polar section). Every declaration name and namespace is unchanged, so there
+are no aliases. Every "last old form" is at main `d1cda40`. ham-spin `HISTORY.md` lists the same
+moves.
+
+### Module moved to ham-spin
+
+| old module | new module | last old form |
+|---|---|---|
+| `Repair.Automorphism` (`repair/Repair/Automorphism.lean`) | ham-spin `Pairing.Automorphism` (`core/Pairing/Automorphism.lean`, `c1941cf`) | `d1cda40:repair/Repair/Automorphism.lean` |
+
+`Repair.Automorphism` stays as a module that imports `Pairing.Automorphism` and
+`Repair.FactorCap.Tail`, so its importers are unchanged.
+
+### Declarations moved to ham-spin (same full name)
+
+| name | old location | new location | last old form |
+|---|---|---|---|
+| `RRC.shift`, `RRC.shift_none`, `RRC.shift_some`, `RRC.shift_inv_none`, `RRC.shift_inv_some`, `RRC.shift_smul_factor` | `suppression/Suppression/HamCount.lean` | ham-spin `core/Pairing/Affine.lean` (`c1941cf`) | `d1cda40:suppression/Suppression/HamCount.lean:40` to `:66` |
+| `RRC.scale`, `RRC.scale_none`, `RRC.scale_some`, `RRC.scale_inv_none`, `RRC.scale_inv_some`, `RRC.scale_smul_factor`, `RRC.scale_mate_factor`, `RRC.affine_smul_factor`, `RRC.isZeroState_affine_smul_iff` | `repair/Repair/FactorCap/Scale.lean` | ham-spin `core/Pairing/Affine.lean` (`c1941cf`) | `d1cda40:repair/Repair/FactorCap/Scale.lean:26` to `:73`, `:90` |
+| `RRC.two_mul_natCast_self`, `RRC.natCast_injOn` | `repair/Repair/ZeroState.lean` | ham-spin `core/Pairing/Affine.lean` (`c1941cf`) | `d1cda40:repair/Repair/ZeroState.lean:94`, `:103` |
+| `FactorCap.gadget` | `repair/Repair/FactorCap/Tail.lean` | ham-spin `core/Pairing/Automorphism.lean` (`c1941cf`) | `d1cda40:repair/Repair/FactorCap/Tail.lean:49` |
+| every declaration of `Repair.Automorphism`, from `RRC.IsAut` to `RRC.isAut_three_moebius` | `repair/Repair/Automorphism.lean` | ham-spin `core/Pairing/Automorphism.lean` (`c1941cf`) | `d1cda40:repair/Repair/Automorphism.lean:41` to `:506` |
+
+`Suppression.HamCount`, `Repair.ZeroState` and `Repair.FactorCap.Tail` now import
+`Pairing.Affine` or `Pairing.Automorphism`. `RRC.ham_factor_of_isUnit_sub` stays in
+`repair/Repair/FactorCap/Scale.lean`.
+
+### AxiomCheck
+
+862 endpoints at `d1cda40`, 843 after. The 19 endpoints of the moved declarations
+(`RRC.shift_smul_factor`, `RRC.scale_smul_factor`, `RRC.isZeroState_affine_smul_iff` and the 16
+from `RRC.isAut_affine` to `RRC.isAut_three_moebius`) moved to the ham-spin `AxiomCheck.lean`
+(`c1941cf`), which also checks the four new AGL theorems (`7f4fd9b`).

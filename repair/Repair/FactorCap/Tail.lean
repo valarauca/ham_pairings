@@ -1,3 +1,4 @@
+import Pairing.Automorphism
 import Repair.FactorCap.Construction
 import Suppression.Density
 
@@ -44,10 +45,6 @@ theorem two_mul_capCenter : 2 * capCenter m = 7 := by
   rw [capCenter]
   push_cast
   linear_combination (two_mul_natCast_self (m := m))
-
-/-- The default gadget `G0 = {1, …, 6}`. -/
-def gadget (m : ℕ) : Finset (Vertex m) :=
-  (Finset.Icc 1 6).image fun k : ℕ ↦ some (k : ZMod (2 * m - 1))
 
 /-- `F_{s0}` maps the gadget to itself, `v ↦ 7 - v`. -/
 theorem factor_capCenter_mem_gadget (hm : 5 ≤ m) {v : Vertex m} (hv : v ∈ gadget m) :
