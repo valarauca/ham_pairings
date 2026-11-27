@@ -1,3 +1,4 @@
+import Pairing.InvolutionProduct
 import Repair.Insertion
 
 /-!
@@ -899,14 +900,14 @@ theorem exists_context_extension (B R : PerfectMatching V) (n : ℕ) :
 
 omit [DecidableEq V] in
 /-- `κ(P ∪ Q) ≤ |V|/2`: every cycle has at least two vertices.
-(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
+(`results/hybrid-joint-incoherence.md`, Corollary 5.1). By `two_mul_cycleCount` of the bridge,
+ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf), `2 κ` counts the parts of a partition
+of `|V|`. -/
 theorem two_mul_cycleCount_le (P Q : PerfectMatching V) :
     2 * cycleCount P Q ≤ Fintype.card V := by
-  have h := two_mul_card_le (P.toGraph ⊔ Q.toGraph) P.mate P.mate_ne
-    (fun v ↦ (adj_mate_left P Q v).reachable) (fun _ ↦ True) Finset.univ
-    (fun v _ ↦ Finset.mem_univ v)
-  rw [Finset.card_univ, Nat.card_congr (Equiv.subtypeUnivEquiv fun _ ↦ trivial)] at h
-  exact h
+  classical
+  have h := Multiset.card_nsmul_le_sum (a := 1) fun _ hx ↦ (P.mate * Q.mate).partition.parts_pos hx
+  rwa [smul_eq_mul, mul_one, Nat.Partition.parts_sum, ← two_mul_cycleCount] at h
 
 /-- **Corollary 5.1 (free defects), corrected.** `results/hybrid-joint-incoherence.md`.
 `E = E_0 ⊔ Y` with `B = F_0|_E`, `A = V(E_0)`, `|Y| = n` and `|E_0| = m`. The contexts of `E`
