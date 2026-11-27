@@ -3,12 +3,6 @@ import Repair
 
 open Pairing PerfectMatching
 
-#print axioms RoundRobin.factor_injective
-#print axioms RoundRobin.distinct_factors_edge_disjoint
-#print axioms RoundRobin.card_block
-#print axioms RoundRobin.Canonical.card_vertex
-#print axioms RoundRobin.Canonical.card_block
-#print axioms RoundRobin.Canonical.distinct_factors_edge_disjoint
 #print axioms restrict_glue
 #print axioms glueEquiv
 #print axioms edgesOff_subset_iff
