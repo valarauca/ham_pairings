@@ -74,6 +74,17 @@ theorem affine_smul_factor (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) (b t 
     (shift m b * scale m a) • factor m t = factor m (a * t + b) := by
   rw [mul_smul, scale_smul_factor, shift_smul_factor]
 
+/-- `F_s ∪ F_t` is one cycle whenever `s - t` is a unit, the "if" half of the gcd law of
+`cod-149-core-sharpening.md`, Theorem B(i). The "only if" half is `isUnit_sub_of_ham`. -/
+theorem ham_factor_of_isUnit_sub (m : ℕ) [NeZero m] {s t : ZMod (2 * m - 1)}
+    (hu : IsUnit (s - t)) : Ham (factor m s) (factor m t) := by
+  have h1 := affine_smul_factor m hu.unit t 1
+  have h0 := affine_smul_factor m hu.unit t 0
+  rw [IsUnit.unit_spec, mul_one, sub_add_cancel] at h1
+  rw [mul_zero, zero_add] at h0
+  rw [← h1, ← h0, ham_smul]
+  exact ham_factor_one m
+
 /-- Affine maps preserve zero states, `IsZeroState F (σ • P) ↔ IsZeroState F P` for
 `σ = (v ↦ a v + b)`. -/
 theorem isZeroState_affine_smul_iff (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ)

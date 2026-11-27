@@ -90,17 +90,12 @@ theorem natCast_ne_zero_of_lt {k : ℕ} (hk : 0 < k) (hk' : k < 2 * m - 1) :
   simpa using natCast_ne hk' (by omega : 0 < 2 * m - 1) (by omega : k ≠ 0)
 
 /-- At prime `n`, `F_s ∪ F_t` is one cycle for `s ≠ t` (the gcd law of
-`cod-149-core-sharpening.md`, Theorem B(i), at prime `n`). -/
+`cod-149-core-sharpening.md`, Theorem B(i), at prime `n`). For composite `n` see
+`ham_factor_of_isUnit_sub`. -/
 theorem ham_factor_of_ne (hp : (2 * m - 1).Prime) {s t : ZMod (2 * m - 1)} (h : s ≠ t) :
     Ham (factor m s) (factor m t) := by
   have := Fact.mk hp
-  have hu : IsUnit (s - t) := (sub_ne_zero.mpr h).isUnit
-  have h1 := affine_smul_factor m hu.unit t 1
-  have h0 := affine_smul_factor m hu.unit t 0
-  rw [IsUnit.unit_spec, mul_one, sub_add_cancel] at h1
-  rw [mul_zero, zero_add] at h0
-  rw [← h1, ← h0, ham_smul]
-  exact ham_factor_one m
+  exact ham_factor_of_isUnit_sub m (sub_ne_zero.mpr h).isUnit
 
 /-- `σ_t = P F_t`. Its orbits are the cycles of `P ∪ F_t`, and an orbit of length `r` is a cycle
 with `r` edges of `P` (`factor-tail-L-test.md`, Theorem C′). -/

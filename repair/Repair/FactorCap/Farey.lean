@@ -14,7 +14,7 @@ the cell checker.
 
 `not_farey_hit` is the other half of the covering argument. For a prime `n > 16` and
 `0 < μ < n`, `μ/n` is never a fraction of denominator at most 16, so it lies strictly inside
-one cell.
+one cell. `not_farey_hit_of_coprime` needs only `n > 16` coprime to `μ`.
 -/
 
 namespace Pairing
@@ -46,15 +46,20 @@ theorem form_pos_of_endpoints {p q p' q' μ n A B : ℤ} (hdet : p' * q - p * q'
   rw [form_param]
   nlinarith [mul_nonneg hX (sub_nonneg.2 hu), mul_nonneg hY (sub_nonneg.2 hw)]
 
-/-- For a prime `n > 16` and `0 < μ < n`, `μ/n` is not a fraction with denominator
-`1 ≤ q ≤ 16`. -/
-theorem not_farey_hit {n μ p q : ℕ} (hn : n.Prime) (h16 : 16 < n) (hμ0 : 0 < μ) (hμn : μ < n)
+/-- For `n > 16` coprime to `μ`, `μ/n` is not a fraction with denominator `1 ≤ q ≤ 16`. -/
+theorem not_farey_hit_of_coprime {n μ p q : ℕ} (hcop : Nat.Coprime n μ) (h16 : 16 < n)
     (hq0 : 0 < q) (hq : q ≤ 16) : p * n ≠ q * μ := by
   intro h
   have hdvd : n ∣ q * μ := ⟨p, by rw [← h, Nat.mul_comm]⟩
-  rcases hn.dvd_mul.1 hdvd with hd | hd
-  · exact absurd (Nat.le_of_dvd hq0 hd) (by omega)
-  · exact absurd (Nat.le_of_dvd hμ0 hd) (by omega)
+  have := Nat.le_of_dvd hq0 (hcop.dvd_of_dvd_mul_right hdvd)
+  omega
+
+/-- For a prime `n > 16` and `0 < μ < n`, `μ/n` is not a fraction with denominator
+`1 ≤ q ≤ 16`. It is `not_farey_hit_of_coprime` at a prime. -/
+theorem not_farey_hit {n μ p q : ℕ} (hn : n.Prime) (h16 : 16 < n) (hμ0 : 0 < μ) (hμn : μ < n)
+    (hq0 : 0 < q) (hq : q ≤ 16) : p * n ≠ q * μ :=
+  not_farey_hit_of_coprime ((Nat.Prime.coprime_iff_not_dvd hn).2 fun hd ↦
+    absurd (Nat.le_of_dvd hμ0 hd) (by omega)) h16 hq0 hq
 
 end FactorCap
 

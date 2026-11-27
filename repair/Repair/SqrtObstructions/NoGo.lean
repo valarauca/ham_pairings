@@ -88,6 +88,12 @@ def FamilyRepairBound (A : ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))
     (G : Finset (Vertex m)) (K : ℕ) : Prop :=
   ∀ T : PerfectMatching (Gᶜ : Finset (Vertex m)), ∃ P ∈ zeroSet A, tailDist P T ≤ K
 
+/-- For the true family, `FamilyRepairBound` is the repair bound `RepairBound` of
+`Suppression.Density`. -/
+theorem familyRepairBound_hamEvent_iff (G : Finset (Vertex m)) (K : ℕ) :
+    FamilyRepairBound (hamEvent m) G K ↔ RepairBound m G K :=
+  ⟨fun h T ↦ let ⟨P, hP, hd⟩ := h T; ⟨⟨P, hP⟩, hd⟩, fun h T ↦ let ⟨P, hd⟩ := h T; ⟨P.1, P.2, hd⟩⟩
+
 /-- `U(Y′ ≠ Y)`, the uniform mass on which the profiles of two families differ
 (`sqrt-m-obstructions.md` §0). -/
 noncomputable def profileDist (A A' : ZMod (2 * m - 1) → Set (PerfectMatching (Vertex m))) : ℝ :=
