@@ -56,3 +56,4 @@ import Repair.Reflection
 import Repair.Translation
 import Repair.RoundRobinSpan
 import Repair.DualOrbit
+import Repair.WittBridgeSix
