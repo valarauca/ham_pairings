@@ -364,6 +364,41 @@ example : True := by
     (by norm_num) h4
   trivial
 
+-- R4 the radius of the corollary of Theorem A′ is K_m ≥ 1 at m = 2^15, and the hypotheses of
+-- corollaryAPrime, corollaryAPrime_good and their Fin forms hold there with K = K_m
+example : 1 ≤ kAPrime 32768 := by
+  have h2 := log_two_lt_d9
+  have h2' := log_two_gt_d9
+  have hl1 : log ((32768 : ℕ) : ℝ) = 15 * log 2 := by
+    rw [show ((32768 : ℕ) : ℝ) = 2 ^ 15 by norm_num, log_pow]
+    push_cast
+    ring
+  have hl2 : log (2 * ((32768 : ℕ) : ℝ)) = 16 * log 2 := by
+    rw [show (2 * ((32768 : ℕ) : ℝ)) = 2 ^ 16 by norm_num, log_pow]
+    push_cast
+    ring
+  have hs : (256 : ℝ) ≤ √(π * ((32768 : ℕ) : ℝ)) := by
+    rw [le_sqrt (by norm_num) (by positivity)]
+    have := two_le_pi
+    push_cast
+    linarith
+  have hpos : 0 < log (2 * ((32768 : ℕ) : ℝ)) := by rw [hl2]; linarith
+  have h4 : (4 : ℤ) ≤ ⌊(√(π * ((32768 : ℕ) : ℝ)) - 1 - 2 * log ((32768 : ℕ) : ℝ)) /
+      log (2 * ((32768 : ℕ) : ℝ))⌋ := by
+    rw [Int.le_floor, le_div_iff₀ hpos, hl1, hl2]
+    push_cast at hs ⊢
+    linarith
+  have h1 : 1 ≤ kAPrime 32768 := by
+    unfold kAPrime
+    omega
+  have h0 : 0 ≤ kAPrime 32768 := by omega
+  have hK : (((kAPrime 32768).toNat : ℕ) : ℤ) ≤ kAPrime 32768 := (Int.toNat_of_nonneg h0).le
+  have := corollaryAPrime (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) hK
+  have := corollaryAPrime_good (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) hK
+  have := corollaryAPrime_fin (m := 32768) (by norm_num) h0
+  have := corollaryAPrime_fin_good (m := 32768) (by norm_num) h0
+  exact h1
+
 end VacuityCheck.RandomFamily
 
 namespace VacuityCheck.LowerBound
