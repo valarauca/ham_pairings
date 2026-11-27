@@ -282,6 +282,7 @@ The walk is read off the bridge by `PM.alt_two_mul` (`c_{2k} = (F₁ F₀)^k v`)
 | `PM.mate_mem_cycleOf` | the two edges at `x` (the cycle is a reachability class) | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:381` |
 | `PM.mem_cycleOf_alt`, `PM.exists_lt_of_mem_cycleOf` | `PM.reachable_alt`, `PM.reachable_iff_sameCycle` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:634`, `:640` |
 | `PM.cycLen_self` | `PM.mate_mul_self` (`A A = 1`, period `1`) | `repair/Repair/PairLevelOne.lean` | `4d534d1:repair/Repair/PairLevelOne.lean:283` |
+| `PM.card_pairType` | the fibres of `connectedComponentMk` (not the bridge) | `repair/Repair/PairFormula.lean` | `4d534d1:repair/Repair/PairFormula.lean:56` |
 
 ### Same name, weaker hypotheses
 

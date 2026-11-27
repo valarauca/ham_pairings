@@ -57,32 +57,16 @@ theorem card_pairType (A B : PerfectMatching W) :
     Multiset.card (pairType A B) = cycleCount A B := by
   classical
   set G := A.toGraph ⊔ B.toGraph
-  let φ : G.ConnectedComponent → Finset W :=
-    fun c ↦ univ.filter fun x ↦ G.connectedComponentMk x = c
-  have hφ : ∀ w, cycleOf A B w = φ (G.connectedComponentMk w) := by
-    intro w
-    ext x
-    simp only [mem_cycleOf, φ, mem_filter, mem_univ, true_and, SimpleGraph.ConnectedComponent.eq]
-    exact ⟨fun h ↦ h.symm, fun h ↦ h.symm⟩
-  have himg : univ.image (cycleOf A B) = univ.image φ := by
-    ext S
-    simp only [mem_image, mem_univ, true_and]
-    constructor
-    · rintro ⟨w, rfl⟩
-      exact ⟨_, (hφ w).symm⟩
-    · rintro ⟨c, rfl⟩
-      obtain ⟨w, rfl⟩ := c.exists_rep
-      exact ⟨w, hφ w⟩
-  have hinj : Function.Injective φ := by
-    intro c c' h
-    obtain ⟨w, rfl⟩ := c.exists_rep
-    have h' : φ (G.connectedComponentMk w) = φ c' := h
-    have hw : w ∈ φ (G.connectedComponentMk w) := by simp [φ]
-    rw [h'] at hw
-    change G.connectedComponentMk w = c'
-    simpa [φ] using hw
-  rw [pairType, Multiset.card_map, Finset.card_val, himg, card_image_of_injective _ hinj,
-    card_univ, cycleCount, Nat.card_eq_fintype_card]
+  have hφ : cycleOf A B =
+      (fun c ↦ ({x | G.connectedComponentMk x = c} : Finset W)) ∘ G.connectedComponentMk := by
+    ext w x
+    simp [mem_cycleOf, G, SimpleGraph.ConnectedComponent.eq, SimpleGraph.reachable_comm]
+  rw [pairType, Multiset.card_map, Finset.card_val, hφ, ← Finset.image_image,
+    image_univ_of_surjective fun c ↦ c.exists_rep, card_image_of_injective, card_univ, cycleCount,
+    Nat.card_eq_fintype_card]
+  intro c c' h
+  obtain ⟨w, rfl⟩ := c.exists_rep
+  exact (mem_filter.mp ((Finset.ext_iff.mp h w).mp (mem_filter.mpr ⟨mem_univ _, rfl⟩))).2
 
 namespace HamSpectral
 
