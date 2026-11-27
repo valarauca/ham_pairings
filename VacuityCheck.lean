@@ -420,4 +420,46 @@ example : True := by
   have := LowerBound.shortVector_or_forall_disk (n := 2137) (by norm_num) le_rfl 5
   trivial
 
+-- B11 exists_cert8 for the matching {0, 1}, {2, 3}, {4, 5}, {6, 7} of the eight ends
+example : True := by
+  have := LowerBound.exists_cert8 (r := LowerBound.fin8 [1, 0, 3, 2, 5, 4, 7, 6]) (by decide)
+    (by decide)
+  trivial
+
+-- B12 lineGood_of_le_900 at the direction (c, a) = (29, -7), the worst line of the table
+example : LowerBound.LineGood 29 (-7) 696 :=
+  LowerBound.lineGood_of_le_900 (by decide) (by norm_num)
+
+-- B13 exists_cell7 for the involution of Fin 7 fixing 0
+example : True := by
+  have := LowerBound.exists_cell7 (r := LowerBound.fin7 [0, 2, 1, 4, 3, 6, 5]) (by decide)
+    (by decide)
+  trivial
+
+-- B14 exists_ham_finite at n = 2137, s0 = 1072, x = 100, with P = F_{s0}
+example : ∃ t, Ham (RoundRobin.factor (n := 2137) ⟨1068, rfl⟩ 1072)
+    (RoundRobin.factor ⟨1068, rfl⟩ t) :=
+  LowerBound.exists_ham_finite ⟨1068, rfl⟩ (by norm_num) le_rfl (by decide) (x := 100)
+    (by decide) (by decide) (by decide) fun _ _ _ _ ↦ rfl
+
+-- B15 exists_ham_inf at n = 29, s0 = 18, with P = F_{s0}
+example : ∃ t, Ham (RoundRobin.factor (n := 29) ⟨14, rfl⟩ 18) (RoundRobin.factor ⟨14, rfl⟩ t) :=
+  LowerBound.exists_ham_inf ⟨14, rfl⟩ (by norm_num) (by norm_num) (by decide)
+    fun _ _ _ _ ↦ rfl
+
+-- B16 exists_ham_of_agree_one at n = 2137 with the tail edge e_∞ and P = F_{s0}
+example : ∃ t, Ham (RoundRobin.factor (n := 2137) ⟨1068, rfl⟩ 1072)
+    (RoundRobin.factor ⟨1068, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree_one ⟨1068, rfl⟩ (by norm_num) le_rfl (by decide) (u := none)
+    (fun _ h ↦ by simp at h) fun _ _ _ _ ↦ rfl
+
+-- B17 two_le_tailDist_factorTail at m = 1069, n = 2137, where a zero state exists
+example : ∃ P : ZeroState 1069, 2 ≤ tailDist P.1 (FactorCap.factorTail 1069 (by norm_num)) :=
+  let ⟨P⟩ := nonempty_zeroState (m := 1069) (by norm_num)
+  ⟨P, two_le_tailDist_factorTail (by norm_num) (by norm_num) (by norm_num) P⟩
+
+-- B18 not_repairBound_one_of_two_one_three_seven_le at m = 1069, n = 2137
+example : ¬RepairBound 1069 (FactorCap.gadget 1069) 1 :=
+  not_repairBound_one_of_two_one_three_seven_le le_rfl (by norm_num)
+
 end VacuityCheck.LowerBound

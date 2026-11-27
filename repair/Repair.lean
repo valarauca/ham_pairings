@@ -63,3 +63,10 @@ import Repair.RandomFamily.TheoremA
 import Repair.LowerBound.Arc
 import Repair.LowerBound.ZeroCore
 import Repair.LowerBound.Lattice
+import Repair.LowerBound.Chart
+import Repair.LowerBound.Eight
+import Repair.LowerBound.Cert
+import Repair.LowerBound.Line
+import Repair.LowerBound.LineTable
+import Repair.LowerBound.Seven
+import Repair.LowerBound.KTwo
