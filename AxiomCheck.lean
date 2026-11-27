@@ -514,10 +514,6 @@ open Pairing PerfectMatching
 #print axioms HybridConditional.tail_product_le
 #print axioms HybridConditional.exists_tail_le
 #print axioms HybridConditional.hybrid_theorem1
-#print axioms PerfectMatching.ham_iff_cycleCount_eq_one
-#print axioms PerfectMatching.cycleCount_le_contractAt
-#print axioms PerfectMatching.cycleCount_le_contractAt_add_one
-#print axioms PerfectMatching.sum_pow_cycleCount_le
 #print axioms RoundRobin.Canonical.hamBottomRatio_eq_cycleProfile
 #print axioms RoundRobin.Canonical.card_le_cycleProfile_mul_sum
 #print axioms RoundRobin.Canonical.inv_cycleMoment_le_hamBottomRatio

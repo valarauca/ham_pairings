@@ -1,5 +1,5 @@
 import Repair.BoundedRadius
-import Repair.CycleCount
+import Pairing.Union
 
 /-!
 # The cycle-step reduction (COD-146)

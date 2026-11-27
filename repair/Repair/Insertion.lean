@@ -1,10 +1,10 @@
 import Clifford.Contraction
-import Repair.CycleCount
+import Pairing.Union
 
 /-!
 # One-defect insertion (Lemma 5 and Corollary 5.1 of the joint-incoherence spike)
 
-`cycleCount P Q = κ(P ∪ Q)` (from `Repair.CycleCount`) is the number of cycles of the union of
+`cycleCount P Q = κ(P ∪ Q)` (from `Pairing.Union`) is the number of cycles of the union of
 two perfect matchings, that is the number of connected components of the union graph.
 
 * `card_sup_edge_of_reachable`, `card_sup_edge_add_one` : adding an edge keeps the component
