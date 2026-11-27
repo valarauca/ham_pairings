@@ -43,7 +43,7 @@ namespace PerfectMatching
 
 section Transitive
 
-variable {V : Type*} [Fintype V] [DecidableEq V] {F0 F1 : PerfectMatching V}
+variable {V : Type*} [Finite V] {F0 F1 : PerfectMatching V}
 
 /-- `F_{(k+1) mod 2}(c_k) = c_{k + 2a - 1}`, the backward step of the alternating walk
 (`results/hybrid-pair-averaged.md`, Theorem 2). -/
@@ -75,31 +75,31 @@ theorem mate_one_alt (v : V) (k : ℕ) :
   · rw [← stepMatching_succ_mate_alt, stepMatching_of_odd (by omega)]
   · rw [alt_succ, stepMatching_of_odd (by omega)]
 
+omit [Finite V] in
 /-- For a Hamiltonian pair the cycle through `v` is all of `V`
 (`results/hybrid-pair-averaged.md`, Theorem 2). -/
-theorem cycLen_of_ham (h : Ham F0 F1) (v : V) : cycLen F0 F1 v = Fintype.card V := by
+theorem cycLen_of_ham [Fintype V] (h : Ham F0 F1) (v : V) :
+    cycLen F0 F1 v = Fintype.card V := by
+  classical
   rw [← card_cycleOf, ← card_univ]
   congr 1
   ext x
   simp only [mem_cycleOf, mem_univ, iff_true]
   exact h.preconnected v x
 
-omit [Fintype V] [DecidableEq V] in
 /-- The stabiliser of `B` acts transitively on the matchings `C` with `B ∪ C` one cycle
 (`results/hybrid-pair-averaged.md`, Theorem 2). -/
-theorem exists_smul_eq_of_ham [Finite V] {B C C' : PerfectMatching V} (hC : Ham B C)
+theorem exists_smul_eq_of_ham {B C C' : PerfectMatching V} (hC : Ham B C)
     (hC' : Ham B C') : ∃ σ : Equiv.Perm V, σ • B = B ∧ σ • C = C' := by
   classical
   have := Fintype.ofFinite V
   obtain ⟨v⟩ := hC.nonempty
   have hL := cycLen_of_ham hC v
   have hL' := cycLen_of_ham hC' v
-  have hex : ∀ x, ∃ k, alt B C v k = x := fun x ↦ mem_cyc.mp (by
-    rw [← cycleOf_eq_cyc, mem_cycleOf]
-    exact hC.preconnected v x)
-  have hex' : ∀ x, ∃ k, alt B C' v k = x := fun x ↦ mem_cyc.mp (by
-    rw [← cycleOf_eq_cyc, mem_cycleOf]
-    exact hC'.preconnected v x)
+  have hex : ∀ x, ∃ k, alt B C v k = x := fun x ↦
+    (exists_lt_of_mem_cycleOf (mem_cycleOf.mpr (hC.preconnected v x))).imp fun _ ↦ And.right
+  have hex' : ∀ x, ∃ k, alt B C' v k = x := fun x ↦
+    (exists_lt_of_mem_cycleOf (mem_cycleOf.mpr (hC'.preconnected v x))).imp fun _ ↦ And.right
   let φ : V → V := fun x ↦ alt B C' v (Nat.find (hex x))
   have hφ : ∀ k, φ (alt B C v k) = alt B C' v k := by
     intro k

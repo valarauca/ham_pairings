@@ -262,13 +262,58 @@ bridge. After the merge of main `02cf0ca` there are 982 endpoints, 945 on
 
 From main `4d534d1`, against ham-spin `fe1f6bf`. Every "last old form" is at main `4d534d1`.
 
+### Redefined on the bridge
+
+| name | new definition | location | last old form |
+|---|---|---|---|
+| `PM.cycLen` | `2 * Function.minimalPeriod (F1.mate * F0.mate) v`, the same number. It was the first return time `Nat.find (exists_alt_eq_self F0 F1 v)` of the walk. It is now `noncomputable` and needs no `[Fintype V] [DecidableEq V]` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:158` |
+
+The walk is read off the bridge by `PM.alt_two_mul` (`c_{2k} = (F₁ F₀)^k v`) and
+`PM.alt_two_mul_add_one` (`c_{2k+1} = F₀((F₁ F₀)^k v)`). `PM.card_cycleOf` now comes from
+`PM.card_reachable_eq_two_mul` and the new `PM.card_sameCycle_eq_minimalPeriod`, and
+`PM.exists_lt_of_mem_cycleOf` from `PM.reachable_iff_sameCycle`.
+
+### Same statement, new proof
+
+| name | now proved from | location | last old proof |
+|---|---|---|---|
+| `PM.alt_cycLen`, `PM.alt_ne_self`, `PM.cycLen_even`, `PM.alt_injOn` | `PM.alt_two_mul`, `Function.minimalPeriod`, `PM.not_sameCycle_mate_right` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:170`, `:175`, `:181`, `:188` |
+| `PM.card_cycleOf` | `PM.card_reachable_eq_two_mul` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:364` |
+| `PM.mate_mem_cycleOf` | the two edges at `x` (the cycle is a reachability class) | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:381` |
+| `PM.mem_cycleOf_alt`, `PM.exists_lt_of_mem_cycleOf` | `PM.reachable_alt`, `PM.reachable_iff_sameCycle` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:634`, `:640` |
+| `PM.cycLen_self` | `PM.mate_mul_self` (`A A = 1`, period `1`) | `repair/Repair/PairLevelOne.lean` | `4d534d1:repair/Repair/PairLevelOne.lean:283` |
+
+### Same name, weaker hypotheses
+
+| name | change | location | last old form |
+|---|---|---|---|
+| `PM.cycLen_pos`, `PM.mate_one_eq_alt_pred` | `[Fintype V] [DecidableEq V]` become `[Finite V]` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:166`, `:658` |
+| `PM.alt_cycLen`, `PM.alt_ne_self`, `PM.cycLen_even`, `PM.alt_injOn`, `PM.alt_add_cycLen`, `PM.alt_mod`, `PM.stepMatching_adj`, `PM.reachable_alt` | drop `[Fintype V] [DecidableEq V]` | `repair/Repair/PairRecursion.lean` | `4d534d1:repair/Repair/PairRecursion.lean:170` to `:277` |
+| `PM.stepMatching_succ_mate_alt`, `PM.mate_zero_alt`, `PM.mate_one_alt`, `PM.exists_smul_eq_of_ham` | `[Fintype V] [DecidableEq V]` become `[Finite V]` | `repair/Repair/PairVariance.lean` | `4d534d1:repair/Repair/PairVariance.lean:50`, `:62`, `:71`, `:90` |
+| `PM.cycLen_of_ham` | drops `[DecidableEq V]` | `repair/Repair/PairVariance.lean` | `4d534d1:repair/Repair/PairVariance.lean:80` |
+| `PM.cycLen_self` | drops `[Fintype W] [DecidableEq W]` | `repair/Repair/PairLevelOne.lean` | `4d534d1:repair/Repair/PairLevelOne.lean:283` |
+
 ### Same name, weaker statement
 
 | name | change | location | last old form |
 |---|---|---|---|
 | `RRC.reflection_cycle` | drops the conjunct that every vertex of `C` is reachable from `y`. Its only consumer, `not_ham_of_reflection`, discarded it | `repair/Repair/Reflection.lean` | `4d534d1:repair/Repair/Reflection.lean:589` |
 
-### Removed dead lemmas
+### Removed
+
+The walk lemmas below served only the `Nat.find` definition of `PM.cycLen` and the walk set
+`PM.cyc`. None is cited in `organize-archive/results/` except by the plan
+`results/walk-engine-inventory.md`, so none keeps an alias. `PM.cyc` was the cycle through `v` as
+the positions `c_0, …, c_{2a-1}`. Use `PM.cycleOf`, which is the same set, with
+`PM.card_cycleOf`, `PM.mate_mem_cycleOf`, `PM.mem_cycleOf_alt` and `PM.exists_lt_of_mem_cycleOf`.
+
+| name | use instead | last old form |
+|---|---|---|
+| `PM.alt_ne_add_odd`, `PM.alt_mod_two_eq`, `PM.alt_eq_of_succ_eq`, `PM.alt_two_mul_eq_self` | `PM.alt_injOn`, `PM.alt_two_mul` | `4d534d1:repair/Repair/PairRecursion.lean:90`, `:107`, `:119`, `:132` |
+| `PM.exists_alt_eq_self` | `PM.alt_cycLen` with `PM.cycLen_pos` | `4d534d1:repair/Repair/PairRecursion.lean:141` |
+| `PM.cyc`, `PM.mem_cyc`, `PM.alt_mem_cyc`, `PM.card_cyc`, `PM.mate_mem_cyc`, `PM.cycleOf_eq_cyc` | `PM.cycleOf` and its lemmas | `4d534d1:repair/Repair/PairRecursion.lean:213`, `:218`, `:228`, `:232`, `:248`, `:356` |
+| `PM.stepMatching_mate_alt` | `PM.stepMatching_succ_mate_alt` | `4d534d1:repair/Repair/PairRecursion.lean:238` |
+| `PM.stepMatching_self` (used only by the old proof of `PM.cycLen_self`) | `PM.stepMatching_of_even`, `PM.stepMatching_of_odd` | `4d534d1:repair/Repair/PairLevelOne.lean:276` |
 
 Used only for the dropped conjunct of `RRC.reflection_cycle`, and cited nowhere.
 

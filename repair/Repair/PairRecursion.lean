@@ -85,110 +85,90 @@ theorem mate_alt_succ (v : V) (k : ℕ) :
     (stepMatching F0 F1 k).mate (alt F0 F1 v (k + 1)) = alt F0 F1 v k := by
   rw [alt_succ, mate_mate]
 
-/-- Positions at odd distance along the walk are distinct (`results/k3-counterexample-hunt.md`,
-Lemma K2). -/
-theorem alt_ne_add_odd (v : V) (t i : ℕ) : alt F0 F1 v i ≠ alt F0 F1 v (i + 2 * t + 1) := by
-  induction t generalizing i with
-  | zero =>
-    intro h
-    rw [mul_zero, add_zero, alt_succ] at h
-    exact (stepMatching F0 F1 i).mate_ne _ h.symm
-  | succ t ih =>
-    intro h
-    apply ih (i + 1)
-    have h1 := congrArg (stepMatching F0 F1 i).mate h
-    rw [← alt_succ, stepMatching_congr (l := i + 2 * t + 2) (by omega),
-      show i + 2 * (t + 1) + 1 = i + 2 * t + 2 + 1 by ring, mate_alt_succ] at h1
-    rw [h1]
-    ring_nf
-
-/-- Equal positions of the walk have equal parity (`results/k3-counterexample-hunt.md`, Lemma K2).
--/
-theorem alt_mod_two_eq {v : V} {i j : ℕ} (h : alt F0 F1 v i = alt F0 F1 v j) : i % 2 = j % 2 := by
-  rcases lt_trichotomy i j with hij | rfl | hij
-  · by_contra hne
-    obtain ⟨t, rfl⟩ : ∃ t, j = i + 2 * t + 1 := ⟨(j - i - 1) / 2, by omega⟩
-    exact alt_ne_add_odd v t i h
-  · rfl
-  · by_contra hne
-    obtain ⟨t, rfl⟩ : ∃ t, i = j + 2 * t + 1 := ⟨(i - j - 1) / 2, by omega⟩
-    exact alt_ne_add_odd v t j h.symm
-
-/-- Equal successors at equal parity have equal predecessors (`results/k3-counterexample-hunt.md`,
-Lemma K2). -/
-theorem alt_eq_of_succ_eq {v : V} {i j : ℕ} (h2 : i % 2 = j % 2)
-    (h : alt F0 F1 v (i + 1) = alt F0 F1 v (j + 1)) : alt F0 F1 v i = alt F0 F1 v j := by
-  have h1 := congrArg (stepMatching F0 F1 i).mate h
-  rwa [mate_alt_succ, stepMatching_congr h2, mate_alt_succ] at h1
-
 /-- Equal positions at equal parity have equal successors (`results/k3-counterexample-hunt.md`,
 Lemma K2). -/
 theorem alt_succ_eq_of_eq {v : V} {i j : ℕ} (h2 : i % 2 = j % 2)
     (h : alt F0 F1 v i = alt F0 F1 v j) : alt F0 F1 v (i + 1) = alt F0 F1 v (j + 1) := by
   rw [alt_succ, alt_succ, h, stepMatching_congr h2]
 
-/-- A repeat at even distance `2t` gives `c_{2t} = v` (`results/k3-counterexample-hunt.md`, Lemma
-K2). -/
-theorem alt_two_mul_eq_self {v : V} (t i : ℕ) (h : alt F0 F1 v i = alt F0 F1 v (i + 2 * t)) :
-    alt F0 F1 v (2 * t) = v := by
-  induction i with
-  | zero => simpa using h.symm
-  | succ i ih =>
-    exact ih (alt_eq_of_succ_eq (by omega) (by rwa [show i + 2 * t + 1 = i + 1 + 2 * t by ring]))
+/-- `c_{2k} = (F₁ F₀)^k v`: two steps of the walk are one step of the involution product of the
+bridge, ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf)
+(`results/k3-counterexample-hunt.md`, Lemma K2). -/
+theorem alt_two_mul (v : V) (k : ℕ) : alt F0 F1 v (2 * k) = ((F1.mate * F0.mate) ^ k) v := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+    rw [show 2 * (k + 1) = 2 * k + 1 + 1 by ring, alt_succ, alt_succ, ih,
+      stepMatching_of_odd (by omega), stepMatching_of_even (by omega), pow_succ',
+      Equiv.Perm.mul_apply, Equiv.Perm.mul_apply]
 
-variable (F0 F1) in
-/-- The alternating walk returns to `v` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem exists_alt_eq_self [Finite V] (v : V) : ∃ k, 0 < k ∧ alt F0 F1 v k = v := by
-  obtain ⟨i, j, hne, h⟩ := Finite.exists_ne_map_eq_of_infinite (alt F0 F1 v)
-  have h2 := alt_mod_two_eq h
-  rcases lt_or_gt_of_ne hne with hij | hij
-  · obtain ⟨t, rfl⟩ : ∃ t, j = i + 2 * t := ⟨(j - i) / 2, by omega⟩
-    exact ⟨2 * t, by omega, alt_two_mul_eq_self t i h⟩
-  · obtain ⟨t, rfl⟩ : ∃ t, i = j + 2 * t := ⟨(i - j) / 2, by omega⟩
-    exact ⟨2 * t, by omega, alt_two_mul_eq_self t j h.symm⟩
+/-- `c_{2k+1} = F₀((F₁ F₀)^k v)` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+theorem alt_two_mul_add_one (v : V) (k : ℕ) :
+    alt F0 F1 v (2 * k + 1) = F0.mate (((F1.mate * F0.mate) ^ k) v) := by
+  rw [alt_succ, alt_two_mul, stepMatching_of_even (by omega)]
 
 end Walk
 
 section Cycle
 
-variable [Fintype V] [DecidableEq V] (F0 F1 : PerfectMatching V)
+variable (F0 F1 : PerfectMatching V)
 
-/-- The length `2a` of the cycle of `F₀ ∪ F₁` through `v`, the first return time of the
-alternating walk (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-def cycLen (v : V) : ℕ :=
-  Nat.find (exists_alt_eq_self F0 F1 v)
+/-- The length `2a` of the cycle of `F₀ ∪ F₁` through `v`, twice the period of `v` under
+`F₁ F₀` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+noncomputable def cycLen (v : V) : ℕ :=
+  2 * Function.minimalPeriod (F1.mate * F0.mate) v
 
 variable {F0 F1}
 
 /-- `2a > 0` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem cycLen_pos (v : V) : 0 < cycLen F0 F1 v :=
-  (Nat.find_spec (exists_alt_eq_self F0 F1 v)).1
+theorem cycLen_pos [Finite V] (v : V) : 0 < cycLen F0 F1 v :=
+  Nat.mul_pos two_pos (Function.minimalPeriod_pos_of_mem_periodicPts
+    ((F1.mate * F0.mate).injective.mem_periodicPts v))
 
 /-- `c_{2a} = v` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem alt_cycLen (v : V) : alt F0 F1 v (cycLen F0 F1 v) = v :=
-  (Nat.find_spec (exists_alt_eq_self F0 F1 v)).2
+theorem alt_cycLen (v : V) : alt F0 F1 v (cycLen F0 F1 v) = v := by
+  rw [cycLen, alt_two_mul, Equiv.Perm.coe_pow, Function.iterate_minimalPeriod]
 
-/-- `c_k ≠ v` for `0 < k < 2a` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+/-- `c_k ≠ v` for `0 < k < 2a`. An odd position `c_{2j+1} = v` would put `F₀ v` in the
+`F₁ F₀`-cycle of `v` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem alt_ne_self {v : V} {k : ℕ} (h0 : 0 < k) (hk : k < cycLen F0 F1 v) :
-    alt F0 F1 v k ≠ v :=
-  fun h ↦ Nat.find_min (exists_alt_eq_self F0 F1 v) hk ⟨h0, h⟩
+    alt F0 F1 v k ≠ v := by
+  rw [cycLen] at hk
+  obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' k
+  · rw [alt_two_mul, Equiv.Perm.coe_pow]
+    exact Function.not_isPeriodicPt_of_pos_of_lt_minimalPeriod (by omega) (by omega)
+  · rw [alt_two_mul_add_one]
+    exact fun h ↦ not_sameCycle_mate_right F1 F0 v
+      ⟨j, by rw [zpow_natCast, ← F0.mate_eq_comm.mp h]⟩
 
 /-- The cycle length `2a` is even (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem cycLen_even (v : V) : cycLen F0 F1 v % 2 = 0 := by
-  have := alt_mod_two_eq (F0 := F0) (F1 := F1) (v := v) (i := 0) (j := cycLen F0 F1 v)
-    (by rw [alt_cycLen, alt_zero])
-  omega
+theorem cycLen_even (v : V) : cycLen F0 F1 v % 2 = 0 :=
+  Nat.mul_mod_right 2 _
 
-/-- `c_0, …, c_{2a-1}` are distinct (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+/-- `c_0, …, c_{2a-1}` are distinct. Positions of opposite parity would put some `u` and `F₀ u`
+in one `F₁ F₀`-cycle (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem alt_injOn {v : V} {i j : ℕ} (hi : i < cycLen F0 F1 v) (hj : j < cycLen F0 F1 v)
     (h : alt F0 F1 v i = alt F0 F1 v j) : i = j := by
-  have h2 := alt_mod_two_eq h
-  by_contra hne
-  rcases lt_or_gt_of_ne hne with hij | hij
-  · obtain ⟨t, rfl⟩ : ∃ t, j = i + 2 * t := ⟨(j - i) / 2, by omega⟩
-    exact alt_ne_self (by omega) (by omega) (alt_two_mul_eq_self t i h)
-  · obtain ⟨t, rfl⟩ : ∃ t, i = j + 2 * t := ⟨(i - j) / 2, by omega⟩
-    exact alt_ne_self (by omega) (by omega) (alt_two_mul_eq_self t j h.symm)
+  have key : ∀ {a b : ℕ}, 2 * a < cycLen F0 F1 v → 2 * b < cycLen F0 F1 v →
+      ((F1.mate * F0.mate) ^ a) v = ((F1.mate * F0.mate) ^ b) v → a = b := fun ha hb h ↦
+    Function.iterate_injOn_Iio_minimalPeriod (f := ⇑(F1.mate * F0.mate)) (x := v)
+      (by rw [cycLen] at ha; exact Set.mem_Iio.mpr (by omega))
+      (by rw [cycLen] at hb; exact Set.mem_Iio.mpr (by omega)) h
+  have hodd : ∀ a b : ℕ, ((F1.mate * F0.mate) ^ a) v ≠ F0.mate (((F1.mate * F0.mate) ^ b) v) := by
+    intro a b h
+    refine not_sameCycle_mate_right F1 F0 (((F1.mate * F0.mate) ^ b) v) ?_
+    rw [← h]
+    exact Equiv.Perm.sameCycle_pow_left.mpr
+      (Equiv.Perm.sameCycle_pow_right.mpr (Equiv.Perm.SameCycle.refl _ _))
+  obtain ⟨a, rfl | rfl⟩ := Nat.even_or_odd' i <;> obtain ⟨b, rfl | rfl⟩ := Nat.even_or_odd' j
+  · rw [alt_two_mul, alt_two_mul] at h
+    rw [key hi hj h]
+  · rw [alt_two_mul, alt_two_mul_add_one] at h
+    exact absurd h (hodd a b)
+  · rw [alt_two_mul_add_one, alt_two_mul] at h
+    exact absurd h.symm (hodd b a)
+  · rw [alt_two_mul_add_one, alt_two_mul_add_one] at h
+    rw [key (by omega) (by omega) (F0.mate.injective h)]
 
 /-- The walk has period `2a` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem alt_add_cycLen (v : V) (k : ℕ) :
@@ -207,60 +187,6 @@ theorem alt_mod (v : V) (k : ℕ) : alt F0 F1 v (k % cycLen F0 F1 v) = alt F0 F1
   | zero => simp
   | succ q ih => rw [mul_add, mul_one, ← add_assoc, alt_add_cycLen, ih]
 
-variable (F0 F1) in
-/-- The cycle of `F₀ ∪ F₁` through `v`, as the vertices `c_0, …, c_{2a-1}` of the walk
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
-def cyc (v : V) : Finset V :=
-  (range (cycLen F0 F1 v)).image (alt F0 F1 v)
-
-/-- The cycle of `v` is the set of all positions of the walk (`results/k3-counterexample-hunt.md`,
-Lemma K2). -/
-theorem mem_cyc {v x : V} : x ∈ cyc F0 F1 v ↔ ∃ k, alt F0 F1 v k = x := by
-  simp only [cyc, mem_image, mem_range]
-  constructor
-  · rintro ⟨k, -, rfl⟩
-    exact ⟨k, rfl⟩
-  · rintro ⟨k, rfl⟩
-    exact ⟨k % cycLen F0 F1 v, Nat.mod_lt _ (cycLen_pos v), alt_mod v k⟩
-
-/-- Every position of the walk lies on the cycle of `v` (`results/k3-counterexample-hunt.md`, Lemma
-K2). -/
-theorem alt_mem_cyc (v : V) (k : ℕ) : alt F0 F1 v k ∈ cyc F0 F1 v :=
-  mem_cyc.mpr ⟨k, rfl⟩
-
-/-- The cycle of `v` has `2a` vertices (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem card_cyc (v : V) : #(cyc F0 F1 v) = cycLen F0 F1 v := by
-  rw [cyc, card_image_of_injOn, card_range]
-  intro i hi j hj h
-  exact alt_injOn (mem_range.mp hi) (mem_range.mp hj) h
-
-/-- The other partner of `c_k` lies on the cycle (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem stepMatching_mate_alt (v : V) (k : ℕ) :
-    (stepMatching F0 F1 (k + 1)).mate (alt F0 F1 v k) ∈ cyc F0 F1 v := by
-  rw [← alt_add_cycLen v k]
-  obtain ⟨L, hL⟩ : ∃ L, cycLen F0 F1 v = L + 1 := ⟨_, (Nat.succ_pred_eq_of_pos (cycLen_pos v)).symm⟩
-  have he := cycLen_even (F0 := F0) (F1 := F1) v
-  rw [hL, ← add_assoc, stepMatching_congr (l := k + L) (by omega), mate_alt_succ]
-  exact alt_mem_cyc v _
-
-/-- The cycle of `v` is closed under `F₀` and `F₁` (`results/k3-counterexample-hunt.md`, Lemma K2).
--/
-theorem mate_mem_cyc {v x : V} (hx : x ∈ cyc F0 F1 v) :
-    F0.mate x ∈ cyc F0 F1 v ∧ F1.mate x ∈ cyc F0 F1 v := by
-  obtain ⟨k, rfl⟩ := mem_cyc.mp hx
-  have h1 : (stepMatching F0 F1 k).mate (alt F0 F1 v k) ∈ cyc F0 F1 v := by
-    rw [← alt_succ]
-    exact alt_mem_cyc v _
-  have h2 := stepMatching_mate_alt (F0 := F0) (F1 := F1) v k
-  rcases Nat.mod_two_eq_zero_or_one k with hk | hk
-  · rw [stepMatching_of_even hk] at h1
-    rw [stepMatching_of_odd (by omega)] at h2
-    exact ⟨h1, h2⟩
-  · rw [stepMatching_of_odd hk] at h1
-    rw [stepMatching_of_even (by omega)] at h2
-    exact ⟨h2, h1⟩
-
-omit [Fintype V] [DecidableEq V] in
 /-- Each step of the walk is an edge of `F₀ ∪ F₁` (`results/k3-counterexample-hunt.md`, Lemma K2).
 -/
 theorem stepMatching_adj (k : ℕ) (x : V) :
@@ -271,7 +197,6 @@ theorem stepMatching_adj (k : ℕ) (x : V) :
   · rw [stepMatching_of_odd hk]
     exact adj_mate_right _ _ x
 
-omit [Fintype V] [DecidableEq V] in
 /-- Every position of the walk is reachable from `v` in `F₀ ∪ F₁`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem reachable_alt (v : V) (k : ℕ) : (F0.toGraph ⊔ F1.toGraph).Reachable v (alt F0 F1 v k) := by
@@ -351,18 +276,26 @@ theorem pairType_eq_of_blocks {𝓑 : Finset (Finset V)}
     pairType F0 F1 = 𝓑.val.map fun S ↦ #S / 2 := by
   rw [pairType, image_cycleOf_eq hS hc hne hcov]
 
-/-- The cycle through `v` is the set `c_0, …, c_{2a-1}` of the walk
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem cycleOf_eq_cyc (v : V) : cycleOf F0 F1 v = cyc F0 F1 v := by
-  refine cycleOf_eq_of_block (fun x hx ↦ mate_mem_cyc hx) (fun x hx y hy ↦ ?_)
-    (by simpa using alt_mem_cyc (F0 := F0) (F1 := F1) v 0)
-  obtain ⟨i, rfl⟩ := mem_cyc.mp hx
-  obtain ⟨j, rfl⟩ := mem_cyc.mp hy
-  exact (reachable_alt v i).symm.trans (reachable_alt v j)
+omit [Fintype V] [DecidableEq V] in
+/-- The `SameCycle` class of `v` under a permutation of a finite type has the period of `v` as
+its size (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+theorem card_sameCycle_eq_minimalPeriod {α : Type*} [Finite α] (g : Equiv.Perm α) (v : α) :
+    Nat.card {w // g.SameCycle v w} = Function.minimalPeriod g v := by
+  have hpos := Function.minimalPeriod_pos_of_mem_periodicPts (g.injective.mem_periodicPts v)
+  let f : Fin (Function.minimalPeriod g v) → {w // g.SameCycle v w} := fun k ↦
+    ⟨(g ^ (k : ℕ)) v, Equiv.Perm.sameCycle_pow_right.mpr (Equiv.Perm.SameCycle.refl g v)⟩
+  rw [← Nat.card_eq_of_bijective f ⟨fun i j h ↦ Fin.ext ?_, fun w ↦ ?_⟩, Nat.card_eq_fintype_card,
+    Fintype.card_fin]
+  · exact Function.iterate_injOn_Iio_minimalPeriod i.2 j.2 (congrArg Subtype.val h)
+  · obtain ⟨k, hk⟩ := w.2.exists_nat_pow_eq
+    exact ⟨⟨k % _, Nat.mod_lt _ hpos⟩, Subtype.ext (Function.iterate_mod_minimalPeriod_eq.trans hk)⟩
 
-/-- The cycle through `v` has `cycLen` vertices (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+/-- The cycle through `v` has `cycLen` vertices. By `card_reachable_eq_two_mul` of the bridge it
+is two `F₁ F₀`-cycles of the length of the period of `v` (`results/k3-counterexample-hunt.md`,
+Lemma K2). -/
 theorem card_cycleOf (v : V) : #(cycleOf F0 F1 v) = cycLen F0 F1 v := by
-  rw [cycleOf_eq_cyc, card_cyc]
+  rw [cycleOf, ← Fintype.card_subtype, ← Nat.card_eq_fintype_card, sup_comm,
+    card_reachable_eq_two_mul, card_sameCycle_eq_minimalPeriod, cycLen]
 
 /-- `v` lies on its own cycle (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem mem_cycleOf_self (v : V) : v ∈ cycleOf F0 F1 v :=
@@ -380,8 +313,8 @@ theorem cycleOf_eq_of_mem {v w : V} (h : w ∈ cycleOf F0 F1 v) :
 K2). -/
 theorem mate_mem_cycleOf {v x : V} (hx : x ∈ cycleOf F0 F1 v) :
     F0.mate x ∈ cycleOf F0 F1 v ∧ F1.mate x ∈ cycleOf F0 F1 v := by
-  rw [cycleOf_eq_cyc] at hx ⊢
-  exact mate_mem_cyc hx
+  simp only [mem_cycleOf] at hx ⊢
+  exact ⟨hx.trans (adj_mate_left _ _ x).reachable, hx.trans (adj_mate_right _ _ x).reachable⟩
 
 /-- Every cycle has an even number `2a` of vertices (`results/k3-counterexample-hunt.md`, Lemma K2).
 -/
@@ -631,17 +564,28 @@ theorem mem_cycleOf_comm {x y : V} : x ∈ cycleOf F0 F1 y ↔ y ∈ cycleOf F0 
 
 /-- Every position of the walk from `v` lies on the cycle through `v`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem mem_cycleOf_alt (v : V) (k : ℕ) : alt F0 F1 v k ∈ cycleOf F0 F1 v := by
-  rw [cycleOf_eq_cyc]
-  exact alt_mem_cyc v k
+theorem mem_cycleOf_alt (v : V) (k : ℕ) : alt F0 F1 v k ∈ cycleOf F0 F1 v :=
+  mem_cycleOf.mpr (reachable_alt v k)
 
-/-- Every vertex of the cycle through `v` is some `c_k` with `k < 2a`
+/-- Every vertex of the cycle through `v` is some `c_k` with `k < 2a`. By
+`reachable_iff_sameCycle` of the bridge, `x` or `F₀ x` lies in the `F₁ F₀`-cycle of `v`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem exists_lt_of_mem_cycleOf {v x : V} (hx : x ∈ cycleOf F0 F1 v) :
     ∃ k < cycLen F0 F1 v, alt F0 F1 v k = x := by
-  rw [cycleOf_eq_cyc, cyc, mem_image] at hx
-  obtain ⟨k, hk, rfl⟩ := hx
-  exact ⟨k, mem_range.mp hk, rfl⟩
+  have hpos := cycLen_pos (F0 := F0) (F1 := F1) v
+  rw [cycLen] at hpos ⊢
+  have hmod : ∀ {y}, (F1.mate * F0.mate).SameCycle v y →
+      ∃ j, j < Function.minimalPeriod (F1.mate * F0.mate) v ∧ ((F1.mate * F0.mate) ^ j) v = y :=
+    fun hy ↦ let ⟨i, hi⟩ := hy.exists_nat_pow_eq
+      ⟨_, Nat.mod_lt i (by omega), Function.iterate_mod_minimalPeriod_eq.trans hi⟩
+  rw [mem_cycleOf, sup_comm, reachable_iff_sameCycle] at hx
+  rcases hx with h | h
+  · obtain ⟨j, hj, rfl⟩ := hmod h
+    exact ⟨2 * j, by omega, alt_two_mul v j⟩
+  · rw [show F1.mate x = (F1.mate * F0.mate) (F0.mate x) by rw [Equiv.Perm.mul_apply, mate_mate],
+      Equiv.Perm.sameCycle_apply_right] at h
+    obtain ⟨j, hj, hj'⟩ := hmod h
+    exact ⟨2 * j + 1, by omega, by rw [alt_two_mul_add_one, hj', mate_mate]⟩
 
 /-- `c_j` survives the reduction by `v c_d` for `0 < j < 2a`, `j ≠ d`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
@@ -654,8 +598,9 @@ omit [Fintype V] [DecidableEq V] in
 theorem mate_zero_eq_alt_one (v : V) : F0.mate v = alt F0 F1 v 1 := by
   rw [alt_succ, stepMatching_of_even (by norm_num), alt_zero]
 
+omit [Fintype V] [DecidableEq V] in
 /-- `F₁(v) = c_{2a-1}` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem mate_one_eq_alt_pred (v : V) :
+theorem mate_one_eq_alt_pred [Finite V] (v : V) :
     F1.mate v = alt F0 F1 v (cycLen F0 F1 v - 1) := by
   have he := cycLen_even (F0 := F0) (F1 := F1) v
   have hp := cycLen_pos (F0 := F0) (F1 := F1) v

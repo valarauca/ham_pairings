@@ -272,21 +272,10 @@ theorem sum_shared2_mul (A B : PerfectMatching W) :
   ring
 
 omit [Fintype W] [DecidableEq W] hW he in
-/-- Every step of the walk of `(A, A)` uses `A` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
-theorem stepMatching_self (A : PerfectMatching W) (k : ℕ) : stepMatching A A k = A := by
-  unfold stepMatching
-  split_ifs <;> rfl
-
-omit hW he in
-/-- The cycles of `A ∪ A` are the doubled edges `{x, A(x)}` (`results/hybrid-pair-averaged.md`,
-Theorem 1). -/
+/-- The cycles of `A ∪ A` are the doubled edges `{x, A(x)}`, since `A A = 1`
+(`results/hybrid-pair-averaged.md`, Theorem 1). -/
 theorem cycLen_self (A : PerfectMatching W) (x : W) : cycLen A A x = 2 := by
-  rw [cycLen, Nat.find_eq_iff]
-  refine ⟨⟨two_pos, ?_⟩, fun n hn ⟨h0, h1⟩ ↦ ?_⟩
-  · simp [alt_succ, stepMatching_self]
-  · obtain rfl : n = 1 := by omega
-    simp only [alt_succ, alt_zero, stepMatching_self] at h1
-    exact A.mate_ne x h1
+  rw [cycLen, mate_mul_self, Equiv.Perm.coe_one, Function.minimalPeriod_id]
 
 omit hW he in
 /-- The cycle of `A ∪ A` through `x` is `{x, A(x)}` (`results/hybrid-pair-averaged.md`,
