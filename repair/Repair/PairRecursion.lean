@@ -3,7 +3,9 @@ import Repair.HybridPair.CommonEdge
 /-!
 # The k = 2 pair recursion (Lemma K2)
 
-Source: `results/k3-counterexample-hunt.md` (e5bd2f7), §3, Lemma K2.
+Source: `results/k3-counterexample-hunt.md` (e5bd2f7), §3, Lemma K2. Lemma K2 is Theorem 5,
+eq. (23) of Kanunnikov and Vassilieva, arXiv:1409.4356, at `α = 2`, with the same three cases
+and multiplicities (`results/citation-audit.md`, row 20).
 
 For two perfect matchings `F₀, F₁` of a finite vertex set `V`, `jointCount F₀ F₁` is the
 number of perfect matchings `P` with `P ∪ F₀` and `P ∪ F₁` both one cycle. The type
@@ -1554,7 +1556,8 @@ theorem jointCount_eq_k2Count {V : Type u} [Fintype V] [DecidableEq V]
 
 /-- Lemma K2 as a recursion: for every vertex `v`, in a cycle of half-length `a`, and
 `|V| > 2`, `N(F₀, F₁) = k2Step N μ a` where `μ` is the type of `F₀ ∪ F₁`
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
+(`results/k3-counterexample-hunt.md`, Lemma K2; Kanunnikov and Vassilieva, arXiv:1409.4356,
+Theorem 5, eq. (23) at `α = 2`). -/
 theorem jointCount_eq_k2Step {V : Type u} [Fintype V] [DecidableEq V]
     (F0 F1 : PerfectMatching V) (v : V) (hV : 2 < Fintype.card V) :
     jointCount F0 F1 = k2Step k2Count (pairType F0 F1) (#(cycleOf F0 F1 v) / 2) := by

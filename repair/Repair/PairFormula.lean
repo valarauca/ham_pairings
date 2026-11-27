@@ -4,7 +4,10 @@ import Repair.PairVariance
 /-!
 # The spectral pair formula and its first-order term (Theorem 1)
 
-Source: `results/hybrid-pair-averaged.md` (aed6f2d), §2, Theorem 1 and Corollary 1.1.
+Source: `results/hybrid-pair-averaged.md` (aed6f2d), §2, Theorem 1 and Corollary 1.1. Theorem 1
+is Lemma 3.3 of Hanlon, Stanley and Stembridge, Contemp. Math. 138 (1992) 151-174, after
+normalization. It is also in Goulden and Jackson, Trans. AMS 348 (1996), and in Tout,
+arXiv:1502.01932, eq. (18) and Lemma 8.1 (`results/citation-audit.md`, row 18).
 
 * `jointHamProb A B = h(A, B) = P_R(R ∪ A and R ∪ B both one cycle)`, and
   `jointHamProb_eq_k2Count` : it depends only on the type of `A ∪ B`, through the Lemma K2
@@ -113,7 +116,8 @@ theorem E_eq_zero_of_trace (ν : I) (h : (S.E ν).trace = 0) (A C : PerfectMatch
   exact pow_eq_zero_iff (n := 2) (by norm_num) |>.mp h2
 
 /-- Theorem 1, the spectral pair formula `h(A, B) / p² = Σ_ν d_ν ω_ν((e))² ω_ν(A, B)` with
-`ω_ν((e)) = λ_ν / |Ham(B)|` (`results/hybrid-pair-averaged.md`, Theorem 1). -/
+`ω_ν((e)) = λ_ν / |Ham(B)|` (`results/hybrid-pair-averaged.md`, Theorem 1; Hanlon, Stanley and
+Stembridge 1992, Lemma 3.3). -/
 theorem jointHamProb_div_sq (A B : PerfectMatching W) (hk : hamDeg B ≠ 0) :
     jointHamProb A B / hamProbOf B ^ 2 =
       ∑ ν, (S.E ν).trace * (S.eig ν / hamDeg B) ^ 2 * S.omega ν A B := by

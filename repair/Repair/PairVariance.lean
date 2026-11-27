@@ -8,7 +8,8 @@ import Repair.PairRecursion
 /-!
 # The exact variance identity for a fixed context family (Theorem 2)
 
-Source: `results/hybrid-pair-averaged.md` (aed6f2d), §3, Theorem 2.
+Source: `results/hybrid-pair-averaged.md` (aed6f2d), §3, Theorem 2. Theorem 2 is the law of total
+variance, conditioning on the cycle type of `R ∪ B` (`results/citation-audit.md`, row 21).
 
 `B` is a perfect matching of a finite set `W`, and `C : ι → PM(W)` is a family of contexts with
 every `C_t ∪ B` one cycle. `R` is uniform on `PM(W)` and `X(R) = #{t : R ∪ C_t one cycle}`.
@@ -271,7 +272,8 @@ theorem coherence_nonneg (B : PerfectMatching W) (C : ι → PerfectMatching W) 
 
 /-- Theorem 2, the exact variance identity `Var_R(X | E) = p² [(n - 1)² c_gen(e) + Γ(E)]`, for
 any family of contexts `C_t` with every `C_t ∪ B` one cycle
-(`results/hybrid-pair-averaged.md`, Theorem 2). -/
+(`results/hybrid-pair-averaged.md`, Theorem 2). It is the law of total variance, conditioning on
+the cycle type of `R ∪ B`. -/
 theorem var_ctxCount [Nonempty ι] (B : PerfectMatching W) (C : ι → PerfectMatching W)
     (hC : ∀ t, Ham (C t) B) :
     pmVar (fun R ↦ (ctxCount C R : ℝ)) =

@@ -7,7 +7,10 @@ Source: `results/sl5-kill.md` §1 and §2 (Lemma K1, Theorem K1, the excluded cl
 §5), with the orbit criterion of `results/sl5-contra.md` (Remark O5). The archive ancestor is the
 two-switch profile identity, Theorem 11.1 of "Mathematical Pattern Investigation"
 (`old-personal-chatgpt` doc `01a1e1d3-a7a1-728c-8db1-cd74249be926`), whose Corollary 11.2 is the
-signature count.
+signature count. Lemma K1 is Lemma 1 of Hannenhalli and Pevzner, J. ACM 46 (1999), see also
+Bafna and Pevzner, SIAM J. Comput. 25 (1996). Theorem K1(a) and the class (X1) are the
+separating-system bound of Rényi, Acta Sci. Math. (Szeged) 22 (1961) 75-81, and Katona,
+J. Combin. Theory 1 (1966) 174-194 (`results/citation-audit.md`, rows 2 and 3).
 
 `twoarc` is not formalized, so everything is stated for a general perfect matching `M` of a finite
 `V`, any factor family, and, in the round-robin part, any tail `T` of any six-vertex gadget with
@@ -207,9 +210,10 @@ def SameSig (M Q : PerfectMatching V) (a a' : V) : Prop :=
   (Q.mate * M.mate).SameCycle a a' ∨
     ∃ w, ¬(M.toGraph ⊔ Q.toGraph).Reachable a w ∧ ¬(M.toGraph ⊔ Q.toGraph).Reachable a' w
 
-/-- **Lemma K1** (`sl5-kill.md` §2; archive Theorem 11.1; `sl5-contra.md` Remark O5), the
-direction the barrier uses. If `a ≠ a′` lie on distinct edges of `M` and have the same signature
-under `Q`, the 2-switch is not Hamiltonian with `Q`. -/
+/-- **Lemma K1** (`sl5-kill.md` §2; archive Theorem 11.1; `sl5-contra.md` Remark O5;
+Hannenhalli and Pevzner 1999, Lemma 1), the direction the barrier uses. If `a ≠ a′` lie on
+distinct edges of `M` and have the same signature under `Q`, the 2-switch is not Hamiltonian
+with `Q`. -/
 theorem not_ham_twoSwitch_of_sameSig [Finite V] [DecidableEq V]
     (M Q : PerfectMatching V) {a a' : V} (haa : a ≠ a')
     (ha' : a' ≠ M.mate a) (h : SameSig M Q a a') : ¬Ham (twoSwitch M a a') Q := by
@@ -322,10 +326,11 @@ theorem sameSig_of_sigBit_eq {M Q : PerfectMatching V} {a₀ v v' : V}
     · have hv' : ¬(M.toGraph ⊔ Q.toGraph).Reachable a₀ v' := fun h' ↦ hv (h.mpr h')
       exact ⟨a₀, fun h' ↦ hv h'.symm, fun h' ↦ hv' h'.symm⟩
 
-/-- **Theorem K1(a)** (`sl5-kill.md` §2; archive Corollary 11.2). Let `E` be a set of endpoints of
-distinct edges of `M` (`M a ∉ E` for `a ∈ E`), `𝓕` a finite family of factors `F i`, and `𝓕₁₂`
-its members without three separate cycles with `M`. If `2^|𝓕₁₂| < |E|`, some two edges of `E`
-have a 2-switch that no member of `𝓕` makes Hamiltonian. -/
+/-- **Theorem K1(a)** (`sl5-kill.md` §2; archive Corollary 11.2; the separating-system bound of
+Rényi 1961 and Katona 1966). Let `E` be a set of endpoints of distinct edges of `M`
+(`M a ∉ E` for `a ∈ E`), `𝓕` a finite family of factors `F i`, and `𝓕₁₂` its members without
+three separate cycles with `M`. If `2^|𝓕₁₂| < |E|`, some two edges of `E` have a 2-switch that
+no member of `𝓕` makes Hamiltonian. -/
 theorem exists_uncovered_twoSwitch [Fintype V] [DecidableEq V] {ι : Type*}
     (M : PerfectMatching V) (F : ι → PerfectMatching V)
     (𝓕 : Finset ι) (E : Finset V) (hE : ∀ a ∈ E, M.mate a ∉ E)
@@ -428,11 +433,11 @@ theorem tailDist_twoSwitch_le {G : Finset (Vertex m)}
   have h4 := Finset.card_le_four (a := a) (b := M.mate a) (c := a') (d := M.mate a')
   omega
 
-/-- **The class (X1)** (`sl5-kill.md` Theorem K1(a) and §5 (X1)). Let `T` be a tail of a
-six-vertex gadget, `M` any completion of `T`, and `𝓕` any set of factors, of any height. If
-`2^|𝓕₁₂| < m - 3`, where `𝓕₁₂` are the members without three separate cycles with `M`, some
-perfect matching within `2` of `T` is `𝓕`-uncovered: a 2-switch of two tail edges with equal
-`𝓕`-signatures. -/
+/-- **The class (X1)** (`sl5-kill.md` Theorem K1(a) and §5 (X1); Rényi 1961, Katona 1966). Let
+`T` be a tail of a six-vertex gadget, `M` any completion of `T`, and `𝓕` any set of factors, of
+any height. If `2^|𝓕₁₂| < m - 3`, where `𝓕₁₂` are the members without three separate cycles
+with `M`, some perfect matching within `2` of `T` is `𝓕`-uncovered: a 2-switch of two tail edges
+with equal `𝓕`-signatures. -/
 theorem exists_uncovered_near_tail {G : Finset (Vertex m)} (hG : G.card = 6)
     (T : PerfectMatching (Gᶜ : Finset (Vertex m))) (M : PerfectMatching (Vertex m))
     (hM : ∀ u : (Gᶜ : Finset (Vertex m)), M.mate u = T.mate u) (𝓕 : Finset (ZMod (2 * m - 1)))

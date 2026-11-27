@@ -346,7 +346,8 @@ theorem jointHamProb_eq_of_mate_eq {e : ℕ} (hV : Fintype.card V = 2 * e) (he :
 
 /-- Lemma 2 of `results/hybrid-pair-incoherence.md`, ratio form. If `|V| = 2e`, `e ≥ 2`, and `A`,
 `B` share the edge `{a, b}`, then `h_e(A, B)/p_e² = (1 + 1/(2e - 2)) h_{e-1}(A', B')/p_{e-1}²`,
-with `A'`, `B'` the restrictions to `V ∖ {a, b}`. -/
+with `A'`, `B'` the restrictions to `V ∖ {a, b}`. This is Remark 1 of Kanunnikov and Vassilieva,
+arXiv:1409.4356, at `α = 2`, divided by `|PM|` and `p²` (`results/citation-audit.md`, row 23). -/
 theorem jointHamProb_div_sq_eq_of_mate_eq {e : ℕ} (hV : Fintype.card V = 2 * e) (he : 2 ≤ e)
     {A B : PerfectMatching V} {a b : V} (hA : A.mate a = b) (hB : B.mate a = b) :
     jointHamProb A B / hamProb e ^ 2 = (1 + 1 / (2 * e - 2 : ℝ)) *
