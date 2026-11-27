@@ -17,7 +17,7 @@ rev = "v4.35.0"
 [[require]]
 name = "ham-spin"
 git = "https://github.com/valarauca/ham-spin"
-rev = "e88ff2de4ed433f59507988180c5f43172ea23ad"
+rev = "87df892c7b167f3c315f4668355f4a5fe0445598"
 
 [[lean_lib]]
 name = "Suppression"
