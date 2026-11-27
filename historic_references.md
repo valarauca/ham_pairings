@@ -251,3 +251,9 @@ main `77d3de5`.
 
 `Repair.CycleStep` imports the bridge, so its use of the alias would be ambiguous under
 `open PerfectMatching`. It names `PerfectMatching.cycleCount_smul` instead.
+
+### AxiomCheck
+
+No endpoint was removed. The four names moved to ham-spin keep their lines and now resolve to the
+bridge. After the merge of main `02cf0ca` there are 982 endpoints, 945 on
+`[propext, Classical.choice, Quot.sound]` and 37 on fewer axioms.
