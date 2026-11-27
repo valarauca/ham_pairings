@@ -211,3 +211,21 @@ moves.
 (`RRC.shift_smul_factor`, `RRC.scale_smul_factor`, `RRC.isZeroState_affine_smul_iff` and the 16
 from `RRC.isAut_affine` to `RRC.isAut_three_moebius`) moved to the ham-spin `AxiomCheck.lean`
 (`c1941cf`), which also checks the four new AGL theorems (`7f4fd9b`).
+
+## Involution-product bridge (COD-266 stage 2, branch `mig`)
+
+The walk engines moved onto the involution-product bridge, ham-spin
+`core/Pairing/InvolutionProduct.lean` (`fe1f6bf`), from main `77d3de5`. Every "last old form" is at
+main `77d3de5`.
+
+### Moved to ham-spin (same full name)
+
+| name | old location | new location | last old form |
+|---|---|---|---|
+| `PM.mate_inv`, `PM.mate_mul_self`, `PM.not_sameCycle_mate_right`, `PM.not_sameCycle_mate_left` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | ham-spin `core/Pairing/InvolutionProduct.lean` (`fe1f6bf`) | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:45`, `:50`, `:68`, `:94` |
+
+### Same statement, new proof
+
+| name | now proved from | location | last old proof |
+|---|---|---|---|
+| `PM.exists_pow_eq_of_closed` | `PM.card_reachable_eq_two_mul` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:104` |
