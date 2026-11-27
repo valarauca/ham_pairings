@@ -37,28 +37,28 @@ namespace RoundRobin.Canonical
 open PerfectMatching
 
 /-- The translation `v ↦ v + b` of `V_m`, fixing `∞`. -/
-def shift (m : ℕ) [NeZero m] (b : ZMod (2 * m - 1)) : Equiv.Perm (Vertex m) :=
+def shift (m : ℕ) (b : ZMod (2 * m - 1)) : Equiv.Perm (Vertex m) :=
   Equiv.optionCongr (Equiv.addRight b)
 
 /-- The translation fixes `∞`. -/
 @[simp]
-theorem shift_none (m : ℕ) [NeZero m] (b : ZMod (2 * m - 1)) : shift m b none = none :=
+theorem shift_none (m : ℕ) (b : ZMod (2 * m - 1)) : shift m b none = none :=
   rfl
 
 /-- The translation sends `x` to `x + b`. -/
 @[simp]
-theorem shift_some (m : ℕ) [NeZero m] (b x : ZMod (2 * m - 1)) :
+theorem shift_some (m : ℕ) (b x : ZMod (2 * m - 1)) :
     shift m b (some x) = some (x + b) :=
   rfl
 
 /-- The inverse translation fixes `∞`. -/
 @[simp]
-theorem shift_inv_none (m : ℕ) [NeZero m] (b : ZMod (2 * m - 1)) : (shift m b)⁻¹ none = none := by
+theorem shift_inv_none (m : ℕ) (b : ZMod (2 * m - 1)) : (shift m b)⁻¹ none = none := by
   rw [Equiv.Perm.inv_eq_iff_eq, shift_none]
 
 /-- The inverse translation sends `x` to `x - b`. -/
 @[simp]
-theorem shift_inv_some (m : ℕ) [NeZero m] (b x : ZMod (2 * m - 1)) :
+theorem shift_inv_some (m : ℕ) (b x : ZMod (2 * m - 1)) :
     (shift m b)⁻¹ (some x) = some (x - b) := by
   rw [Equiv.Perm.inv_eq_iff_eq, shift_some, sub_add_cancel]
 

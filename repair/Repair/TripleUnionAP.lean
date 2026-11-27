@@ -122,10 +122,11 @@ private theorem eq_rainbow_of_triangle' {r : ZMod (2 * m - 1)} (hr0 : r ≠ 0) (
 /-- The triangle of an AP triple through `∞`: `∞` and the two ends of the progression, so
 `{∞, 0, 2}` for `r = 2`, `{∞, 1, -1}` for `r = -1` and `{∞, 0, 1}` for `r = 1/2`
 (`results/k3-workaround-spike.md`, Lemma M (a)). -/
-def apTriangle (m : ℕ) [NeZero m] (r : ZMod (2 * m - 1)) : Finset (Vertex m) :=
+def apTriangle (m : ℕ) (r : ZMod (2 * m - 1)) : Finset (Vertex m) :=
   if r = 2 then {none, some 0, some r} else if r = -1 then {none, some 1, some r}
   else {none, some 0, some 1}
 
+omit [NeZero m] in
 /-- `∞` lies on `apTriangle m r` (`results/k3-workaround-spike.md`, Lemma M (a)). -/
 theorem none_mem_apTriangle (r : ZMod (2 * m - 1)) : none ∈ apTriangle m r := by
   unfold apTriangle
@@ -356,6 +357,7 @@ theorem chord_mem_ladderSquare {v : ZMod (2 * m - 1)} (hv : v ≠ -1) :
   right; right; right
   rw [show (2 : ZMod (2 * m - 1)) - (v + 2) = -v by ring]
 
+omit [NeZero m] in
 /-- **Lemma M (d)**, the ends of the ladder. The ladder of `G_2` closes through the two triangles of
 Lemma M (a): `Q_3` contains the `F_1`-chord `{-1, 3}` of the rainbow triangle `T_2 = {-1, 1, 3}`,
 and `Q_2` contains the `F_1`-chord `{0, 2}` of the triangle `{∞, 0, 2}`

@@ -58,15 +58,17 @@ theorem valMinAbs_eq_of_eq {y : ZMod (2 * m - 1)} {k : ℤ} (hy : y = k)
 /-- The position of a vertex on the zig-zag cycle `∞, 0, 1, -1, 2, -2, …` of `F_0 ∪ F_{1/2}`.
 `∞` is at `0`, and a finite vertex with least absolute residue `k` is at `2k` for `k > 0` and at
 `1 - 2k` for `k ≤ 0`. -/
-def zigPos (m : ℕ) [NeZero m] : Vertex m → ℤ
+def zigPos (m : ℕ) : Vertex m → ℤ
   | none => 0
   | some y => if 0 < y.valMinAbs then 2 * y.valMinAbs else 1 - 2 * y.valMinAbs
 
+omit [NeZero m] in
 /-- `∞` is at position `0`. -/
 @[simp]
 theorem zigPos_none : zigPos m none = 0 :=
   rfl
 
+omit [NeZero m] in
 /-- The position of a finite vertex. -/
 theorem zigPos_some (y : ZMod (2 * m - 1)) :
     zigPos m (some y) = if 0 < y.valMinAbs then 2 * y.valMinAbs else 1 - 2 * y.valMinAbs :=
@@ -88,6 +90,7 @@ theorem zigPos_bounds (v : Vertex m) : 0 ≤ zigPos m v ∧ zigPos m v ≤ 2 * m
     rw [zigPos_some]
     split_ifs <;> omega
 
+omit [NeZero m] in
 /-- Distinct vertices have distinct positions. -/
 theorem zigPos_injective : Function.Injective (zigPos m) := by
   rintro (_ | y) (_ | y') h

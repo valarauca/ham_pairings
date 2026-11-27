@@ -464,6 +464,7 @@ theorem certLength_bound_of_isZeroState (hp : (2 * m - 1).Prime) {P : PerfectMat
   obtain ⟨y', hy', hcyc'⟩ := exists_defect_of_cycle hp hP hts hcyc
   exact ⟨y', hy', r, hr1, hrL, hcyc'⟩
 
+omit [NeZero m] in
 /-- The default gadget `G0 = {1, …, 6}` has six vertices for `m ≥ 5`. -/
 theorem card_gadget (hm : 5 ≤ m) : (FactorCap.gadget m).card = 6 := by
   rw [FactorCap.gadget, Finset.card_image_of_injOn]

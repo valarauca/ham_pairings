@@ -78,7 +78,7 @@ theorem sum_card_ham_glue {ι : Type*} [Fintype ι] (F : ι → PerfectMatching 
     _ = _ := by
         rw [sum_ite, sum_const_zero, zero_add, sum_const, smul_eq_mul]
 
-omit [Fintype V] in
+omit [Fintype V] [DecidableEq V] in
 /-- A factor that is one cycle with `P` closes no cycle with `P'` off a nonempty boundary `A`
 (`results/ulzd-longcycle-spike.md`, Lemma 1). -/
 theorem not_hasClosedCycle_of_ham {P Q : PerfectMatching V} (h : Ham P Q)
@@ -88,11 +88,12 @@ theorem not_hasClosedCycle_of_ham {P Q : PerfectMatching V} (h : Ham P Q)
   exact not_ham_of_closed P Q (C : Set V) hP hQ (u := v) (w := a) hv
     (Finset.disjoint_right.mp hdisj ha) h
 
-omit [Fintype V] in
+omit [Fintype V] [DecidableEq V] in
 /-- `F_0 ∪ F_0'` closes the `2`-cycle of any `F_0`-edge off a proper boundary `A`
 (`results/ulzd-longcycle-spike.md`, the factor `t = 0` is dead for a hybrid). -/
 theorem hasClosedCycle_self (P : PerfectMatching V) (A : Finset V)
     (hA : ∀ v ∈ A, P.mate v ∈ A) {v : V} (hv : v ∉ A) : HasClosedCycle P P A := by
+  classical
   have hv' : P.mate v ∉ A := fun h ↦ hv (by simpa using hA _ h)
   refine ⟨{v, P.mate v}, ⟨v, mem_insert_self _ _⟩, ?_, ?_, ?_⟩
   · rw [Finset.disjoint_left]

@@ -94,7 +94,7 @@ theorem isAut_affine (a : (ZMod (2 * m - 1))ˣ) (b : ZMod (2 * m - 1)) :
 
 /-- The label of the factor holding the edge `uw`. `∞x` lies in `F_x` and `xy` in
 `F_{(x + y)/2}`, where `1/2 = m` in `ℤ/(2m-1)` (`results/autgroup-spike.md` §5.1). -/
-def edgeLabel (m : ℕ) [NeZero m] : Vertex m → Vertex m → ZMod (2 * m - 1)
+def edgeLabel (m : ℕ) : Vertex m → Vertex m → ZMod (2 * m - 1)
   | none, none => 0
   | none, some y => y
   | some x, none => x
@@ -300,6 +300,7 @@ theorem isAut_iff (hm : 4 ≤ m) {σ : Equiv.Perm (Vertex m)} :
       ∃ (a : (ZMod (2 * m - 1))ˣ) (b : ZMod (2 * m - 1)), σ = shift m b * scale m a :=
   ⟨fun hσ ↦ hσ.exists_affine (hσ.apply_none hm), fun ⟨a, b, h⟩ ↦ h ▸ isAut_affine a b⟩
 
+omit [NeZero m] in
 /-- The affine map `v ↦ a v + b` determines `a` and `b` (`results/autgroup-spike.md` §5.1). -/
 theorem affine_inj {a a' : (ZMod (2 * m - 1))ˣ} {b b' : ZMod (2 * m - 1)}
     (h : shift m b * scale m a = shift m b' * scale m a') : a = a' ∧ b = b' := by
@@ -333,18 +334,20 @@ theorem card_autGroup (hm : 4 ≤ m) :
 
 /-- An affine permutation `f` of `ℤ/n` acting on `V_m`, `x ↦ f x` and `∞ ↦ ∞`, as a homomorphism
 from `AGL(1, ℤ/n) = (ℤ/n ≃ᵃ[ℤ/n] ℤ/n)` (`results/autgroup-spike.md` §5.1). -/
-def affinePerm (m : ℕ) [NeZero m] :
+def affinePerm (m : ℕ) :
     (ZMod (2 * m - 1) ≃ᵃ[ZMod (2 * m - 1)] ZMod (2 * m - 1)) →* Equiv.Perm (Vertex m) where
   toFun f := Equiv.optionCongr f.toEquiv
   map_one' := Equiv.ext fun v ↦ by cases v <;> rfl
   map_mul' f g := Equiv.ext fun v ↦ by cases v <;> rfl
 
+omit [NeZero m] in
 /-- `affinePerm` sends `x` to `f x` (`results/autgroup-spike.md` §5.1). -/
 @[simp]
 theorem affinePerm_some (f : ZMod (2 * m - 1) ≃ᵃ[ZMod (2 * m - 1)] ZMod (2 * m - 1))
     (x : ZMod (2 * m - 1)) : affinePerm m f (some x) = some (f x) :=
   rfl
 
+omit [NeZero m] in
 /-- `affinePerm` is injective (`results/autgroup-spike.md` §5.1). -/
 theorem affinePerm_injective : Function.Injective (affinePerm m) := fun f g h ↦
   AffineEquiv.ext fun x ↦ Option.some_inj.1 (by rw [← affinePerm_some, h, affinePerm_some])

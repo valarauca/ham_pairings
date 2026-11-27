@@ -95,11 +95,11 @@ theorem capInt_endInt : ∀ ε < 16, ∃ ε' < 16,
   decide
 
 /-- End `ε` as a vertex of `V_m`, in the coordinate `x = 2v - 7`. -/
-def endVtx (m : ℕ) [NeZero m] (ε : ℕ) : Vertex m :=
+def endVtx (m : ℕ) (ε : ℕ) : Vertex m :=
   some ((endInt ε : ℤ) : ZMod (2 * m - 1))
 
 /-- The partner of a vertex in `P_q`, in the coordinate `x = 2v - 7`. -/
-def capFn (m : ℕ) [NeZero m] : Vertex m → Vertex m
+def capFn (m : ℕ) : Vertex m → Vertex m
   | none => some 0
   | some x => if x = 0 then none else some ((capInt x.valMinAbs : ℤ) : ZMod (2 * m - 1))
 

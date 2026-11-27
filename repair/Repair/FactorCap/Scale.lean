@@ -23,29 +23,29 @@ namespace RoundRobin.Canonical
 open PerfectMatching
 
 /-- The scaling `v ↦ a v` of `V_m` by a unit `a`, fixing `∞`. -/
-def scale (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) : Equiv.Perm (Vertex m) :=
+def scale (m : ℕ) (a : (ZMod (2 * m - 1))ˣ) : Equiv.Perm (Vertex m) :=
   Equiv.optionCongr a.mulLeft
 
 /-- The scaling fixes `∞`. -/
 @[simp]
-theorem scale_none (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) : scale m a none = none :=
+theorem scale_none (m : ℕ) (a : (ZMod (2 * m - 1))ˣ) : scale m a none = none :=
   rfl
 
 /-- The scaling sends `x` to `a x`. -/
 @[simp]
-theorem scale_some (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) (x : ZMod (2 * m - 1)) :
+theorem scale_some (m : ℕ) (a : (ZMod (2 * m - 1))ˣ) (x : ZMod (2 * m - 1)) :
     scale m a (some x) = some (a * x) :=
   rfl
 
 /-- The inverse scaling fixes `∞`. -/
 @[simp]
-theorem scale_inv_none (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) :
+theorem scale_inv_none (m : ℕ) (a : (ZMod (2 * m - 1))ˣ) :
     (scale m a)⁻¹ none = none := by
   rw [Equiv.Perm.inv_eq_iff_eq, scale_none]
 
 /-- The inverse scaling sends `x` to `a⁻¹ x`. -/
 @[simp]
-theorem scale_inv_some (m : ℕ) [NeZero m] (a : (ZMod (2 * m - 1))ˣ) (x : ZMod (2 * m - 1)) :
+theorem scale_inv_some (m : ℕ) (a : (ZMod (2 * m - 1))ˣ) (x : ZMod (2 * m - 1)) :
     (scale m a)⁻¹ (some x) = some (↑a⁻¹ * x) := by
   rw [Equiv.Perm.inv_eq_iff_eq, scale_some, ← mul_assoc, Units.mul_inv, one_mul]
 

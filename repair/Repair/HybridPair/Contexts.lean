@@ -140,6 +140,7 @@ theorem context_mate_of_lt (hm : 2 ≤ m) {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod
     rw [zigPos_scale_factor hm ht]
     split_ifs <;> omega
 
+omit [NeZero m] in
 /-- The zig-zag position of a finite vertex `y`: `2k` for `k = valMinAbs y > 0`, and `1 - 2k`
 otherwise (`results/hybrid-pair-incoherence.md` §1). -/
 theorem zigPos_scale_some (lam : (ZMod (2 * m - 1))ˣ) (y : ZMod (2 * m - 1)) :
@@ -154,6 +155,7 @@ theorem valMinAbs_neg' (y : ZMod (2 * m - 1)) : (-y).valMinAbs = -y.valMinAbs :=
   have hodd : 2 * y.valMinAbs ≠ 2 * m - 1 := by omega
   refine valMinAbs_eq_of_eq (by rw [Int.cast_neg, ZMod.coe_valMinAbs]) (by omega) (by omega)
 
+omit [NeZero m] in
 /-- A vertex of `A` whose position lies strictly between `2|v| + 1` and `2|w|` has a label `z`
 with `|v| < |valMinAbs (λ z)| < |w|` (`results/hybrid-pair-incoherence.md`, Lemma 3). -/
 theorem gap_of_abs_gap (lam : (ZMod (2 * m - 1))ˣ) (A : Finset (Vertex m)) {v w : ℤ}

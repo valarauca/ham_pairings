@@ -35,7 +35,7 @@ open RoundRobin.Canonical PerfectMatching
 variable {m : ℕ} [NeZero m]
 
 /-- The centre `s0 = 7/2 = m + 3` of the factor that contains the gadget edges. -/
-def capCenter (m : ℕ) [NeZero m] : ZMod (2 * m - 1) :=
+def capCenter (m : ℕ) : ZMod (2 * m - 1) :=
   ((m + 3 : ℕ) : ZMod (2 * m - 1))
 
 /-- `2 s0 = 7`. -/
@@ -45,7 +45,7 @@ theorem two_mul_capCenter : 2 * capCenter m = 7 := by
   linear_combination (two_mul_natCast_self (m := m))
 
 /-- The default gadget `G0 = {1, …, 6}`. -/
-def gadget (m : ℕ) [NeZero m] : Finset (Vertex m) :=
+def gadget (m : ℕ) : Finset (Vertex m) :=
   (Finset.Icc 1 6).image fun k : ℕ ↦ some (k : ZMod (2 * m - 1))
 
 /-- `F_{s0}` maps the gadget to itself, `v ↦ 7 - v`. -/

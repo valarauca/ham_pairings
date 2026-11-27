@@ -279,7 +279,7 @@ def IsA3 (r : ZMod (2 * m - 1)) : Prop :=
 
 /-- The rainbow triangle `T_r = {1 - r, r - 1, r + 1}` (`results/k3-workaround-spike.md`,
 Lemma M (a)). -/
-def rainbow (m : ℕ) [NeZero m] (r : ZMod (2 * m - 1)) : Finset (Vertex m) :=
+def rainbow (m : ℕ) (r : ZMod (2 * m - 1)) : Finset (Vertex m) :=
   {some (1 - r), some (r - 1), some (r + 1)}
 
 /-- `2` is a unit of `ℤ/(2m-1)` (`results/k3-workaround-spike.md`, Lemma M). -/
@@ -364,16 +364,6 @@ private theorem unit3 (hD : Nat.Coprime (2 * m - 1) D) (hk : 3 ∣ D) :
     IsUnit (3 : ZMod (2 * m - 1)) := by
   simpa using unit_of (k := 3) hD hk
 
-omit [NeZero m] in
-private theorem unit5 (hD : Nat.Coprime (2 * m - 1) D) (hk : 5 ∣ D) :
-    IsUnit (5 : ZMod (2 * m - 1)) := by
-  simpa using unit_of (k := 5) hD hk
-
-omit [NeZero m] in
-private theorem unit7 (hD : Nat.Coprime (2 * m - 1) D) (hk : 7 ∣ D) :
-    IsUnit (7 : ZMod (2 * m - 1)) := by
-  simpa using unit_of (k := 7) hD hk
-
 end Units
 
 /-! ### (a) Triangles -/
@@ -452,7 +442,7 @@ def a3Eq (r : ZMod (2 * m - 1)) : Fin 6 → Prop
 
 /-- The 4-cycle through `∞` attached to each equation of `A_3`, `∞, a, x, b` with
 `x = 2c - a = 2c' - b` (`results/k3-workaround-spike.md`, Lemma M (c)). -/
-def infSquare (m : ℕ) [NeZero m] (r : ZMod (2 * m - 1)) : Fin 6 → Finset (Sym2 (Vertex m))
+def infSquare (m : ℕ) (r : ZMod (2 * m - 1)) : Fin 6 → Finset (Sym2 (Vertex m))
   | 0 => fourCycleEdges none (some 0) (some 2) (some 1)
   | 1 => fourCycleEdges none (some 0) (some (-1)) (some 1)
   | 2 => fourCycleEdges none (some 0) (some 2) (some r)
@@ -712,7 +702,7 @@ theorem fourCyclesAvoiding_nonempty_iff {r : ZMod (2 * m - 1)} (h3 : Nat.Coprime
 
 /-- The ladder square `Q_v = v, -v, v + 2, 2 - v` of `G_2`, with colour word `0, 1, 2, 1`
 (`results/k3-workaround-spike.md`, Lemma M (d)). -/
-def ladderSquare (m : ℕ) [NeZero m] (v : ZMod (2 * m - 1)) : Finset (Sym2 (Vertex m)) :=
+def ladderSquare (m : ℕ) (v : ZMod (2 * m - 1)) : Finset (Sym2 (Vertex m)) :=
   fourCycleEdges (some v) (some (-v)) (some (v + 2)) (some (2 - v))
 
 /-- `Q_v` is a 4-cycle of `G_2` iff `v ∉ {0, 1, -1}` (`results/k3-workaround-spike.md`,
