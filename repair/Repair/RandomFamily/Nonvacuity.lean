@@ -19,7 +19,8 @@ On the small side `jointCount_div_psiK_sq_le` gives `1 + δ ≤ 27/16`. On the l
 
 * `card_agree_ge_le` : at most `2^|W| (|W| - t - 1)!!` matchings `Q` agree with `P` on `t` or
   more vertices.
-* `sum_sq_delta_eq` : `∑_Q δ(P, Q)² = N · cGen P`, so `cGen` of `PairVariance.lean` is
+* `sum_sq_delta_eq` : `∑_Q δ(P, Q)² = N · cGen P`, so `cGen` of
+  `repair/Repair/PairVariance.lean` (main 27c43f7) is
   `E δ²` (`q-second-moment-extend.md` §3, Lemma 2, the identification).
 * `card_emptyFamilies_le_of_cGen` (Theorem 1, explicit form) : if `cGen B ≤ c/m²` for every
   `B`, then `P(Z(M) = ∅) ≤ C(n, 2)[a²(1 + 11a/16)^(n-2) c/m² + (1 - p)^(-n) 4^m /
@@ -32,7 +33,8 @@ On the small side `jointCount_div_psiK_sq_le` gives `1 + δ ≤ 27/16`. On the l
 
 The hypothesis `cGen B ≤ c/m²` is Lemma 2 of the extend, `E δ² = c_gen ≤ c1 + O(m^(-7/2))`
 with `m² c1 → 1/8`. It needs the spherical functions of the Gelfand pair `(S_2m, H_m)`, which
-are not formalized (`PairVariance.lean` takes a `HamSpectral` resolution as input for the same
+are not formalized (`repair/Repair/PairVariance.lean`, main 27c43f7, takes a `HamSpectral`
+resolution as input for the same
 reason). `cGen_le` gives the trivial bound `cGen B ≤ (N/D)²`, which shows the hypothesis is
 satisfiable at every `m` but carries no rate.
 -/
@@ -671,7 +673,8 @@ theorem card_nonempty_zeroStates_ge (hm : 100 ≤ m) (ι : Type*) [Fintype ι] [
 
 open Classical in
 /-- **C2 with Theorem A′** (`q-second-moment-extend.md` §8, C2, af8925f, with the corollary of
-Theorem A′ in `TheoremAPrime.lean`). Let `m ≥ 100`, `|ι| = 2m - 1`, `K ≤ K_m`, and suppose
+Theorem A′ in `repair/Repair/RandomFamily/TheoremAPrime.lean`, main 27c43f7). Let `m ≥ 100`,
+`|ι| = 2m - 1`, `K ≤ K_m`, and suppose
 `cGen B ≤ c/m²` for every `B`. Then at least a fraction `1 - m^(-3/2) - (7c + 1/100)/m²` of the
 families `M : ι → PerfectMatching (Vertex m)` have `Z(M) ≠ ∅` and `N(M, G) ≥ K + 1`, that is
 `¬RepairBoundFor (zeroStates M) G K`, at every six-vertex gadget `G` at once. -/

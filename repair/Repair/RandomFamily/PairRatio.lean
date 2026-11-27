@@ -5,8 +5,8 @@ import Repair.PairRecursion
 
 Source: `results/q-second-moment-extend.md` §4, Lemma 3 (organize-archive af8925f), checked in
 `results/q-second-moment-factcheck-extend.md`, row L3 (af8925f). `K(μ) = k2Count μ` is the Lemma
-K2 count of `PairRecursion.lean`, `j = |μ|`, `N_j = (2j - 1)!!`, `D_j = 2^(j-1)(j-1)!` and
-`ψ_j = D_j² / N_j`, so that `g(μ) = h/p² = K(μ) / ψ_j`.
+K2 count of `repair/Repair/PairRecursion.lean` (main 27c43f7), `j = |μ|`, `N_j = (2j - 1)!!`,
+`D_j = 2^(j-1)(j-1)!` and `ψ_j = D_j² / N_j`, so that `g(μ) = h/p² = K(μ) / ψ_j`.
 
 * `k2Count_eq_k2Step` : `K(μ) = k2Step K μ a` at the largest part `a`, for `|μ| ≥ 2`.
 * `k2Count_cons_one` : the shared-edge rule `K(1 ∪ ν) = 2|ν| K(ν)` for `|ν| ≥ 1` and positive
@@ -27,7 +27,8 @@ namespace PerfectMatching
 
 section Recursion
 
-/-- Every part is at most the largest part (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+/-- Every part is at most the largest part (`results/k3-counterexample-hunt.md`, 103b761,
+Lemma K2). -/
 theorem le_maxPart {μ : Multiset ℕ} {x : ℕ} (hx : x ∈ μ) : x ≤ maxPart μ :=
   Finset.le_sup (f := id) (Multiset.mem_toFinset.mpr hx)
 
@@ -39,7 +40,7 @@ theorem one_le_maxPart {μ : Multiset ℕ} (h : 1 ≤ μ.sum) : 1 ≤ maxPart μ
   omega
 
 /-- `k2Step` only reads `g` on types of size `|μ| - 1` (`results/k3-counterexample-hunt.md`,
-Lemma K2). -/
+103b761, Lemma K2). -/
 theorem k2Step_congr {g₁ g₂ : Multiset ℕ → ℕ} {μ : Multiset ℕ} {a : ℕ} (ha : a ∈ μ)
     (ha1 : 1 ≤ a) (hg : ∀ ν : Multiset ℕ, ν.sum + 1 = μ.sum → g₁ ν = g₂ ν) :
     k2Step g₁ μ a = k2Step g₂ μ a := by
@@ -61,7 +62,7 @@ theorem k2Step_congr {g₁ g₂ : Multiset ℕ → ℕ} {μ : Multiset ℕ} {a :
     omega
 
 /-- Lemma K2 at the largest part: `K(μ) = k2Step K μ a` with `a = maxPart μ`, for `|μ| ≥ 2`
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
+(`results/k3-counterexample-hunt.md`, 103b761, Lemma K2). -/
 theorem k2Count_eq_k2Step {μ : Multiset ℕ} (h : 2 ≤ μ.sum) :
     k2Count μ = k2Step k2Count μ (maxPart μ) := by
   have hne : μ ≠ 0 := by
@@ -93,7 +94,7 @@ theorem maxPart_cons_one {ν : Multiset ℕ} (h : 1 ≤ ν.sum) : maxPart (1 ::�
 
 /-- The shared-edge rule `K(1 ∪ ν) = 2|ν| K(ν)` for `|ν| ≥ 1` with positive parts
 (`results/q-second-moment-extend.md` §4, af8925f; `results/hybrid-pair-incoherence.md`,
-Lemma 2). It is proved from the recursion alone, by induction on `|ν|`. -/
+103b761, Lemma 2). It is proved from the recursion alone, by induction on `|ν|`. -/
 theorem k2Count_cons_one : ∀ (s : ℕ) (ν : Multiset ℕ), ν.sum = s → (∀ x ∈ ν, 0 < x) → 1 ≤ s →
     k2Count (1 ::ₘ ν) = 2 * s * k2Count ν := by
   intro s
@@ -327,7 +328,7 @@ end Potential
 
 section LemmaThree
 
-/-- `k2Step` in `ℝ` (`results/k3-counterexample-hunt.md`, Lemma K2). -/
+/-- `k2Step` in `ℝ` (`results/k3-counterexample-hunt.md`, 103b761, Lemma K2). -/
 theorem cast_k2Step (g : Multiset ℕ → ℕ) (μ : Multiset ℕ) {a : ℕ} (ha : 1 ≤ a) :
     (k2Step g μ a : ℝ) = ((a : ℝ) - 1) * g ((a - 1) ::ₘ μ.erase a) +
       ∑ x ∈ Icc 1 (a - 2), (g (x ::ₘ (a - 1 - x) ::ₘ μ.erase a) : ℝ) +
