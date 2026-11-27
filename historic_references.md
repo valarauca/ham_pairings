@@ -238,6 +238,7 @@ main `77d3de5`.
 | `PM.mem_cycleOf_self_iff` | `PM.reachable_iff_sameCycle` with `A A = 1` | `repair/Repair/PairLevelOne.lean` | `77d3de5:repair/Repair/PairLevelOne.lean:294` |
 | `PM.le_card_ham` (base case `r = 0`) | `PM.ham_iff_partition` with `M M = 1` | `repair/Repair/DensityGlue.lean` | `77d3de5:repair/Repair/DensityGlue.lean:61` |
 | `PM.two_mul_cycleCount_le` | `PM.two_mul_cycleCount` (`2 κ` parts of a partition of the vertex count) | `repair/Repair/FreeDefects.lean` | `77d3de5:repair/Repair/FreeDefects.lean:903` |
+| `RoundRobin.Covering.reachable_of_mem_altWalk` | `PM.reachable_mate_right`, `PM.reachable_mate_left` | `repair/Repair/Covering/Witness.lean` | `77d3de5:repair/Repair/Covering/Witness.lean:72` |
 
 ### Deprecated aliases
 

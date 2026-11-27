@@ -1,3 +1,4 @@
+import Pairing.InvolutionProduct
 import Repair.Covering.Basic
 import Suppression.Density
 
@@ -67,23 +68,21 @@ def altWalk (X Y : V → V) : ℕ → V → List V
 theorem mem_altWalk_self (X Y : V → V) (j : ℕ) (v : V) : v ∈ altWalk X Y j v := by
   cases j <;> simp [altWalk]
 
-/-- Every vertex on the alternating walk from `v` is reachable from `v` in `X ∪ Y`.
-(`covering-spike.md` §3, R2 witness) -/
+/-- Every vertex on the alternating walk from `v` is reachable from `v` in `X ∪ Y`, by the steps
+`reachable_mate_right`, `reachable_mate_left` of ham-spin `core/Pairing/InvolutionProduct.lean`
+(fe1f6bf). (`covering-spike.md` §3, R2 witness) -/
 theorem reachable_of_mem_altWalk (X Y : PerfectMatching V) :
     ∀ (j : ℕ) (v w : V), w ∈ altWalk X.mate Y.mate j v → (X.toGraph ⊔ Y.toGraph).Reachable v w
   | 0, v, w, hw => by
     rw [altWalk, List.mem_singleton] at hw
     rw [hw]
   | j + 1, v, w, hw => by
-    have h1 : (X.toGraph ⊔ Y.toGraph).Reachable v (Y.mate v) :=
-      SimpleGraph.Adj.reachable ((SimpleGraph.sup_adj _ _ _ _).mpr (Or.inr rfl))
-    have h2 : (X.toGraph ⊔ Y.toGraph).Reachable (Y.mate v) (X.mate (Y.mate v)) :=
-      SimpleGraph.Adj.reachable ((SimpleGraph.sup_adj _ _ _ _).mpr (Or.inl rfl))
     rw [altWalk, List.mem_cons, List.mem_cons] at hw
     rcases hw with rfl | rfl | hw
     · rfl
-    · exact h1
-    · exact (h1.trans h2).trans (reachable_of_mem_altWalk X Y j _ w hw)
+    · exact reachable_mate_right X Y v
+    · exact ((reachable_mate_right X Y v).trans (reachable_mate_left X Y _)).trans
+        (reachable_of_mem_altWalk X Y j _ w hw)
 
 /-- If the alternating walk from `v` visits every vertex, `X ∪ Y` is one cycle.
 (`covering-spike.md` §3, R2 witness) -/
