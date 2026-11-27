@@ -25,8 +25,11 @@ set `Z_6` is preserved by Möbius maps that are not automorphisms of the round-r
 Not done: the converse, that `Sym(Z_6)` is no larger than `PGL(2,11)`, which needs a search over
 permutations of the 12 points.
 
-Source: `results/autgroup-spike.md` §4, runs 4 and 5. Each orbit is the sporadic 1-factorization
-of `K_12` with automorphism group `PSL(2,11)` of Cameron and Korchmáros 1993.
+Source: `results/autgroup-spike.md` §4, runs 4 and 5. By the exact computation of run 5 and the
+uniqueness theorem of Cameron and Korchmáros 1993, each orbit is their sporadic 1-factorization of
+`K_12`, with full automorphism group `PSL(2,11)`. That identification is not formalized. This file
+proves only that each orbit is a 1-factorization on which `⟨T, S⟩` acts
+(`results/symmetry-audit-contra.md` row L4, organize-archive bf3fe60).
 -/
 
 namespace Pairing
@@ -38,7 +41,7 @@ namespace PSL211
 open PerfectMatching
 
 /-- The 22 zero states of `V_6` as lists of label pairs, with `11 = ∞`, in the order of
-`scripts/autgroup-zero-m6.txt` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+`scripts/autgroup-zero-m6.txt` (`results/autgroup-spike.md` §4). -/
 def zeroPairs : List (List (ℕ × ℕ)) :=
   [[(0, 1), (2, 5), (3, 7), (4, 9), (6, 8), (10, 11)],
     [(0, 1), (2, 11), (3, 8), (4, 6), (5, 9), (7, 10)],
@@ -67,13 +70,11 @@ def zeroPairs : List (List (ℕ × ℕ)) :=
 def zeroMate (i : Fin 22) : Vertex 6 → Vertex 6 :=
   Covering.Witness.natPairs 6 (zeroPairs.getD i [])
 
-/-- Each listed partner function is an involution (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- Each listed partner function is an involution (`results/autgroup-spike.md` §4). -/
 theorem zeroMate_zeroMate : ∀ (i : Fin 22) (v : Vertex 6), zeroMate i (zeroMate i v) = v := by
   decide +kernel
 
-/-- Each listed partner function has no fixed point (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- Each listed partner function has no fixed point (`results/autgroup-spike.md` §4). -/
 theorem zeroMate_ne : ∀ (i : Fin 22) (v : Vertex 6), zeroMate i v ≠ v := by
   decide +kernel
 
@@ -81,14 +82,12 @@ theorem zeroMate_ne : ∀ (i : Fin 22) (v : Vertex 6), zeroMate i v ≠ v := by
 def zeroState (i : Fin 22) : PerfectMatching (Vertex 6) :=
   Covering.mkMatching (zeroMate i) (zeroMate_zeroMate i) (zeroMate_ne i)
 
-/-- The partner map of `zeroState i` is `zeroMate i` (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- The partner map of `zeroState i` is `zeroMate i` (`results/autgroup-spike.md` §4). -/
 @[simp]
 theorem zeroState_mate (i : Fin 22) (v : Vertex 6) : (zeroState i).mate v = zeroMate i v :=
   rfl
 
-/-- The 22 listed matchings are distinct (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+/-- The 22 listed matchings are distinct (`results/autgroup-spike.md` §4). -/
 theorem zeroState_injective : Function.Injective zeroState := by
   have h : ∀ i j : Fin 22, (∀ v, zeroMate i v = zeroMate j v) → i = j := by
     decide +kernel
@@ -96,15 +95,14 @@ theorem zeroState_injective : Function.Injective zeroState := by
   exact h i j fun v ↦ by rw [← zeroState_mate, hij, zeroState_mate]
 
 /-- Every listed matching is a zero state: for each `t` the alternating walk from `∞` closes up
-before it visits every vertex (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+before it visits every vertex (`results/autgroup-spike.md` §4). -/
 theorem isZeroState_zeroState (i : Fin 22) : IsZeroState (factor 6) (zeroState i) := by
   have h : ∀ (i : Fin 22) (t : ZMod (2 * 6 - 1)), Covering.ClosedMiss (zeroMate i) (mateFn t)
       (Covering.altWalk (zeroMate i) (mateFn t) 6 none) := by
     decide +kernel
   exact Covering.isZeroState_of_closedMiss (j := 6) (modulus_odd 6) (h i)
 
-/-- Translations preserve zero states (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+/-- Translations preserve zero states (`results/autgroup-spike.md` §4). -/
 theorem isZeroState_shift_smul (b : ZMod (2 * 6 - 1)) {P : PerfectMatching (Vertex 6)}
     (hP : IsZeroState (factor 6) P) : IsZeroState (factor 6) (shift 6 b • P) := by
   intro t h
@@ -118,14 +116,13 @@ def listedOrHam (g : Vertex 6 → Vertex 6) : Bool :=
   Covering.hamSome (2 * 6 - 1) 6 g || decide (∃ i : Fin 22, ∀ v, g v = zeroMate i v)
 
 /-- Every perfect matching of `V_6` that pairs `∞` with `0` passes `listedOrHam`. The search
-covers `9!! = 945` matchings (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+covers `9!! = 945` matchings (`results/autgroup-spike.md` §4). -/
 theorem allComplete_listedOrHam :
     Covering.allComplete listedOrHam Covering.Witness.verts6 12
       (Covering.pairUp (fun _ ↦ none) none (some 0)) = true := by
   decide +kernel
 
-/-- A zero state pairing `∞` with `0` is listed (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- A zero state pairing `∞` with `0` is listed (`results/autgroup-spike.md` §4). -/
 theorem exists_eq_zeroState_of_mate_none {P : PerfectMatching (Vertex 6)}
     (hP : IsZeroState (factor 6) P) (h0 : P.mate none = some 0) : ∃ i, P = zeroState i := by
   have hs : Covering.PartialSymm (Covering.pairUp (fun _ ↦ none) (none : Vertex 6) (some 0)) := by
@@ -139,7 +136,7 @@ theorem exists_eq_zeroState_of_mate_none {P : PerfectMatching (Vertex 6)}
     exact ⟨i, PerfectMatching.ext (Equiv.ext hi)⟩
 
 /-- **The zero states at `m = 6`.** A perfect matching of `V_6` is a zero state iff it is one of
-the 22 listed matchings (`results/autgroup-spike.md` §4, run 4; Cameron and Korchmáros 1993). -/
+the 22 listed matchings (`results/autgroup-spike.md` §4, run 4). -/
 theorem isZeroState_iff {P : PerfectMatching (Vertex 6)} :
     IsZeroState (factor 6) P ↔ ∃ i, P = zeroState i := by
   refine ⟨fun hP ↦ ?_, fun ⟨i, h⟩ ↦ h ▸ isZeroState_zeroState i⟩
@@ -157,13 +154,13 @@ theorem isZeroState_iff {P : PerfectMatching (Vertex 6)} :
   refine ⟨j, ?_⟩
   rw [← hj, ← hi, smul_smul, h1, one_smul]
 
-/-- The zero-state set at `m = 6` is the set of listed matchings (`results/autgroup-spike.md` §4;
-Cameron and Korchmáros 1993). -/
+/-- The zero-state set at `m = 6` is the set of listed matchings
+(`results/autgroup-spike.md` §4). -/
 theorem setOf_isZeroState : {P | IsZeroState (factor 6) P} = Set.range zeroState := by
   ext P
   simp only [Set.mem_ofPred_eq, Set.mem_range, isZeroState_iff, eq_comm]
 
-/-- **`Z_6 = 22`** (`results/autgroup-spike.md` §4, run 4; Cameron and Korchmáros 1993). -/
+/-- **`Z_6 = 22`** (`results/autgroup-spike.md` §4, run 4). -/
 theorem zeroCount_six : zeroCount 6 = 22 := by
   have e : Fin 22 ≃ ZeroState 6 :=
     Equiv.ofBijective (fun i ↦ ⟨zeroState i, isZeroState_zeroState i⟩)
@@ -186,8 +183,7 @@ def moebius (a b c d : ZMod (2 * 6 - 1)) : Vertex 6 → Vertex 6
   | none => ofHomog a c
   | some x => ofHomog (a * x + b) (c * x + d)
 
-/-- Homogeneous coordinates are defined up to a nonzero scalar (`results/autgroup-spike.md` §4;
-Cameron and Korchmáros 1993). -/
+/-- Homogeneous coordinates are defined up to a nonzero scalar (`results/autgroup-spike.md` §4). -/
 theorem ofHomog_mul {k : ZMod (2 * 6 - 1)} (hk : k ≠ 0) (N M : ZMod (2 * 6 - 1)) :
     ofHomog (k * N) (k * M) = ofHomog N M := by
   unfold ofHomog
@@ -196,8 +192,7 @@ theorem ofHomog_mul {k : ZMod (2 * 6 - 1)} (hk : k ≠ 0) (N M : ZMod (2 * 6 - 1
   · rw [ite_eq_right (mul_ne_zero hk hM), ite_eq_right hM, Option.some_inj]
     field_simp
 
-/-- A Möbius map acts linearly on homogeneous coordinates (`results/autgroup-spike.md` §4;
-Cameron and Korchmáros 1993). -/
+/-- A Möbius map acts linearly on homogeneous coordinates (`results/autgroup-spike.md` §4). -/
 theorem moebius_ofHomog (p r s u : ZMod (2 * 6 - 1)) {N M : ZMod (2 * 6 - 1)}
     (h : N ≠ 0 ∨ M ≠ 0) :
     moebius p r s u (ofHomog N M) = ofHomog (p * N + r * M) (s * N + u * M) := by
@@ -215,7 +210,7 @@ theorem moebius_ofHomog (p r s u : ZMod (2 * 6 - 1)) {N M : ZMod (2 * 6 - 1)}
     · linear_combination (s * N) * mul_inv_cancel₀ hM
 
 /-- **Composition of Möbius maps is matrix multiplication**, for an invertible inner matrix
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem moebius_moebius (p r s u : ZMod (2 * 6 - 1)) {a b c d : ZMod (2 * 6 - 1)}
     (h : a * d - b * c ≠ 0) (v : Vertex 6) :
     moebius p r s u (moebius a b c d v) =
@@ -238,7 +233,7 @@ theorem moebius_moebius (p r s u : ZMod (2 * 6 - 1)) {a b c d : ZMod (2 * 6 - 1)
     congr 1 <;> ring
 
 /-- A Möbius map depends on its matrix only up to a nonzero scalar (`results/autgroup-spike.md`
-§4; Cameron and Korchmáros 1993). -/
+§4). -/
 theorem moebius_mul {k : ZMod (2 * 6 - 1)} (hk : k ≠ 0) (a b c d : ZMod (2 * 6 - 1)) :
     moebius (k * a) (k * b) (k * c) (k * d) = moebius a b c d := by
   funext v
@@ -288,24 +283,23 @@ def D : Equiv.Perm (Vertex 6) where
     decide +kernel
 
 /-- `T` fixes `∞` and sends `x` to `x + 1`, so `T` is the translation `shift 6 1`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem T_apply : T none = none ∧ (∀ x, T (some x) = some (x + 1)) ∧ T = shift 6 1 := by
   decide +kernel
 
-/-- `S` swaps `∞` and `0` and sends `x ≠ 0` to `-1/x` (`results/autgroup-spike.md` §4; Cameron
-and Korchmáros 1993). -/
+/-- `S` swaps `∞` and `0` and sends `x ≠ 0` to `-1/x` (`results/autgroup-spike.md` §4). -/
 theorem S_apply :
     S none = some 0 ∧ S (some 0) = none ∧ ∀ x, x ≠ 0 → S (some x) = some (-x⁻¹) := by
   decide +kernel
 
 /-- `D` fixes `∞` and sends `x` to `2 x`, and `2` is not a square mod `11`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem D_apply :
     D none = none ∧ (∀ x, D (some x) = some (2 * x)) ∧ ∀ y : ZMod (2 * 6 - 1), y * y ≠ 2 := by
   decide +kernel
 
 /-- `x ↦ -1/x` is not an automorphism of the round-robin factorization, since it moves `∞`
-(`results/autgroup-spike.md` §4 and §5.1; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4 and §5.1). -/
 theorem S_not_mem_autGroup : S ∉ autGroup 6 := fun h ↦
   absurd (IsAut.apply_none (by norm_num) h) (by decide +kernel)
 
@@ -320,7 +314,7 @@ def symZero : Subgroup (Equiv.Perm (Vertex 6)) where
   inv_mem' {σ} hσ P := by rw [← hσ (σ⁻¹ • P), smul_inv_smul]
 
 /-- A permutation that maps the listed zero states, and whose inverse maps them, to listed zero
-states lies in `Sym(Z_6)` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+states lies in `Sym(Z_6)` (`results/autgroup-spike.md` §4). -/
 theorem mem_symZero_of_forall {σ : Equiv.Perm (Vertex 6)}
     (h : ∀ i, ∃ j, σ • zeroState i = zeroState j) (h' : ∀ i, ∃ j, σ⁻¹ • zeroState i = zeroState j) :
     σ ∈ symZero := by
@@ -337,29 +331,27 @@ theorem mem_symZero_of_forall {σ : Equiv.Perm (Vertex 6)}
     rw [hj]
     exact isZeroState_zeroState j
 
-/-- `T` maps zero states to zero states (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+/-- `T` maps zero states to zero states (`results/autgroup-spike.md` §4). -/
 theorem T_mem_symZero : T ∈ symZero :=
   mem_symZero_of_forall (by decide +kernel) (by decide +kernel)
 
 /-- `S x = -1/x` maps zero states to zero states, although it is not an automorphism of the
-round-robin factorization (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+round-robin factorization (`results/autgroup-spike.md` §4). -/
 theorem S_mem_symZero : S ∈ symZero :=
   mem_symZero_of_forall (by decide +kernel) (by decide +kernel)
 
-/-- `D x = 2 x` maps zero states to zero states (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- `D x = 2 x` maps zero states to zero states (`results/autgroup-spike.md` §4). -/
 theorem D_mem_symZero : D ∈ symZero :=
   mem_symZero_of_forall (by decide +kernel) (by decide +kernel)
 
 /-- **`⟨T, S, D⟩` acts on `Z_6`.** The group generated by `T`, `S` and `D` lies in `Sym(Z_6)`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem closure_le_symZero : Subgroup.closure {T, S, D} ≤ symZero := by
   rw [Subgroup.closure_le]
   rintro σ (rfl | rfl | rfl)
   exacts [T_mem_symZero, S_mem_symZero, D_mem_symZero]
 
-/-- `⟨T, S⟩ ≤ ⟨T, S, D⟩` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+/-- `⟨T, S⟩ ≤ ⟨T, S, D⟩` (`results/autgroup-spike.md` §4). -/
 theorem closure_TS_le_TSD : Subgroup.closure {T, S} ≤ Subgroup.closure {T, S, D} :=
   Subgroup.closure_mono fun σ hσ ↦ by
     rcases hσ with rfl | rfl
@@ -367,14 +359,13 @@ theorem closure_TS_le_TSD : Subgroup.closure {T, S} ≤ Subgroup.closure {T, S, 
     · exact Set.mem_insert_of_mem _ (Set.mem_insert _ _)
 
 /-- **`⟨T, S⟩` acts on `Z_6`**: every element maps zero states to zero states
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem isZeroState_smul {σ : Equiv.Perm (Vertex 6)} (hσ : σ ∈ Subgroup.closure {T, S})
     {P : PerfectMatching (Vertex 6)} (hP : IsZeroState (factor 6) P) :
     IsZeroState (factor 6) (σ • P) :=
   (closure_le_symZero (closure_TS_le_TSD hσ) P).2 hP
 
-/-- `⟨T, S⟩` is not contained in `Aut(𝓕)` (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- `⟨T, S⟩` is not contained in `Aut(𝓕)` (`results/autgroup-spike.md` §4). -/
 theorem closure_TS_not_le_autGroup : ¬Subgroup.closure {T, S} ≤ autGroup 6 := fun h ↦
   S_not_mem_autGroup (h (Subgroup.subset_closure (Set.mem_insert_of_mem _ rfl)))
 
@@ -395,7 +386,7 @@ def KeepsSides (σ : Equiv.Perm (Vertex 6)) : Prop :=
   ∀ i, ∃ j, σ • zeroState i = zeroState j ∧ (j ∈ sideA ↔ i ∈ sideA)
 
 /-- **The two orbits are invariant.** Every element of `⟨T, S⟩` keeps the two sides
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem keepsSides_of_mem_closure {σ : Equiv.Perm (Vertex 6)}
     (hσ : σ ∈ Subgroup.closure {T, S}) : KeepsSides σ := by
   have hmul : ∀ x y, KeepsSides x → KeepsSides y → KeepsSides (x * y) := by
@@ -427,8 +418,7 @@ def sideBase (i : Fin 22) : Fin 22 :=
   if i ∈ sideA then 0 else 1
 
 /-- **Each side is one orbit.** Listed zero states on the same side are related by an element of
-`⟨T, S⟩`, in fact by a power of `T` (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+`⟨T, S⟩`. The proof finds a power of `T` (`results/autgroup-spike.md` §4). -/
 theorem exists_mem_closure_smul_eq {i j : Fin 22} (h : i ∈ sideA ↔ j ∈ sideA) :
     ∃ σ ∈ Subgroup.closure {T, S}, σ • zeroState i = zeroState j := by
   have hb : ∀ i, ∃ k : Fin 11, T ^ (k : ℕ) • zeroState (sideBase i) = zeroState i := by
@@ -445,8 +435,7 @@ theorem exists_mem_closure_smul_eq {i j : Fin 22} (h : i ∈ sideA ↔ j ∈ sid
     mul_mem (pow_mem hT _) (inv_mem (pow_mem hT _)), ?_⟩
   rw [← hk, mul_smul, inv_smul_smul, hij, hl]
 
-/-- **The two orbits have `11` matchings each** (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- **The two orbits have `11` matchings each** (`results/autgroup-spike.md` §4). -/
 theorem card_sideA : sideA.card = 11 ∧ sideAᶜ.card = 11 := by
   decide +kernel
 
@@ -462,12 +451,11 @@ theorem exists_mate_eq_of_side : ∀ u w : Vertex 6, u ≠ w →
     (∃ i ∈ sideA, (zeroState i).mate u = w) ∧ ∃ i ∈ sideAᶜ, (zeroState i).mate u = w := by
   decide +kernel
 
-/-- `D` swaps the two sides (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+/-- `D` swaps the two sides (`results/autgroup-spike.md` §4). -/
 theorem D_swaps_sides : ∀ i, ∃ j, D • zeroState i = zeroState j ∧ (j ∈ sideA ↔ i ∉ sideA) := by
   decide +kernel
 
-/-- `D ∉ ⟨T, S⟩`, since `D` swaps the two orbits (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- `D ∉ ⟨T, S⟩`, since `D` swaps the two orbits (`results/autgroup-spike.md` §4). -/
 theorem D_not_mem_closure_TS : D ∉ Subgroup.closure {T, S} := by
   intro h
   obtain ⟨j, hj, hji⟩ := keepsSides_of_mem_closure h 0
@@ -497,26 +485,23 @@ def quadMul (g q : Quad) : Quad :=
 def quadSmul (k : ZMod (2 * 6 - 1)) (q : Quad) : Quad :=
   (k * q.1, k * q.2.1, k * q.2.2.1, k * q.2.2.2)
 
-/-- The determinant is multiplicative (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+/-- The determinant is multiplicative (`results/autgroup-spike.md` §4). -/
 theorem quadDet_mul (g q : Quad) : quadDet (quadMul g q) = quadDet g * quadDet q := by
   unfold quadDet quadMul
   ring
 
-/-- `det (k q) = k² det q` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+/-- `det (k q) = k² det q` (`results/autgroup-spike.md` §4). -/
 theorem quadDet_smul (k : ZMod (2 * 6 - 1)) (q : Quad) :
     quadDet (quadSmul k q) = k * k * quadDet q := by
   unfold quadDet quadSmul
   ring
 
-/-- `quadMap (g q) = quadMap g ∘ quadMap q` for invertible `q` (`results/autgroup-spike.md` §4;
-Cameron and Korchmáros 1993). -/
+/-- `quadMap (g q) = quadMap g ∘ quadMap q` for invertible `q` (`results/autgroup-spike.md` §4). -/
 theorem quadMap_mul (g : Quad) {q : Quad} (hq : quadDet q ≠ 0) (v : Vertex 6) :
     quadMap g (quadMap q v) = quadMap (quadMul g q) v :=
   moebius_moebius _ _ _ _ hq v
 
-/-- `quadMap (k q) = quadMap q` for `k ≠ 0` (`results/autgroup-spike.md` §4; Cameron and
-Korchmáros 1993). -/
+/-- `quadMap (k q) = quadMap q` for `k ≠ 0` (`results/autgroup-spike.md` §4). -/
 theorem quadMap_smul {k : ZMod (2 * 6 - 1)} (hk : k ≠ 0) (q : Quad) :
     quadMap (quadSmul k q) = quadMap q :=
   moebius_mul hk _ _ _ _
@@ -549,13 +534,13 @@ instance : DecidablePred IsPGL :=
   fun q ↦ inferInstanceAs (Decidable (quadDet q ≠ 0 ∧ (q.2.2.1 = 1 ∨ q.2.2.1 = 0 ∧ q.2.2.2 = 1)))
 
 /-- One of `(c, d)` and `(-c, -d)` is sign normalised unless both vanish
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem signNormal_or : ∀ c d : ZMod (2 * 6 - 1), c ≠ 0 ∨ d ≠ 0 →
     SignNormal c d ∨ SignNormal (-c) (-d) := by
   decide +kernel
 
 /-- A determinant-one matrix has a sign-normalised representative with the same Möbius map
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem exists_isPSL {q : Quad} (hq : quadDet q = 1) : ∃ q', IsPSL q' ∧ quadMap q' = quadMap q := by
   obtain ⟨a, b, c, d⟩ := q
   have hcd : c ≠ 0 ∨ d ≠ 0 := by
@@ -571,7 +556,7 @@ theorem exists_isPSL {q : Quad} (hq : quadDet q = 1) : ∃ q', IsPSL q' ∧ quad
     · simpa [quadSmul] using h
 
 /-- An invertible matrix has a representative with `c = 1`, or `c = 0` and `d = 1`, and the same
-Möbius map (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+Möbius map (`results/autgroup-spike.md` §4). -/
 theorem exists_isPGL {q : Quad} (hq : quadDet q ≠ 0) : ∃ q', IsPGL q' ∧ quadMap q' = quadMap q := by
   obtain ⟨a, b, c, d⟩ := q
   by_cases hc : c = 0
@@ -587,18 +572,18 @@ theorem exists_isPGL {q : Quad} (hq : quadDet q ≠ 0) : ∃ q', IsPGL q' ∧ qu
     exact mul_ne_zero (mul_ne_zero (inv_ne_zero hc) (inv_ne_zero hc)) hq
 
 /-- `660` sign-normalised matrices of determinant `1`, the order of `PSL(2,11)`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem card_isPSL : Fintype.card {q // IsPSL q} = 660 := by
   decide +kernel
 
 /-- `1320` normalised invertible matrices, the order of `PGL(2,11)`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem card_isPGL : Fintype.card {q // IsPGL q} = 1320 := by
   decide +kernel
 
 /-- If each generator, and each generator's inverse as a power of it, maps the Möbius maps of
 `p` into themselves, so does every element of the generated group (`results/autgroup-spike.md`
-§4; Cameron and Korchmáros 1993). -/
+§4). -/
 theorem exists_quad_of_mem_closure {s : Set (Equiv.Perm (Vertex 6))} {p : Quad → Prop}
     (h1 : ∃ q, p q ∧ quadMap q = id)
     (hs : ∀ x ∈ s, ∀ q, p q → ∃ q', p q' ∧ ⇑x ∘ quadMap q = quadMap q')
@@ -631,7 +616,7 @@ theorem exists_quad_of_mem_closure {s : Set (Equiv.Perm (Vertex 6))} {p : Quad �
     exact hpow x hx k y ih
 
 /-- A generator with a determinant-one matrix maps the `PSL(2,11)` Möbius maps into themselves
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem step_isPSL {x : Equiv.Perm (Vertex 6)} {g : Quad} (hg : quadDet g = 1)
     (hx : ⇑x = quadMap g) (q : Quad) (hq : IsPSL q) :
     ∃ q', IsPSL q' ∧ ⇑x ∘ quadMap q = quadMap q' := by
@@ -640,7 +625,7 @@ theorem step_isPSL {x : Equiv.Perm (Vertex 6)} {g : Quad} (hg : quadDet g = 1)
   rw [Function.comp_apply, hx, h, quadMap_mul g (by rw [hq.1]; exact one_ne_zero)]
 
 /-- A generator with an invertible matrix maps the `PGL(2,11)` Möbius maps into themselves
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem step_isPGL {x : Equiv.Perm (Vertex 6)} {g : Quad} (hg : quadDet g ≠ 0)
     (hx : ⇑x = quadMap g) (q : Quad) (hq : IsPGL q) :
     ∃ q', IsPGL q' ∧ ⇑x ∘ quadMap q = quadMap q' := by
@@ -650,8 +635,7 @@ theorem step_isPGL {x : Equiv.Perm (Vertex 6)} {g : Quad} (hg : quadDet g ≠ 0)
   rw [Function.comp_apply, hx, h, quadMap_mul g hq.1]
 
 /-- An injective map from a subgroup into the normalised matrices of `p` bounds its order, and
-an equality of orders makes it onto (`results/autgroup-spike.md` §4; Cameron and Korchmáros
-1993). -/
+an equality of orders makes it onto (`results/autgroup-spike.md` §4). -/
 theorem card_le_and_mem {H : Subgroup (Equiv.Perm (Vertex 6))} {p : Quad → Prop}
     [DecidablePred p] (h : ∀ g ∈ H, ∃ q, p q ∧ ⇑g = quadMap q) :
     Nat.card H ≤ Fintype.card {q // p q} ∧
@@ -677,7 +661,7 @@ theorem card_le_and_mem {H : Subgroup (Equiv.Perm (Vertex 6))} {p : Quad → Pro
     exact g.2
 
 /-- Every element of `⟨T, S⟩` is a Möbius map of determinant `1`
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem exists_isPSL_of_mem_closure {g : Equiv.Perm (Vertex 6)}
     (hg : g ∈ Subgroup.closure {T, S}) : ∃ q, IsPSL q ∧ ⇑g = quadMap q := by
   refine exists_quad_of_mem_closure ⟨(1, 0, 0, 1), by decide +kernel, ?_⟩ ?_ ?_ hg
@@ -691,8 +675,7 @@ theorem exists_isPSL_of_mem_closure {g : Equiv.Perm (Vertex 6)}
     · exact ⟨10, by decide +kernel⟩
     · exact ⟨1, by decide +kernel⟩
 
-/-- Every element of `⟨T, S, D⟩` is an invertible Möbius map (`results/autgroup-spike.md` §4;
-Cameron and Korchmáros 1993). -/
+/-- Every element of `⟨T, S, D⟩` is an invertible Möbius map (`results/autgroup-spike.md` §4). -/
 theorem exists_isPGL_of_mem_closure {g : Equiv.Perm (Vertex 6)}
     (hg : g ∈ Subgroup.closure {T, S, D}) : ∃ q, IsPGL q ∧ ⇑g = quadMap q := by
   refine exists_quad_of_mem_closure ⟨(1, 0, 0, 1), by decide +kernel, ?_⟩ ?_ ?_ hg
@@ -709,7 +692,7 @@ theorem exists_isPGL_of_mem_closure {g : Equiv.Perm (Vertex 6)}
     · exact ⟨9, by decide +kernel⟩
 
 /-- `⟨T, S⟩` is transitive on the 12 points, so `12` divides its order
-(`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4). -/
 theorem twelve_dvd_card_closure_TS : 12 ∣ Nat.card (Subgroup.closure {T, S}) := by
   have hT : T ∈ Subgroup.closure {T, S} := Subgroup.subset_closure (Set.mem_insert _ _)
   have hS : S ∈ Subgroup.closure {T, S} :=
@@ -725,8 +708,7 @@ theorem twelve_dvd_card_closure_TS : 12 ∣ Nat.card (Subgroup.closure {T, S}) :
   rwa [MulAction.index_stabilizer, horbit, Set.ncard_univ, Nat.card_eq_fintype_card,
     card_vertex] at h
 
-/-- **`|⟨T, S⟩| = 660`**, the order of `PSL(2,11)` (`results/autgroup-spike.md` §4, run 5;
-Cameron and Korchmáros 1993). -/
+/-- **`|⟨T, S⟩| = 660`**, the order of `PSL(2,11)` (`results/autgroup-spike.md` §4, run 5). -/
 theorem card_closure_TS : Nat.card (Subgroup.closure {T, S}) = 660 := by
   have hT : T ∈ Subgroup.closure {T, S} := Subgroup.subset_closure (Set.mem_insert _ _)
   have hS : S ∈ Subgroup.closure {T, S} :=
@@ -752,7 +734,7 @@ theorem card_closure_TS : Nat.card (Subgroup.closure {T, S}) = 660 := by
 
 /-- **`⟨T, S⟩ = PSL(2,11)`.** A permutation of `V_6 = P¹(𝔽₁₁)` lies in the group generated by
 `x ↦ x + 1` and `x ↦ -1/x` iff it is a Möbius map `x ↦ (a x + b)/(c x + d)` with `a d - b c = 1`
-(`results/autgroup-spike.md` §4, run 5; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4, run 5). -/
 theorem mem_closure_TS_iff {σ : Equiv.Perm (Vertex 6)} :
     σ ∈ Subgroup.closure {T, S} ↔ ∃ a b c d, a * d - b * c = 1 ∧ ⇑σ = moebius a b c d := by
   constructor
@@ -767,7 +749,7 @@ theorem mem_closure_TS_iff {σ : Equiv.Perm (Vertex 6)} :
     rfl
 
 /-- **`|⟨T, S, D⟩| = 1320`**, the order of `PGL(2,11)`, and this group acts on `Z_6` by
-`closure_le_symZero` (`results/autgroup-spike.md` §4, run 5; Cameron and Korchmáros 1993). -/
+`closure_le_symZero` (`results/autgroup-spike.md` §4, run 5). -/
 theorem card_closure_TSD : Nat.card (Subgroup.closure {T, S, D}) = 1320 := by
   have hdvd : 660 ∣ Nat.card (Subgroup.closure {T, S, D}) :=
     card_closure_TS ▸ Subgroup.card_dvd_of_le closure_TS_le_TSD
@@ -784,7 +766,7 @@ theorem card_closure_TSD : Nat.card (Subgroup.closure {T, S, D}) = 1320 := by
 
 /-- **`⟨T, S, D⟩ = PGL(2,11)`.** A permutation of `V_6` lies in the group generated by
 `x ↦ x + 1`, `x ↦ -1/x` and `x ↦ 2 x` iff it is an invertible Möbius map
-(`results/autgroup-spike.md` §4, run 5; Cameron and Korchmáros 1993). -/
+(`results/autgroup-spike.md` §4, run 5). -/
 theorem mem_closure_TSD_iff {σ : Equiv.Perm (Vertex 6)} :
     σ ∈ Subgroup.closure {T, S, D} ↔ ∃ a b c d, a * d - b * c ≠ 0 ∧ ⇑σ = moebius a b c d := by
   constructor

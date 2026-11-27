@@ -23,13 +23,15 @@ edge-disjoint, so the multigraph union is a simple graph.
   `fourCyclesThrough_eq_empty_of_isAP` : for `n` coprime to `15` AP triples have none.
 * (d) `fourCycles_two`, `card_fourCycles_two` : for `n` coprime to `15` the 4-cycles of `G_2`
   are the ladder squares `Q_v = {v, -v, v + 2, 2 - v}`, `v ∉ {0, 1, -1}`, with `Q_w = Q_v` iff
-  `w = ±v` (`ladderSquare_eq_iff`), so there are exactly `m - 2` of them. The file checks the
-  count only for prime `n ≤ 61`.
+  `w = ±v` (`ladderSquare_eq_iff`), so there are exactly `m - 2` of them. The source checked the
+  count only for prime `n ≤ 61` (`scripts/k3w-motifs.py`, organize-archive b37ffe5). Here it is
+  proved for every `n` coprime to `15`.
 * Small cases at `n = 11`, by `decide +kernel` : `cliqueFinset_tripleUnion_six_three`,
   `card_fourCyclesThrough_six_three`, `card_fourCycles_six_two`.
 
-Source: `results/k3-workaround-spike.md` §2.1, Lemma M. The file assumes `n ≥ 11` prime.
-`coprime_105_of_prime` shows that this implies every coprimality hypothesis used here.
+Source: `results/k3-workaround-spike.md` §2.1, Lemma M. The source assumes `n ≥ 11` prime. The
+theorems here assume only that `n` is odd and coprime to `3`, `15` or `105`, and
+`coprime_105_of_prime` shows that prime `n ≥ 11` is a sufficient condition.
 -/
 
 local macro "lcpm " e:term : tactic =>
@@ -786,7 +788,7 @@ theorem fourCycles_two (h : Nat.Coprime (2 * m - 1) 15) (hm : 2 ≤ m) :
     exact mem_fourCycles.2 ⟨_, _, _, _, isFourCycle_ladder_iff.2 ⟨h0, h1, hm1⟩, rfl⟩
 
 /-- **Lemma M (d)**, count. For `n` coprime to `15` (and `m ≥ 2`), `G_2` has exactly `m - 2`
-4-cycles, the squares of the ladder. The file checks this only for prime `n ≤ 61`
+4-cycles, the squares of the ladder. The source checked this only for prime `n ≤ 61`
 (`results/k3-workaround-spike.md`, Lemma M (d)). -/
 theorem card_fourCycles_two (h : Nat.Coprime (2 * m - 1) 15) (hm : 2 ≤ m) :
     (fourCycles (tripleUnion m 2)).card = m - 2 := by
