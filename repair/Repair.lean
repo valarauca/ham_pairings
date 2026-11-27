@@ -56,6 +56,7 @@ import Repair.Reflection
 import Repair.Translation
 import Repair.RoundRobinSpan
 import Repair.DualOrbit
+import Repair.WittBridgeSix
 import Repair.LowerBound.Arc
 import Repair.LowerBound.ZeroCore
 import Repair.LowerBound.Lattice

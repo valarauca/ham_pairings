@@ -211,3 +211,49 @@ moves.
 (`RRC.shift_smul_factor`, `RRC.scale_smul_factor`, `RRC.isZeroState_affine_smul_iff` and the 16
 from `RRC.isAut_affine` to `RRC.isAut_three_moebius`) moved to the ham-spin `AxiomCheck.lean`
 (`c1941cf`), which also checks the four new AGL theorems (`7f4fd9b`).
+
+## Involution-product bridge (COD-266 stage 2, branch `mig`)
+
+The walk engines moved onto the involution-product bridge, ham-spin
+`core/Pairing/InvolutionProduct.lean` (`fe1f6bf`), from main `77d3de5`. Every "last old form" is at
+main `77d3de5`.
+
+### Moved to ham-spin (same full name)
+
+| name | old location | new location | last old form |
+|---|---|---|---|
+| `PM.mate_inv`, `PM.mate_mul_self`, `PM.not_sameCycle_mate_right`, `PM.not_sameCycle_mate_left` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | ham-spin `core/Pairing/InvolutionProduct.lean` (`fe1f6bf`) | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:45`, `:50`, `:68`, `:94` |
+| `RRC.exists_walkEnd_mem_of_agree` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:227` |
+
+### Same statement, new proof
+
+| name | now proved from | location | last old proof |
+|---|---|---|---|
+| `PM.exists_pow_eq_of_closed` | `PM.card_reachable_eq_two_mul` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:104` |
+| `RRC.exists_walkEnd_mem` | `RRC.exists_walkEnd_mem_of_agree` (the two proofs were the same walk) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:288` |
+| `PM.sameCycle_of_sameCycle_mate` | `PM.sameCycle_mate_right_iff` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:258` |
+| `PM.sameCycle_or_of_ham` | `PM.ham_iff_forall_sameCycle` | `repair/Repair/Signature.lean` | `77d3de5:repair/Repair/Signature.lean:269` |
+| `RRC.exists_defect_of_cycle` | `PM.reachable_iff_sameCycle` (the closed set is the component of `y`) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:396` |
+| `RRC.certPerm_smul` | `PM.smul_mate_mul_smul_mate` | `repair/Repair/SqrtObstructions/NoGo.lean` | `77d3de5:repair/Repair/SqrtObstructions/NoGo.lean:328` |
+| `PM.mem_cycleOf_self_iff` | `PM.reachable_iff_sameCycle` with `A A = 1` | `repair/Repair/PairLevelOne.lean` | `77d3de5:repair/Repair/PairLevelOne.lean:294` |
+| `PM.le_card_ham` (base case `r = 0`) | `PM.ham_iff_partition` with `M M = 1` | `repair/Repair/DensityGlue.lean` | `77d3de5:repair/Repair/DensityGlue.lean:61` |
+| `PM.jointCount_of_card_eq_two` | `PM.ham_iff_partition` with `P P = 1` | `repair/Repair/PairRecursion.lean` | `77d3de5:repair/Repair/PairRecursion.lean:1477` |
+| `PM.two_mul_cycleCount_le` | `PM.two_mul_cycleCount` (`2 κ` parts of a partition of the vertex count) | `repair/Repair/FreeDefects.lean` | `77d3de5:repair/Repair/FreeDefects.lean:903` |
+| `RoundRobin.Covering.reachable_of_mem_altWalk` | `PM.reachable_mate_right`, `PM.reachable_mate_left` | `repair/Repair/Covering/Witness.lean` | `77d3de5:repair/Repair/Covering/Witness.lean:72` |
+| `RRC.ham_factor_factor_zero` | `RRC.ham_factor_of_isUnit_sub` (not the bridge, a duplicate) | `repair/Repair/HybridPair/MeanCount.lean` | `77d3de5:repair/Repair/HybridPair/MeanCount.lean:149` |
+| `RRC.ham_factor_two_zero` | `RRC.ham_factor_of_isUnit_sub` (not the bridge, a duplicate) | `repair/Repair/TripleUnionAP.lean` | `77d3de5:repair/Repair/TripleUnionAP.lean:342` |
+
+### Deprecated aliases
+
+| old name | alias of | location | last old form |
+|---|---|---|---|
+| `RRC.cycleCount_smul` | `PM.cycleCount_smul` (same statement) | `repair/Repair/CycleStep.lean` | `77d3de5:repair/Repair/CycleStep.lean:427` |
+
+`Repair.CycleStep` imports the bridge, so its use of the alias would be ambiguous under
+`open PerfectMatching`. It names `PerfectMatching.cycleCount_smul` instead.
+
+### AxiomCheck
+
+No endpoint was removed. The four names moved to ham-spin keep their lines and now resolve to the
+bridge. After the merge of main `02cf0ca` there are 982 endpoints, 945 on
+`[propext, Classical.choice, Quot.sound]` and 37 on fewer axioms.

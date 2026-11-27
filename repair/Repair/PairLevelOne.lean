@@ -290,19 +290,13 @@ theorem cycLen_self (A : PerfectMatching W) (x : W) : cycLen A A x = 2 := by
 
 omit hW he in
 /-- The cycle of `A ∪ A` through `x` is `{x, A(x)}` (`results/hybrid-pair-averaged.md`,
-Theorem 1). -/
+Theorem 1). Here `A A = 1`, so `reachable_iff_sameCycle` of the bridge, ham-spin
+`core/Pairing/InvolutionProduct.lean` (fe1f6bf), reads `x = u ∨ x = A u`. -/
 theorem mem_cycleOf_self_iff (A : PerfectMatching W) {x u : W} :
     u ∈ cycleOf A A x ↔ u = x ∨ u = A.mate x := by
-  constructor
-  · intro h
-    obtain ⟨k, hk, rfl⟩ := exists_lt_of_mem_cycleOf h
-    rw [cycLen_self] at hk
-    interval_cases k
-    · exact Or.inl rfl
-    · exact Or.inr (by simp [alt_succ, stepMatching_self])
-  · rintro (rfl | rfl)
-    · exact mem_cycleOf_self u
-    · exact (mate_mem_cycleOf (mem_cycleOf_self x)).1
+  rw [mem_cycleOf, reachable_iff_sameCycle, mate_mul_self, Equiv.Perm.sameCycle_one,
+    Equiv.Perm.sameCycle_one, eq_comm (a := x) (b := u), eq_comm (a := x), mate_eq_comm,
+    eq_comm (a := A.mate x)]
 
 omit hW he in
 /-- A Hamiltonian partner of `A` through a fixed non-`A` edge `xu`: there are

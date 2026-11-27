@@ -1,5 +1,5 @@
 import Repair.BoundedRadius
-import Pairing.Union
+import Pairing.InvolutionProduct
 
 /-!
 # The cycle-step reduction (COD-146)
@@ -422,11 +422,8 @@ theorem not_boundedRadius_of_cycleProfile_le {C : ℝ} (hC0 : 0 ≤ C) (hC2 : C 
   rw [Real.rpow_neg hs.le, Real.rpow_neg hm'.le]
   exact inv_anti₀ hpos hb
 
-/-- `κ` is invariant under relabelling both matchings (`results/switching-j0-spike.md`,
-Identity D, translation symmetry). -/
-theorem cycleCount_smul {V : Type*} (σ : Equiv.Perm V) (P Q : PerfectMatching V) :
-    cycleCount (σ • P) (σ • Q) = cycleCount P Q :=
-  (Nat.card_congr (unionIso σ P Q).connectedComponentEquiv).symm
+@[deprecated PerfectMatching.cycleCount_smul (since := "2026-11-26")]
+alias cycleCount_smul := PerfectMatching.cycleCount_smul
 
 /-- `D_k(P) = #{t : κ_t(P) = k}`, the number of factors `F_t` with `P ∪ F_t` made of `k` cycles
 (`results/switching-j0-spike.md`, Identity D). `D_2` is the number of two-cycle factors. -/
@@ -442,7 +439,8 @@ theorem card_cycleCount_and_eq (m : ℕ) [NeZero m] (k : ℕ) (q : ℕ → Prop)
       (univ.filter fun P ↦ cycleCount P (factor m 0) = k ∧ q (hamCount m P)).card := by
   refine card_equiv (MulAction.toPerm (shift m (-t))) fun P ↦ ?_
   simp only [mem_filter, mem_univ, true_and, MulAction.toPerm_apply, hamCount_shift_smul]
-  rw [← cycleCount_smul (shift m (-t)) P (factor m t), shift_smul_factor, add_neg_cancel]
+  rw [← PerfectMatching.cycleCount_smul (shift m (-t)) P (factor m t), shift_smul_factor,
+    add_neg_cancel]
 
 /-- Double counting of the pairs `(P, t)` with `κ_t(P) = k`,
 `∑_{P | q (X P)} D_k(P) = n · #{P | κ_0(P) = k ∧ q (X P)}` (`results/switching-j0-spike.md`,

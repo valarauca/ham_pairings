@@ -1,3 +1,4 @@
+import Pairing.InvolutionProduct
 import Repair.Forcing
 import Repair.SqrtObstructions.CertLength
 
@@ -13,17 +14,19 @@ cycle for every `t`. As in `Repair.Forcing`, a closed alternating cycle is encod
 set `C`, nonempty, a union of edges of `A`, and closed under `F_t`. It has `|C|/2` edges of `A`.
 Put `A'' = A ∖ F_s`, `k = |A''|` and `X = V(A'')`, so `|X| = 2k`.
 
-Alternating cycles (general `V`, two perfect matchings `a, b`, `σ = a b`).
-* `not_sameCycle_mate_right`, `not_sameCycle_mate_left` : no `σ`-orbit meets its image under
-  `a` or `b`. Both involutions conjugate `σ` to `σ⁻¹`, and a meeting would force a fixed point.
+Alternating cycles (general `V`, two perfect matchings `a, b`, `σ = a b`). They use the
+involution-product bridge, ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf), which now
+holds `not_sameCycle_mate_right` and `not_sameCycle_mate_left`: no `σ`-orbit meets its image under
+`a` or `b`.
+* `mate_zpow_apply` : `b` conjugates `σ` to `σ⁻¹`.
 * `exists_pow_eq_of_closed` : if `C ∋ y` is closed under `a` and `b`, then `σ^r y = y` for some
   `1 ≤ r` with `2r ≤ |C|`.
 
 Round-robin part.
 * `certLength_bound_of_hit` : the counting step of Theorem C′. If every `t ≠ s` has
   `E_t(y, i) ∈ X` for some `y ∈ X` and `i < L`, then `n - 1 ≤ |X|(|X| L + 2L - 1)`.
-* `exists_walkEnd_mem_of_agree` : the walk step of `exists_walkEnd_mem`, for any `X` on which
-  `P` agrees with `F_s` along the cycle.
+* `exists_walkEnd_mem_of_agree` (in `Repair.SqrtObstructions.CertLength`) : the walk step of
+  `exists_walkEnd_mem`, for any `X` on which `P` agrees with `F_s` along the cycle.
 * `exists_mem_coreDefect` : Theorem B(i) for cores. At prime `n` every closed alternating cycle of
   `A ∪ F_t`, `t ≠ s`, meets `X = V(A'')`.
 * `core_certLength_bound` (Theorem C′, core form) : if every `t ≠ s` has a closed alternating cycle
@@ -41,70 +44,33 @@ section AltCycle
 
 variable {V : Type*}
 
-/-- A perfect matching is its own inverse. -/
-theorem mate_inv (P : PerfectMatching V) : P.mate⁻¹ = P.mate := by
-  ext v
-  rw [Equiv.Perm.inv_eq_iff_eq, mate_mate]
-
-/-- `P P = 1`. -/
-theorem mate_mul_self (P : PerfectMatching V) : P.mate * P.mate = 1 := by
-  ext v
-  simp
-
 /-- `b (σ^z y) = σ^(-z) (b y)` for `σ = a b`: the involution `b` conjugates `σ` to `σ⁻¹`
 (`factor-tail-L-test.md`, Theorem C′, cycles of `A ∪ F_t`). -/
 theorem mate_zpow_apply (a b : PerfectMatching V) (z : ℤ) (y : V) :
     b.mate (((a.mate * b.mate) ^ z) y) = ((a.mate * b.mate) ^ (-z)) (b.mate y) := by
   have hconj : b.mate * (a.mate * b.mate) * b.mate⁻¹ = (a.mate * b.mate)⁻¹ := by
-    rw [mate_inv, mul_inv_rev, mate_inv, mate_inv, mul_assoc, mul_assoc, mate_mul_self,
-      mul_one]
+    rw [mate_mul_mate_inv, mate_inv, mul_assoc, mul_assoc, mate_mul_self, mul_one]
   have h : b.mate * (a.mate * b.mate) ^ z * b.mate⁻¹ = (a.mate * b.mate) ^ (-z) := by
     rw [← conj_zpow, hconj, inv_zpow']
   rw [mul_inv_eq_iff_eq_mul] at h
   rw [← Equiv.Perm.mul_apply, h, Equiv.Perm.mul_apply]
 
-/-- No orbit of `σ = a b` meets its image under `b` (`factor-tail-L-test.md`, Theorem C′,
-cycles of `A ∪ F_t`). -/
-theorem not_sameCycle_mate_right (a b : PerfectMatching V) (y : V) :
-    ¬(a.mate * b.mate).SameCycle y (b.mate y) := by
-  set σ := a.mate * b.mate with hσ
-  have ha : ∀ v, a.mate v = σ (b.mate v) := fun v ↦ by
-    rw [hσ, Equiv.Perm.mul_apply, mate_mate]
-  rintro ⟨c, hc⟩
-  obtain ⟨k, rfl | rfl⟩ := Int.even_or_odd' c
-  · apply b.mate_ne ((σ ^ k) y)
-    calc b.mate ((σ ^ k) y) = (σ ^ (-k)) (b.mate y) := mate_zpow_apply a b k y
-      _ = (σ ^ (-k)) ((σ ^ (2 * k)) y) := by rw [hc]
-      _ = (σ ^ k) y := by
-          rw [← Equiv.Perm.mul_apply, ← zpow_add]
-          congr 2
-          ring
-  · apply a.mate_ne ((σ ^ (k + 1)) y)
-    calc a.mate ((σ ^ (k + 1)) y) = σ (b.mate ((σ ^ (k + 1)) y)) := ha _
-      _ = σ ((σ ^ (-(k + 1))) (b.mate y)) := by rw [mate_zpow_apply a b (k + 1) y]
-      _ = σ ((σ ^ (-(k + 1))) ((σ ^ (2 * k + 1)) y)) := by rw [hc]
-      _ = (σ ^ (k + 1)) y := by
-          rw [← Equiv.Perm.mul_apply (σ ^ (-(k + 1))), ← zpow_add, ← Equiv.Perm.mul_apply,
-            ← zpow_one_add]
-          congr 2
-          ring
-
-/-- No orbit of `σ = a b` meets its image under `a` (`factor-tail-L-test.md`, Theorem C′,
-cycles of `A ∪ F_t`). -/
-theorem not_sameCycle_mate_left (a b : PerfectMatching V) (y : V) :
-    ¬(a.mate * b.mate).SameCycle y (a.mate y) := by
-  have h : a.mate y = (a.mate * b.mate) (b.mate y) := by
-    rw [Equiv.Perm.mul_apply, mate_mate]
-  rw [h, Equiv.Perm.sameCycle_apply_right]
-  exact not_sameCycle_mate_right a b y
-
 /-- A set closed under two perfect matchings `a, b` holds whole cycles of `a ∪ b`: every `y ∈ C`
 has `σ^r y = y` with `σ = a b`, `1 ≤ r` and `2r ≤ |C|` (`factor-tail-L-test.md`, Theorem C′: a
-closed alternating cycle on at most `2L` vertices has at most `L` edges of `a`). -/
+closed alternating cycle on at most `2L` vertices has at most `L` edges of `a`). `C` holds the
+component of `y`, which has twice as many vertices as the `σ`-cycle of `y`
+(`card_reachable_eq_two_mul`, ham-spin `core/Pairing/InvolutionProduct.lean`, fe1f6bf). -/
 theorem exists_pow_eq_of_closed [Finite V] (a b : PerfectMatching V)
     {C : Finset V} (ha : ∀ v ∈ C, a.mate v ∈ C) (hb : ∀ v ∈ C, b.mate v ∈ C) {y : V}
     (hy : y ∈ C) : ∃ r, 1 ≤ r ∧ 2 * r ≤ C.card ∧ ((a.mate * b.mate) ^ r) y = y := by
-  classical
+  have hreach : ∀ w, (a.toGraph ⊔ b.toGraph).Reachable y w → w ∈ C := by
+    rintro w ⟨p⟩
+    induction p with
+    | nil => exact hy
+    | cons hadj _ ih =>
+      rcases (sup_toGraph_adj _ _ _ _).mp hadj with rfl | rfl
+      · exact ih (ha _ hy)
+      · exact ih (hb _ hy)
   set σ := a.mate * b.mate with hσ
   have hper : Function.IsPeriodicPt σ (orderOf σ) y := by
     rw [Function.IsPeriodicPt, Function.IsFixedPt, Equiv.Perm.iterate_eq_pow,
@@ -115,44 +81,17 @@ theorem exists_pow_eq_of_closed [Finite V] (a b : PerfectMatching V)
   have hfix : (σ ^ r) y = y := by
     rw [← Equiv.Perm.iterate_eq_pow]
     exact Function.iterate_minimalPeriod
-  have hσC : ∀ v ∈ C, σ v ∈ C := fun v hv ↦ ha _ (hb v hv)
-  have hpowC : ∀ i : ℕ, (σ ^ i) y ∈ C := by
-    intro i
-    induction i with
-    | zero => exact hy
-    | succ i ih =>
-      rw [pow_succ', Equiv.Perm.mul_apply]
-      exact hσC _ ih
-  set O := (Finset.range r).image fun i ↦ (σ ^ i) y with hO
-  have hOcard : O.card = r := by
-    rw [hO, Finset.card_image_of_injOn, Finset.card_range]
-    intro i hi j hj hij
-    have h := Function.iterate_injOn_Iio_minimalPeriod (f := σ) (x := y)
-      (by simpa using hi) (by simpa using hj)
-    simp only [Equiv.Perm.iterate_eq_pow] at h
-    exact h hij
-  have hBcard : (O.image b.mate).card = r := by
-    rw [Finset.card_image_of_injective _ b.mate.injective, hOcard]
-  have hdisj : Disjoint O (O.image b.mate) := by
-    rw [Finset.disjoint_left]
-    intro v hv hv'
-    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hv
-    obtain ⟨w, hw, hbw⟩ := Finset.mem_image.mp hv'
-    obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp hw
-    refine not_sameCycle_mate_right a b ((σ ^ j) y) ?_
-    rw [hbw]
-    exact Equiv.Perm.sameCycle_pow_left.mpr
-      (Equiv.Perm.sameCycle_pow_right.mpr (Equiv.Perm.SameCycle.refl σ y))
-  have hsub : O ∪ O.image b.mate ⊆ C := by
-    intro v hv
-    rcases Finset.mem_union.mp hv with hv | hv
-    · obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hv
-      exact hpowC i
-    · obtain ⟨w, hw, rfl⟩ := Finset.mem_image.mp hv
-      obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hw
-      exact hb _ (hpowC i)
-  have hcard := Finset.card_le_card hsub
-  rw [Finset.card_union_of_disjoint hdisj, hOcard, hBcard] at hcard
+  have hcyc : r ≤ Nat.card {w // σ.SameCycle y w} := by
+    rw [← Nat.card_fin r]
+    refine Nat.card_le_card_of_injective (fun i ↦ ⟨(σ ^ (i : ℕ)) y,
+      Equiv.Perm.sameCycle_pow_right.mpr (Equiv.Perm.SameCycle.refl σ y)⟩) fun i j h ↦ ?_
+    have h' := Function.iterate_injOn_Iio_minimalPeriod (f := σ) (x := y) i.2 j.2
+    simp only [Equiv.Perm.iterate_eq_pow] at h'
+    exact Fin.ext (h' (congrArg Subtype.val h))
+  have hC : 2 * Nat.card {w // σ.SameCycle y w} ≤ C.card := by
+    rw [← card_reachable_eq_two_mul, ← Nat.card_eq_finsetCard]
+    exact Nat.card_le_card_of_injective (fun w ↦ ⟨w.1, hreach w.1 w.2⟩) fun _ _ h ↦
+      Subtype.ext (Subtype.mk.inj h)
   exact ⟨r, hrpos, by omega, hfix⟩
 
 end AltCycle
@@ -219,45 +158,6 @@ theorem certLength_bound_of_hit (hp : (2 * m - 1).Prime) (s : ZMod (2 * m - 1))
       generalize X.card * (X.card * L + 2 * L - 1) = q at h2 ⊢
       generalize X.card * L = q' at h1 h2
       omega
-
-/-- **The walk step of Theorem C′** (`factor-tail-L-test.md`, proof of Theorem C′; the proof of
-Theorem C in `cod-149-core-sharpening.md`). Let `σ_t^r y = y` with `r ≥ 1` and `P y ∈ X`, and
-suppose `P` agrees with `F_s` at every point `F_t(σ_t^j y)`, `j < r`, outside `X`. Then
-`E_t(y, i) ∈ X` for some `i < r`. -/
-theorem exists_walkEnd_mem_of_agree (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m - 1))
-    (X : Finset (Vertex m)) {y : Vertex m} (hyP : P.mate y ∈ X) {r : ℕ} (hr : 1 ≤ r)
-    (hcyc : (certPerm P t ^ r) y = y)
-    (hagree : ∀ j < r, (factor m t).mate ((certPerm P t ^ j) y) ∉ X →
-      P.mate ((factor m t).mate ((certPerm P t ^ j) y)) =
-        (factor m s).mate ((factor m t).mate ((certPerm P t ^ j) y))) :
-    ∃ i < r, walkEnd s t y i ∈ X := by
-  have hlast : (factor m t).mate ((certPerm P t ^ (r - 1)) y) ∈ X := by
-    have h : P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y)) = y :=
-      calc P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y))
-          = certPerm P t ((certPerm P t ^ (r - 1)) y) := rfl
-        _ = (certPerm P t ^ r) y := by
-          rw [← Equiv.Perm.mul_apply, ← pow_succ', Nat.sub_add_cancel hr]
-        _ = y := hcyc
-    have h' : (factor m t).mate ((certPerm P t ^ (r - 1)) y) = P.mate y := by
-      have h'' := congrArg P.mate h
-      rwa [mate_mate] at h''
-    rw [h']
-    exact hyP
-  have hex : ∃ i, i < r ∧ (factor m t).mate ((certPerm P t ^ i) y) ∈ X :=
-    ⟨r - 1, by omega, hlast⟩
-  obtain ⟨hlt, hmem⟩ := Nat.find_spec hex
-  have hsame : ∀ j ≤ Nat.find hex, (certPerm P t ^ j) y = (walkPerm s t ^ j) y := by
-    intro j
-    induction j with
-    | zero => intro _; rfl
-    | succ j ih =>
-      intro hj
-      have hnot := Nat.find_min hex (show j < Nat.find hex by omega)
-      have hj' : (factor m t).mate ((certPerm P t ^ j) y) ∉ X := fun h ↦ hnot ⟨by omega, h⟩
-      have hPs := hagree j (by omega) hj'
-      rw [pow_succ', pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, ← ih (by omega)]
-      exact hPs
-  exact ⟨Nat.find hex, hlt, by rw [walkEnd, ← hsame _ le_rfl]; exact hmem⟩
 
 /-- The new edges `A'' = A ∖ F_s` of a core `A` (`cod-149-core-sharpening.md`, Setup). -/
 def coreNew (s : ZMod (2 * m - 1)) (A : Finset (Sym2 (Vertex m))) : Finset (Sym2 (Vertex m)) :=

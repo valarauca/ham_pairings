@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Real.Pi.Wallis
+import Pairing.InvolutionProduct
 import Repair.PartialCore
 import Repair.ZeroState
 import Suppression.VMinus
@@ -57,27 +58,17 @@ theorem exists_mate_eq (hW : Even (Fintype.card W)) {w x : W} (hwx : w ≠ x) :
 /-- Lemma 3 (COD-168, `results/cod-168-density-lower-bound.md`), lower bound. For a perfect
 matching `M` of a type with `2(r + 1)` elements, at least `2^r r!` perfect matchings `X` make
 `X ∪ M` one cycle. As in `card_ham_le`, the proof fixes a vertex `w`, splits by the partner
-`x = X w`, and contracts the edge `wx` with `ham_glue_iff`. -/
+`x = X w`, and contracts the edge `wx` with `ham_glue_iff`. The base case `|W| = 2` is
+`ham_iff_partition` of the bridge, ham-spin `core/Pairing/InvolutionProduct.lean` (fe1f6bf),
+since `M M = 1`. -/
 theorem le_card_ham {r : ℕ} (hW : Fintype.card W = 2 * (r + 1)) (M : PerfectMatching W) :
     2 ^ r * r.factorial ≤ (Finset.univ.filter fun X : PerfectMatching W ↦ Ham X M).card := by
   induction r generalizing W with
   | zero =>
-    obtain ⟨w⟩ : Nonempty W := Fintype.card_pos_iff.mp (by omega)
-    have h2 : ∀ u v : W, u = v ∨ M.mate u = v := by
-      intro u v
-      by_contra h
-      push Not at h
-      have hc := Finset.card_le_univ ({u, v, M.mate u} : Finset W)
-      rw [Finset.card_insert_of_notMem (by simp [h.1, (M.mate_ne u).symm]),
-        Finset.card_pair h.2.symm, hW] at hc
-      omega
     have hM : Ham M M := by
-      change (M.toGraph ⊔ M.toGraph).Connected
-      have : Nonempty W := ⟨w⟩
-      refine ⟨fun u v ↦ ?_⟩
-      rcases h2 u v with rfl | h
-      · exact SimpleGraph.Reachable.refl _
-      · exact h ▸ (adj_mate_left M M u).reachable
+      rw [ham_iff_partition hW, mate_mul_self, Equiv.Perm.parts_partition,
+        Equiv.Perm.cycleType_one, Equiv.Perm.support_one, Finset.card_empty, hW]
+      rfl
     simp only [pow_zero, Nat.factorial_zero, mul_one]
     exact Finset.card_pos.mpr ⟨M, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hM⟩⟩
   | succ r ih =>

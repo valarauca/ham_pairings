@@ -324,13 +324,13 @@ def certTwoClass (m : ℕ) [NeZero m] (e : ℕ) : Finset (PerfectMatching (Verte
     (Finset.univ.filter fun t ↦ ¬ShortCert P t).card ≤ e
 
 /-- An automorphism conjugates `σ_t`: `σ_{π t}(g • P) = g σ_t(P) g⁻¹` when `g • F_t = F_{π t}`
-(`sqrt-m-obstructions.md` §0, the group `G` acting on certificates). -/
+(`sqrt-m-obstructions.md` §0, the group `G` acting on certificates). This is
+`smul_mate_mul_smul_mate` of the bridge, ham-spin `core/Pairing/InvolutionProduct.lean`
+(fe1f6bf). -/
 theorem certPerm_smul (P : PerfectMatching (Vertex m)) {g : Equiv.Perm (Vertex m)}
     {t t' : ZMod (2 * m - 1)} (h : g • factor m t = factor m t') :
     certPerm (g • P) t' = g * certPerm P t * g⁻¹ := by
-  rw [certPerm, certPerm, ← h]
-  change g * P.mate * g⁻¹ * (g * (factor m t).mate * g⁻¹) = _
-  group
+  rw [certPerm, certPerm, ← h, smul_mate_mul_smul_mate]
 
 /-- Short certificates are carried by automorphisms (`sqrt-m-obstructions.md` §1.2, `Z_2(θm)` is
 `G`-invariant). -/

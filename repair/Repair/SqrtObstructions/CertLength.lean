@@ -1,3 +1,4 @@
+import Pairing.InvolutionProduct
 import Repair.Automorphism
 import Repair.SqrtObstructions.Defect
 
@@ -17,8 +18,9 @@ and `|X| = 2k` with `k = |P ∖ F_s|` (`two_mul_card_edgesOutside`).
 * `walkEnd s t y i = E_t(y, i)`, the end of the walk `y, F_t, F_s, …` after `2i + 1` steps.
 * `card_walkHit_le` (the walk lemma, prefix form) : for `L ≤ m - 1`, at most
   `L |X| + 2L - 1` factors `t ≠ s` have `E_t(y, i) ∈ X` for some `i < L`.
-* `exists_walkEnd_mem` : a cycle of `P ∪ F_t` through `y ∈ X` with `r` edges of `P` gives
-  `E_t(y, i) ∈ X` for some `i < r`.
+* `exists_walkEnd_mem_of_agree` : the walk step, for any `X` on which `P` agrees with `F_s` along
+  the cycle. `exists_walkEnd_mem` : a cycle of `P ∪ F_t` through `y ∈ X` with `r` edges of `P`
+  gives `E_t(y, i) ∈ X` for some `i < r`.
 * `certLength_bound` (Theorem C′) : if every `t ≠ s` has such a cycle through `X` with at most `L`
   edges of `P`, then `n - 1 ≤ |X| (|X| L + 2L - 1)`, and `certLength_bound_edges` :
   `n - 1 ≤ 2k((2k + 2)L - 1)`.
@@ -282,13 +284,18 @@ theorem card_walkHit_le (hp : (2 * m - 1).Prime) (s : ZMod (2 * m - 1)) (y : Ver
       rw [div_eq_iff hc']
       linear_combination -h
 
-/-- A certificate cycle reaches the defect along the walk (`factor-tail-L-test.md`, proof of
-Theorem C′). If `y ∈ X = defect F_s P` and `σ_t^r y = y` with `r ≥ 1`, then `E_t(y, i) ∈ X` for
-some `i < r`. -/
-theorem exists_walkEnd_mem (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m - 1))
-    {y : Vertex m} (hy : y ∈ defect (factor m s) P) {r : ℕ} (hr : 1 ≤ r)
-    (hcyc : (certPerm P t ^ r) y = y) : ∃ i < r, walkEnd s t y i ∈ defect (factor m s) P := by
-  have hlast : (factor m t).mate ((certPerm P t ^ (r - 1)) y) ∈ defect (factor m s) P := by
+/-- **The walk step of Theorem C′** (`factor-tail-L-test.md`, proof of Theorem C′; the proof of
+Theorem C in `cod-149-core-sharpening.md`). Let `σ_t^r y = y` with `r ≥ 1` and `P y ∈ X`, and
+suppose `P` agrees with `F_s` at every point `F_t(σ_t^j y)`, `j < r`, outside `X`. Then
+`E_t(y, i) ∈ X` for some `i < r`. -/
+theorem exists_walkEnd_mem_of_agree (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m - 1))
+    (X : Finset (Vertex m)) {y : Vertex m} (hyP : P.mate y ∈ X) {r : ℕ} (hr : 1 ≤ r)
+    (hcyc : (certPerm P t ^ r) y = y)
+    (hagree : ∀ j < r, (factor m t).mate ((certPerm P t ^ j) y) ∉ X →
+      P.mate ((factor m t).mate ((certPerm P t ^ j) y)) =
+        (factor m s).mate ((factor m t).mate ((certPerm P t ^ j) y))) :
+    ∃ i < r, walkEnd s t y i ∈ X := by
+  have hlast : (factor m t).mate ((certPerm P t ^ (r - 1)) y) ∈ X := by
     have h : P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y)) = y :=
       calc P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y))
           = certPerm P t ((certPerm P t ^ (r - 1)) y) := rfl
@@ -299,23 +306,31 @@ theorem exists_walkEnd_mem (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m -
       have h'' := congrArg P.mate h
       rwa [mate_mate] at h''
     rw [h']
-    exact mate_mem_defect _ P hy
-  have hex : ∃ i, i < r ∧ (factor m t).mate ((certPerm P t ^ i) y) ∈ defect (factor m s) P :=
+    exact hyP
+  have hex : ∃ i, i < r ∧ (factor m t).mate ((certPerm P t ^ i) y) ∈ X :=
     ⟨r - 1, by omega, hlast⟩
   obtain ⟨hlt, hmem⟩ := Nat.find_spec hex
-  have hagree : ∀ j ≤ Nat.find hex, (certPerm P t ^ j) y = (walkPerm s t ^ j) y := by
+  have hsame : ∀ j ≤ Nat.find hex, (certPerm P t ^ j) y = (walkPerm s t ^ j) y := by
     intro j
     induction j with
     | zero => intro _; rfl
     | succ j ih =>
       intro hj
       have hnot := Nat.find_min hex (show j < Nat.find hex by omega)
-      have hj' : (factor m t).mate ((certPerm P t ^ j) y) ∉ defect (factor m s) P := fun h ↦
-        hnot ⟨by omega, h⟩
-      rw [mem_defect, not_not] at hj'
+      have hj' : (factor m t).mate ((certPerm P t ^ j) y) ∉ X := fun h ↦ hnot ⟨by omega, h⟩
+      have hPs := hagree j (by omega) hj'
       rw [pow_succ', pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, ← ih (by omega)]
-      exact hj'
-  exact ⟨Nat.find hex, hlt, by rw [walkEnd, ← hagree _ le_rfl]; exact hmem⟩
+      exact hPs
+  exact ⟨Nat.find hex, hlt, by rw [walkEnd, ← hsame _ le_rfl]; exact hmem⟩
+
+/-- A certificate cycle reaches the defect along the walk (`factor-tail-L-test.md`, proof of
+Theorem C′). If `y ∈ X = defect F_s P` and `σ_t^r y = y` with `r ≥ 1`, then `E_t(y, i) ∈ X` for
+some `i < r`. -/
+theorem exists_walkEnd_mem (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m - 1))
+    {y : Vertex m} (hy : y ∈ defect (factor m s) P) {r : ℕ} (hr : 1 ≤ r)
+    (hcyc : (certPerm P t ^ r) y = y) : ∃ i < r, walkEnd s t y i ∈ defect (factor m s) P :=
+  exists_walkEnd_mem_of_agree P s t _ (mate_mem_defect _ P hy) hr hcyc fun _ _ hj ↦ by
+    rwa [mem_defect, not_not] at hj
 
 /-- **Theorem C′** (`factor-tail-L-test.md`; NG-B(b) of `sqrt-m-obstructions.md` §1.3), defect
 form. Let `n = 2m - 1` be prime, `P` a perfect matching of `V_m` and `X = defect F_s P`. If every
@@ -392,49 +407,36 @@ theorem certLength_bound_edges (hp : (2 * m - 1).Prime) (P : PerfectMatching (Ve
 
 /-- For a zero state every cycle of `P ∪ F_t`, `t ≠ s`, meets the defect `X = defect F_s P`
 (`factor-tail-L-test.md`, proof of Theorem C′, by Theorem B(i) of
-`cod-149-core-sharpening.md`). So a cycle with `r` edges of `P` gives one through `X`. -/
+`cod-149-core-sharpening.md`). So a cycle with `r` edges of `P` gives one through `X`. The
+component of `y` is the closed set, and its vertices lie in the `σ_t`-cycle of `y` or of their
+`P`-partners (`reachable_iff_sameCycle`, ham-spin `core/Pairing/InvolutionProduct.lean`,
+fe1f6bf). -/
 theorem exists_defect_of_cycle (hp : (2 * m - 1).Prime) {P : PerfectMatching (Vertex m)}
     (hP : IsZeroState (factor m) P) {s t : ZMod (2 * m - 1)} (hts : t ≠ s) {y : Vertex m}
     {r : ℕ} (hcyc : (certPerm P t ^ r) y = y) :
     ∃ y' ∈ defect (factor m s) P, (certPerm P t ^ r) y' = y' := by
   set σ := certPerm P t with hσ
-  have hσapp : ∀ v, σ v = P.mate ((factor m t).mate v) := fun _ ↦ rfl
   have hfix : ∀ v, σ.SameCycle y v → (σ ^ r) v = v := by
     rintro v ⟨i, rfl⟩
     rw [← Equiv.Perm.mul_apply, ← zpow_natCast, ← zpow_add, add_comm (r : ℤ) i, zpow_add,
       Equiv.Perm.mul_apply, zpow_natCast, hcyc]
-  set B : Set (Vertex m) := {v | σ.SameCycle y v ∨ σ.SameCycle y ((factor m t).mate v)} with hB
+  set B : Set (Vertex m) := {v | (P.toGraph ⊔ (factor m t).toGraph).Reachable y v} with hB
   by_contra hno
   push Not at hno
   have hout : ∀ v ∈ B, v ∉ defect (factor m s) P := by
-    rintro v (hv | hv) hX
+    intro v hv hX
+    rcases (reachable_iff_sameCycle P (factor m t)).mp hv with hv | hv
     · exact hno v hX (hfix v hv)
-    · refine hno (P.mate v) (mate_mem_defect _ P hX) (hfix _ ?_)
-      have h : P.mate v = σ ((factor m t).mate v) := by rw [hσapp, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_apply_right]
-      exact hv
-  have hBt : ∀ v ∈ B, (factor m t).mate v ∈ B := by
-    rintro v (hv | hv)
-    · exact Or.inr (by rwa [mate_mate])
-    · exact Or.inl hv
-  have hBP : ∀ v ∈ B, P.mate v ∈ B := by
-    rintro v (hv | hv)
-    · refine Or.inr ?_
-      have h : (factor m t).mate (P.mate v) = σ.symm v := by
-        rw [Equiv.eq_symm_apply, hσapp, mate_mate, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_symm_apply_right]
-      exact hv
-    · refine Or.inl ?_
-      have h : P.mate v = σ ((factor m t).mate v) := by rw [hσapp, mate_mate]
-      rw [h, Equiv.Perm.sameCycle_apply_right]
-      exact hv
+    · exact hno (P.mate v) (mate_mem_defect _ P hX) (hfix _ hv)
+  have hBt : ∀ v ∈ B, (factor m t).mate v ∈ B := fun v hv ↦ hv.trans (reachable_mate_right _ _ v)
+  have hBP : ∀ v ∈ B, P.mate v ∈ B := fun v hv ↦ hv.trans (reachable_mate_left _ _ v)
   have hBs : ∀ v ∈ B, (factor m s).mate v ∈ B := by
     intro v hv
     have h := hout v hv
     rw [mem_defect, not_not] at h
     rw [← h]
     exact hBP v hv
-  have hyB : y ∈ B := Or.inl (Equiv.Perm.SameCycle.refl σ y)
+  have hyB : y ∈ B := SimpleGraph.Reachable.refl y
   by_cases hall : ∀ w, w ∈ B
   · have hPs : P = factor m s := PerfectMatching.ext (Equiv.ext fun w ↦ by
       have h := hout w (hall w)

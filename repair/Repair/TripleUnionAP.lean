@@ -338,10 +338,10 @@ theorem card_fourCycles_of_isAP {r : ZMod (2 * m - 1)} (hAP : IsAP r)
     card_fourCycles_of_two_mul_eq_one hr h hm]
 
 /-- **Lemma M (d)**, the cycle. `F_0 ∪ F_2` is one cycle, the image of the cycle `F_0 ∪ F_1` under
-the affine automorphism `x ↦ 2x` (`results/k3-workaround-spike.md`, Lemma M (d)). -/
-theorem ham_factor_two_zero : Ham (factor m 2) (factor m 0) := by
-  have h := (ham_smul (scale m isUnit_two'.unit) (factor m 1) (factor m 0)).2 (ham_factor_one m)
-  rwa [scale_smul_factor, scale_smul_factor, IsUnit.unit_spec, mul_one, mul_zero] at h
+the affine automorphism `x ↦ 2x` (`results/k3-workaround-spike.md`, Lemma M (d)). It is a case of
+`ham_factor_of_isUnit_sub`. -/
+theorem ham_factor_two_zero : Ham (factor m 2) (factor m 0) :=
+  ham_factor_of_isUnit_sub m (by rw [sub_zero]; exact isUnit_two')
 
 /-- **Lemma M (d)**, the chords. For `v ≠ -1`, `{-v, v + 2}` is an edge of `F_1` lying on both
 `Q_v` and `Q_{v+2}`, so consecutive squares of the ladder are glued along `F_1`-chords
