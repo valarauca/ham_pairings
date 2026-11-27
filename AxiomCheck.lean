@@ -998,6 +998,15 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.RandomFamily.corollaryA1
 #print axioms RoundRobin.Canonical.RandomFamily.corollaryA1_floor
 #print axioms RoundRobin.Canonical.RandomFamily.corollaryA1_sqrt
+#print axioms RoundRobin.Canonical.RandomFamily.sqrt_pi_lt_log_six
+#print axioms RoundRobin.Canonical.RandomFamily.sqrt_pi_lt_log_two_mul
+#print axioms RoundRobin.Canonical.RandomFamily.add_three_mul_log_le_of_le_kAPrime
+#print axioms RoundRobin.Canonical.RandomFamily.exp_neg_mul_pow_le_rpow
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryAPrime_of_le
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryAPrime
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryAPrime_good
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryAPrime_fin
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryAPrime_fin_good
 #print axioms LowerBound.sameCycle_of_arcs
 #print axioms LowerBound.gadgetPt_injective
 #print axioms LowerBound.gadgetPt_rev

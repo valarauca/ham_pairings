@@ -60,6 +60,7 @@ import Repair.WittBridgeSix
 import Repair.RandomFamily.RepairBound
 import Repair.RandomFamily.FirstMoment
 import Repair.RandomFamily.TheoremA
+import Repair.RandomFamily.TheoremAPrime
 import Repair.LowerBound.Arc
 import Repair.LowerBound.ZeroCore
 import Repair.LowerBound.Lattice
