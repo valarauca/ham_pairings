@@ -257,3 +257,21 @@ main `77d3de5`.
 No endpoint was removed. The four names moved to ham-spin keep their lines and now resolve to the
 bridge. After the merge of main `02cf0ca` there are 982 endpoints, 945 on
 `[propext, Classical.choice, Quot.sound]` and 37 on fewer axioms.
+
+## Walk core on the bridge, and dead code (COD-266 stage 3, branch `shrink`)
+
+From main `4d534d1`, against ham-spin `fe1f6bf`. Every "last old form" is at main `4d534d1`.
+
+### Same name, weaker statement
+
+| name | change | location | last old form |
+|---|---|---|---|
+| `RRC.reflection_cycle` | drops the conjunct that every vertex of `C` is reachable from `y`. Its only consumer, `not_ham_of_reflection`, discarded it | `repair/Repair/Reflection.lean` | `4d534d1:repair/Repair/Reflection.lean:589` |
+
+### Removed dead lemmas
+
+Used only for the dropped conjunct of `RRC.reflection_cycle`, and cited nowhere.
+
+| name | location | last old form |
+|---|---|---|
+| `RRC.reachable_gapSeg`, `RRC.factor_mate_scaled`, `RRC.some_eq_of_valMinAbs` | `repair/Repair/Reflection.lean` | `4d534d1:repair/Repair/Reflection.lean:519`, `:500`, `:493` |

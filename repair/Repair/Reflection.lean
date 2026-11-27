@@ -488,93 +488,6 @@ theorem card_gapSeg (lam : (ZMod (2 * m - 1))ˣ) {a b : ℤ} (ha : 0 ≤ a) (hab
     Int.card_Ioc]
   omega
 
-omit [NeZero m] in
-/-- The vertex at scaled position `k` is `λ⁻¹ k`. -/
-theorem some_eq_of_valMinAbs (lam : (ZMod (2 * m - 1))ˣ) {z : ZMod (2 * m - 1)} {k : ℤ}
-    (hz : (lam * z).valMinAbs = k) :
-    z = (↑lam⁻¹ : ZMod (2 * m - 1)) * (k : ZMod (2 * m - 1)) := by
-  rw [← hz, ZMod.coe_valMinAbs, Units.inv_mul_cancel_left]
-
-/-- `F_t` in scaled positions: the vertex at `k` is paired with the vertex at `1 - k`
-(Lemma 1 of `ulzd-rescue.md` (2f5b9d3)). -/
-theorem factor_mate_scaled {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod (2 * m - 1)}
-    (ht : 2 * t * lam = 1) {k : ℤ} (h1 : 2 - (m : ℤ) ≤ k) (h2 : k ≤ m - 1) :
-    (factor m t).mate (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * k)) =
-      some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((1 - k : ℤ) : ZMod (2 * m - 1))) := by
-  have hne : (↑lam⁻¹ : ZMod (2 * m - 1)) * k ≠ t := by
-    intro h
-    have h' := congrArg (fun z : ZMod (2 * m - 1) ↦ (lam * z).valMinAbs) h
-    simp only [Units.mul_inv_cancel_left, mul_eq_half ht, valMinAbs_half] at h'
-    rw [valMinAbs_eq_of_eq rfl (by omega) (by omega)] at h'
-    omega
-  rw [factor, factor_mate, mateFn_of_ne _ _ hne, Option.some.injEq]
-  apply lam.isUnit.mul_left_cancel
-  rw [Units.mul_inv_cancel_left]
-  push_cast
-  linear_combination 2 * mul_eq_half ht + two_mul_natCast_self (m := m) -
-    (k : ZMod (2 * m - 1)) * Units.mul_inv lam
-
-/-- Each arc is a path of `P ∪ F_t` (`ulzd-rescue.md` (2f5b9d3) Lemma 2, the paths `π_1, π_2`):
-every vertex is reachable from the end at position `-a`. -/
-theorem reachable_gapSeg (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 * m - 1))ˣ}
-    {t : ZMod (2 * m - 1)} (ht : 2 * t * lam = 1) {a b : ℤ} (ha : 0 ≤ a) (hb : 2 * b < 2 * m - 1)
-    (hint : ∀ z : ZMod (2 * m - 1), a < |(lam * z).valMinAbs| → |(lam * z).valMinAbs| < b →
-      P.mate (some z) = some (-z))
-    {p : Vertex m} (hp : p ∈ gapSeg lam a b) :
-    (P.toGraph ⊔ (factor m t).toGraph).Reachable
-      (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((-a : ℤ) : ZMod (2 * m - 1)))) p := by
-  have hP : ∀ j : ℤ, a < j → j < b →
-      P.mate (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * (j : ZMod (2 * m - 1)))) =
-        some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((-j : ℤ) : ZMod (2 * m - 1))) := by
-    intro j h1 h2
-    have hv : ((lam : ZMod (2 * m - 1)) *
-        ((↑lam⁻¹ : ZMod (2 * m - 1)) * (j : ZMod (2 * m - 1)))).valMinAbs = j := by
-      rw [Units.mul_inv_cancel_left]
-      exact valMinAbs_eq_of_eq rfl (by omega) (by omega)
-    rw [hint _ (by rw [hv, abs_of_pos (by omega)]; exact h1)
-      (by rw [hv, abs_of_pos (by omega)]; exact h2)]
-    push_cast
-    ring_nf
-  have key : ∀ i : ℕ, 1 ≤ i → a + i ≤ b →
-      (P.toGraph ⊔ (factor m t).toGraph).Reachable
-        (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((-a : ℤ) : ZMod (2 * m - 1))))
-        (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((a + i : ℤ) : ZMod (2 * m - 1)))) := by
-    intro i hi1 hi2
-    induction i with
-    | zero => omega
-    | succ i ih =>
-      rcases Nat.eq_zero_or_pos i with rfl | hi
-      · have hF := factor_mate_scaled (m := m) ht (k := -a) (by omega) (by omega)
-        have hadj := adj_mate_right P (factor m t)
-          (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((-a : ℤ) : ZMod (2 * m - 1))))
-        rw [hF, show (1 - -a : ℤ) = a + ((0 + 1 : ℕ) : ℤ) by push_cast; ring] at hadj
-        exact hadj.reachable
-      · have h1 := ih hi (by omega)
-        have h2 := adj_mate_left P (factor m t)
-          (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((a + i : ℤ) : ZMod (2 * m - 1))))
-        rw [hP _ (by omega) (by omega)] at h2
-        have h3 := adj_mate_right P (factor m t)
-          (some ((↑lam⁻¹ : ZMod (2 * m - 1)) * ((-(a + i) : ℤ) : ZMod (2 * m - 1))))
-        rw [factor_mate_scaled ht (by omega) (by omega),
-          show (1 - -(a + i) : ℤ) = a + ((i + 1 : ℕ) : ℤ) by push_cast; ring] at h3
-        exact h1.trans (h2.reachable.trans h3.reachable)
-  rcases p with _ | z
-  · exact absurd hp none_notMem_gapSeg
-  rw [some_mem_gapSeg] at hp
-  rw [some_eq_of_valMinAbs lam (z := z) rfl]
-  set k := (lam * z).valMinAbs with hk
-  rcases hp with ⟨h1, h2⟩ | ⟨h1, h2⟩
-  · have := key (k - a).toNat (by omega) (by omega)
-    rwa [show (a + ((k - a).toNat : ℤ) : ℤ) = k by omega] at this
-  · rcases eq_or_lt_of_le h2 with h2 | h2
-    · rw [h2]
-    · have h3 := key (-k - a).toNat (by omega) (by omega)
-      have h4 := adj_mate_left P (factor m t)
-        (some ((↑lam⁻¹ : ZMod (2 * m - 1)) *
-          ((a + ((-k - a).toNat : ℤ) : ℤ) : ZMod (2 * m - 1))))
-      rw [hP _ (by omega) (by omega), show (-(a + ((-k - a).toNat : ℤ)) : ℤ) = k by omega] at h4
-      exact h3.trans h4.reachable
-
 /-- Lemma 2 of `ulzd-rescue.md` (2f5b9d3), the reflection certificate. Let `2tλ = 1`, and let
 `x, y` be labels of one system with centre `σ`, at positions `v = valMinAbs (λ x)` and
 `w = valMinAbs (λ y)` with `v < w` of the same sign (condition (a)), and likewise `v' < w'` for
@@ -582,9 +495,10 @@ the mirrors `σ - y, σ - x`. Suppose `P` keeps every `F_0`-edge whose position 
 between `|v|` and `|w|`, or strictly between `|v'|` and `|w'|` (condition (b)), and contains the
 two `Q_σ`-edges `{y, y - σ}` and `{σ - x, -x}`. Then the arcs `π_1` from `-x` to `y` and `π_2`
 from `σ - y` to `σ - x`, joined by the two chords, form a vertex set `C ∌ ∞` that is closed under
-`P` and `F_t` and connected in `P ∪ F_t`, so one cycle. It has `4δ` vertices, `δ = w - v`, or
-`2δ` in the anchor case `x = σ - y`, so the cycle carries `2δ` edges of `P` (`δ` in the anchor
-case). Since `∞ ∉ C`, the bound `4δ < 2m` of `review-ulzd-rescue.md` (c28a6ed) §2 (D1) is not
+`P` and `F_t`. It has `4δ` vertices, `δ = w - v`, or `2δ` in the anchor case `x = σ - y`. The
+arcs are paths of `P ∪ F_t`, so `C` is one cycle with `2δ` edges of `P` (`δ` in the anchor case).
+That connectivity is not formalized, since `not_ham_of_reflection` needs only the closed set.
+Since `∞ ∉ C`, the bound `4δ < 2m` of `review-ulzd-rescue.md` (c28a6ed) §2 (D1) is not
 needed. -/
 theorem reflection_cycle (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 * m - 1))ˣ}
     {t : ZMod (2 * m - 1)} (ht : 2 * t * lam = 1) {σ x y : ZMod (2 * m - 1)} {v w v' w' : ℤ}
@@ -598,7 +512,6 @@ theorem reflection_cycle (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 * m - 
     (hy : P.mate (some y) = some (y - σ)) (hx : P.mate (some (σ - x)) = some (-x)) :
     ∃ C : Finset (Vertex m), some y ∈ C ∧ none ∉ C ∧ (∀ p ∈ C, P.mate p ∈ C) ∧
       (∀ p ∈ C, (factor m t).mate p ∈ C) ∧
-      (∀ p ∈ C, (P.toGraph ⊔ (factor m t).toGraph).Reachable (some y) p) ∧
       (C.card : ℤ) = (if x = σ - y then 2 else 4) * (w - v) := by
   obtain ⟨a, b, hab, hb⟩ : ∃ a b : ℤ,
       ((0 < v ∧ v < w ∧ a = v ∧ b = w) ∨ (v < w ∧ w < 0 ∧ a = -w ∧ b = -v)) ∧
@@ -657,7 +570,7 @@ theorem reflection_cycle (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 * m - 
         exact Finset.mem_union_left _ hy1
     · rw [not_or] at hz
       exact Finset.mem_union_right _ (mate_mem_gapSeg ha0' hb' hp hz.1 hz.2)
-  refine ⟨gapSeg lam a b ∪ gapSeg lam a' b', Finset.mem_union_left _ hy1, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨gapSeg lam a b ∪ gapSeg lam a' b', Finset.mem_union_left _ hy1, ?_, ?_, ?_, ?_⟩
   · rw [Finset.mem_union, not_or]
     exact ⟨none_notMem_gapSeg, none_notMem_gapSeg⟩
   · intro p hp
@@ -668,13 +581,6 @@ theorem reflection_cycle (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 * m - 
     rcases Finset.mem_union.1 hp with hp | hp
     · exact Finset.mem_union_left _ (factor_mate_mem_gapSeg ht ha0 hbm hp)
     · exact Finset.mem_union_right _ (factor_mate_mem_gapSeg ht ha0' hbm' hp)
-  · have hchord := adj_mate_left P (factor m t) (some y)
-    rw [hy, ← neg_sub] at hchord
-    intro p hp
-    rcases Finset.mem_union.1 hp with hp | hp
-    · exact (reachable_gapSeg P ht ha0 hbm hb hy1).symm.trans (reachable_gapSeg P ht ha0 hbm hb hp)
-    · exact hchord.reachable.trans ((reachable_gapSeg P ht ha0' hbm' hb' hx2).symm.trans
-        (reachable_gapSeg P ht ha0' hbm' hb' hp))
   have hc1 := card_gapSeg lam ha0 (by omega) hbm
   have hc2 := card_gapSeg lam ha0' (by omega) hbm'
   split_ifs with hanc
@@ -757,7 +663,7 @@ theorem not_ham_of_reflection (P : PerfectMatching (Vertex m)) {lam : (ZMod (2 *
       |(lam * z).valMinAbs| < max |v'| |w'| → P.mate (some z) = some (-z))
     (hy : P.mate (some y) = some (y - σ)) (hx : P.mate (some (σ - x)) = some (-x)) :
     ¬Ham P (factor m t) := by
-  obtain ⟨C, hyC, hnC, hP, hF, -, -⟩ :=
+  obtain ⟨C, hyC, hnC, hP, hF, -⟩ :=
     reflection_cycle P ht hv hw hv' hw' ha ha' hb hb' hy hx
   exact not_ham_of_closed P (factor m t) (C : Set (Vertex m)) hP hF hyC hnC
 

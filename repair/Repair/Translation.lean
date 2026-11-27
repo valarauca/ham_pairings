@@ -965,7 +965,7 @@ theorem abs_between_of_sameSign {v w a : ℤ} (h : (0 < v ∧ v < w) ∨ (v < w 
 `translation_cycle_neg` with `k = w - v - 1` gives a set `C ∌ ∞` through `-x`, closed under `P`
 and `F_t`, with `|C| ≤ 4(w - v) = 4δ`. The labels `x + 2lt` at positions `v + l` and their
 shifts `x + 2lt - σ` at positions `l - w'` are the gap labels of conditions (b), and `y` is
-`x + 2δt`. `reflection_cycle` adds the exact size and the connectivity of `C`. -/
+`x + 2δt`. `reflection_cycle` adds the exact size of `C`. -/
 theorem translation_cycle_of_reflection (P : PerfectMatching (Vertex m))
     {lam : (ZMod (2 * m - 1))ˣ} {t : ZMod (2 * m - 1)} (ht : 2 * t * lam = 1)
     {σ x y : ZMod (2 * m - 1)} {v w v' w' : ℤ}
