@@ -985,3 +985,16 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.WittSix.zeroSpan_le_oSevenSpan
 #print axioms RoundRobin.Canonical.WittSix.rrSpan_le_oSevenSpan
 #print axioms RoundRobin.Canonical.WittSix.rrSpan_sup_oSevenSpan
+#print axioms RoundRobin.Canonical.RandomFamily.repairBoundFor_zeroStates_factor_iff
+#print axioms RoundRobin.Canonical.RandomFamily.doubleFactorial_le_card_mul
+#print axioms RoundRobin.Canonical.RandomFamily.doubleFactorial_le_card_zeroStates_mul
+#print axioms RoundRobin.Canonical.RandomFamily.zeroStates_density_ge
+#print axioms RoundRobin.Canonical.RandomFamily.sum_card_zeroStates
+#print axioms RoundRobin.Canonical.RandomFamily.card_badFamilies_le
+#print axioms RoundRobin.Canonical.RandomFamily.card_badFamilies_le_beta
+#print axioms RoundRobin.Canonical.RandomFamily.one_sub_pHam_pow_le
+#print axioms RoundRobin.Canonical.RandomFamily.card_badFamilies_le_exp
+#print axioms RoundRobin.Canonical.RandomFamily.one_sub_pHam_pow_le_sqrt
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryA1
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryA1_floor
+#print axioms RoundRobin.Canonical.RandomFamily.corollaryA1_sqrt

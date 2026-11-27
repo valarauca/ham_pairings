@@ -57,3 +57,6 @@ import Repair.Translation
 import Repair.RoundRobinSpan
 import Repair.DualOrbit
 import Repair.WittBridgeSix
+import Repair.RandomFamily.RepairBound
+import Repair.RandomFamily.FirstMoment
+import Repair.RandomFamily.TheoremA
