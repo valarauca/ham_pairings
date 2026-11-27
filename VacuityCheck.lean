@@ -326,4 +326,29 @@ example : ∃ P : ZeroState 6, 1 ≤ tailDist P.1 (FactorCap.factorTail 6 (by no
 example : ¬RepairBound 6 (FactorCap.gadget 6) 0 := not_repairBound_zero le_rfl
 example : ¬RepairBound 8 (FactorCap.gadget 8) 0 := not_repairBound_zero (by norm_num)
 
+-- B6 exists_shortVector at n = 11, X = 4
+example : ∃ c a : ℤ, LowerBound.InLattice 11 4 c a ∧ 3 * (c ^ 2 + a ^ 2) ^ 2 ≤ 4 * 11 ^ 2 := by
+  obtain ⟨c, a, h, -, -, hH, -⟩ := LowerBound.exists_shortVector (n := 11) (by norm_num) 4
+  exact ⟨c, a, h, by exact_mod_cast hH⟩
+
+-- B7 exists_eq_smul_add_of_inLattice at n = 11, X = 4, (c, a) = (1, 4), (c', a') = (3, 1)
+example : ∃ ν u v : ℤ, 3 = ν * 1 + 11 * u ∧ 1 = ν * 4 + 11 * v :=
+  LowerBound.exists_eq_smul_add_of_inLattice (n := 11) (X := 4) (by norm_num) ⟨0, by norm_num⟩
+    (by norm_num) ⟨-1, by norm_num⟩
+
+-- B8 exists_inLattice_dist_lt at n = 11, X = 4, (c, a) = (1, 4), r = 1
+example : ∃ c' a' : ℤ, LowerBound.InLattice 11 4 c' a' ∧
+    ((c' : ℝ) / (11 : ℕ) - 1 / 3) ^ 2 + ((a' : ℝ) / (11 : ℕ) - 1 / 5) ^ 2 < 1 ^ 2 :=
+  LowerBound.exists_inLattice_dist_lt (n := 11) (X := 4) (c := 1) (a := 4) (by norm_num)
+    ⟨0, by norm_num⟩ (by decide) _ _ _ (by norm_num)
+
+-- B9 threshold_two_one_three_seven at n = 2137, L² = 901
+example : 1 / (4 * (901 : ℝ)) + 901 / (4 * 2137 ^ 2) < (13 / 640) ^ 2 :=
+  LowerBound.threshold_two_one_three_seven le_rfl le_rfl (by norm_num)
+
+-- B10 shortVector_or_forall_disk at the threshold prime n = 2137
+example : True := by
+  have := LowerBound.shortVector_or_forall_disk (n := 2137) (by norm_num) le_rfl 5
+  trivial
+
 end VacuityCheck.LowerBound

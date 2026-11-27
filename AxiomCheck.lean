@@ -959,3 +959,12 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.mem_gadget_iff
 #print axioms RoundRobin.Canonical.one_le_tailDist_factorTail
 #print axioms RoundRobin.Canonical.not_repairBound_zero
+#print axioms LowerBound.inLattice_add_smul
+#print axioms LowerBound.inLattice_nsmul
+#print axioms LowerBound.dvd_cross_of_inLattice
+#print axioms LowerBound.lagrange_two
+#print axioms LowerBound.exists_shortVector
+#print axioms LowerBound.exists_eq_smul_add_of_inLattice
+#print axioms LowerBound.exists_inLattice_dist_lt
+#print axioms LowerBound.threshold_two_one_three_seven
+#print axioms LowerBound.shortVector_or_forall_disk
