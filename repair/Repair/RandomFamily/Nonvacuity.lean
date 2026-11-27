@@ -405,14 +405,17 @@ theorem card_emptyFamilies_le_of_cGen (hm : 2 ≤ m) (ι : Type*) [Fintype ι] [
         _ ≤ C * (x - 1) ^ 2 * W :=
             mul_le_mul_of_nonneg_left hpow (mul_nonneg hC0 (sq_nonneg _))
         _ = C * W * (x - 1) ^ 2 + C * X0 ^ (k + 2) * 0 := by ring
-  have hsum1 : ∑ P : PerfectMatching (Vertex m), ∑ Q, (pairX P Q - 1) ^ 2 ≤ a ^ 2 * (N ^ 2 * (c / m ^ 2)) := by
-    have e : ∀ P : PerfectMatching (Vertex m), ∑ Q, (pairX P Q - 1) ^ 2 = a ^ 2 * (N * cGen P) := by
+  have hsum1 : ∑ P : PerfectMatching (Vertex m), ∑ Q, (pairX P Q - 1) ^ 2 ≤
+      a ^ 2 * (N ^ 2 * (c / m ^ 2)) := by
+    have e : ∀ P : PerfectMatching (Vertex m),
+        ∑ Q, (pairX P Q - 1) ^ 2 = a ^ 2 * (N * cGen P) := by
       intro P
       simp_rw [hx1, mul_pow, ← mul_sum]
       rw [← sum_sq_delta_eq P]
     rw [sum_congr rfl fun P _ ↦ e P, ← mul_sum]
     refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg a)
-    calc ∑ P : PerfectMatching (Vertex m), N * cGen P ≤ ∑ _P : PerfectMatching (Vertex m), N * (c / m ^ 2) :=
+    calc ∑ P : PerfectMatching (Vertex m), N * cGen P
+        ≤ ∑ _P : PerfectMatching (Vertex m), N * (c / m ^ 2) :=
           sum_le_sum fun P _ ↦ mul_le_mul_of_nonneg_left (hc P) hN0.le
       _ = N ^ 2 * (c / m ^ 2) := by
           rw [sum_const, card_univ, card_eq_doubleFactorial (card_vertex m), nsmul_eq_mul, ← hN]
@@ -460,6 +463,240 @@ theorem card_emptyFamilies_le_of_cGen (hm : 2 ≤ m) (ι : Type*) [Fintype ι] [
         ring
 
 end Main
+
+section Numeric
+
+/-- `e^(4/3) < 3.8`, from `e < 2.7182818286` and `2.7182818286⁴ < 3.8³`. -/
+theorem exp_four_thirds_lt : exp (4 / 3) < 3.8 := by
+  have h : exp (4 / 3) ^ 3 = exp 1 ^ 4 := by
+    rw [← exp_nat_mul, ← exp_nat_mul]
+    norm_num
+  have h1 : exp 1 ^ 4 < (2.7182818286 : ℝ) ^ 4 :=
+    pow_lt_pow_left₀ exp_one_lt_d9 (exp_pos 1).le (by norm_num)
+  have h2 : exp (4 / 3) ^ 3 < (3.8 : ℝ) ^ 3 := by
+    rw [h]
+    exact h1.trans (by norm_num)
+  exact lt_of_pow_lt_pow_left₀ 3 (by norm_num) h2
+
+/-- `2000 m⁴ 121^m ≤ 250^m` for `m ≥ 100`. -/
+theorem two_thousand_mul_pow_le {m : ℕ} (hm : 100 ≤ m) : 2000 * m ^ 4 * 121 ^ m ≤ 250 ^ m := by
+  induction m, hm using Nat.le_induction with
+  | base => norm_num
+  | succ m hm ih =>
+    have h1 : 100 * (m + 1) ≤ 101 * m := by omega
+    have h2 : (100 * (m + 1)) ^ 4 ≤ (101 * m) ^ 4 := Nat.pow_le_pow_left h1 4
+    rw [mul_pow, mul_pow] at h2
+    have h3 : 121 * (m + 1) ^ 4 * 100 ^ 4 ≤ 250 * m ^ 4 * 100 ^ 4 :=
+      calc 121 * (m + 1) ^ 4 * 100 ^ 4 = 121 * (100 ^ 4 * (m + 1) ^ 4) := by ring
+        _ ≤ 121 * (101 ^ 4 * m ^ 4) := Nat.mul_le_mul_left _ h2
+        _ = 12591308521 * m ^ 4 := by ring
+        _ ≤ 25000000000 * m ^ 4 := Nat.mul_le_mul_right _ (by norm_num)
+        _ = 250 * m ^ 4 * 100 ^ 4 := by ring
+    have h4 : 121 * (m + 1) ^ 4 ≤ 250 * m ^ 4 := Nat.le_of_mul_le_mul_right h3 (by norm_num)
+    calc 2000 * (m + 1) ^ 4 * 121 ^ (m + 1) = (2000 * 121 ^ m) * (121 * (m + 1) ^ 4) := by ring
+      _ ≤ (2000 * 121 ^ m) * (250 * m ^ 4) := Nat.mul_le_mul_left _ h4
+      _ = 250 * (2000 * m ^ 4 * 121 ^ m) := by ring
+      _ ≤ 250 * 250 ^ m := Nat.mul_le_mul_left _ ih
+      _ = 250 ^ (m + 1) := by ring
+
+/-- `10^(m-1) ≤ (m + 1)^⌊m/2⌋` for `m ≥ 99`. -/
+theorem ten_pow_le_pow_half {m : ℕ} (hm : 99 ≤ m) : 10 ^ (m - 1) ≤ (m + 1) ^ (m / 2) := by
+  calc 10 ^ (m - 1) ≤ 10 ^ (2 * (m / 2)) := Nat.pow_le_pow_right (by norm_num) (by omega)
+    _ = 100 ^ (m / 2) := by rw [pow_mul]; norm_num
+    _ ≤ (m + 1) ^ (m / 2) := Nat.pow_le_pow_left (by omega) _
+
+variable {m : ℕ} [NeZero m]
+
+/-- For `m ≥ 100`, `p ≤ 1/11` and `(2m - 1) p² ≤ 3.1416 · 100/199`, from `μ = (2m - 1)p ≤ √(πm)`
+(`sub_le_mul_pHam`). -/
+theorem pHam_bounds_of_hundred (hm : 100 ≤ m) :
+    pHam m ≤ 1 / 11 ∧ (2 * m - 1 : ℝ) * pHam m ^ 2 ≤ 3.1416 * 100 / 199 := by
+  have hm' : (100 : ℝ) ≤ m := by exact_mod_cast hm
+  have hμ := (sub_le_mul_pHam (m := m)).2
+  have hp0 := pHam_nonneg (m := m)
+  have hn0 : (0 : ℝ) < 2 * m - 1 := by linarith
+  have hπ := pi_lt_d4
+  have hπ0 := pi_pos
+  have hπm : π * m ≤ ((2 * m - 1) / 11 : ℝ) ^ 2 := by
+    rw [div_pow]
+    rw [le_div_iff₀ (by norm_num)]
+    nlinarith
+  have hsq : √(π * m) ≤ (2 * m - 1) / 11 := by
+    calc √(π * m) ≤ √(((2 * m - 1) / 11 : ℝ) ^ 2) := Real.sqrt_le_sqrt hπm
+      _ = (2 * m - 1) / 11 := Real.sqrt_sq (by linarith)
+  refine ⟨?_, ?_⟩
+  · have h := hμ.trans hsq
+    rw [le_div_iff₀ (by norm_num)] at h
+    nlinarith
+  · have hμ0 : 0 ≤ (2 * m - 1 : ℝ) * pHam m := mul_nonneg hn0.le hp0
+    have hμ2 : ((2 * m - 1 : ℝ) * pHam m) ^ 2 ≤ π * m := by
+      calc ((2 * m - 1 : ℝ) * pHam m) ^ 2 ≤ √(π * m) ^ 2 := pow_le_pow_left₀ hμ0 hμ 2
+        _ = π * m := Real.sq_sqrt (by positivity)
+    have e : (2 * m - 1 : ℝ) * pHam m ^ 2 = ((2 * m - 1 : ℝ) * pHam m) ^ 2 / (2 * m - 1) := by
+      field_simp
+    rw [e, div_le_iff₀ hn0]
+    nlinarith
+
+/-- `cGen B ≥ 0`, since `N · cGen B = ∑_Q δ(B, Q)²` (`sum_sq_delta_eq`). -/
+theorem cGen_nonneg (B : PerfectMatching (Vertex m)) : 0 ≤ cGen B := by
+  have h := sum_sq_delta_eq B
+  have hN : (0 : ℝ) < (Nat.doubleFactorial (2 * m - 1) : ℕ) :=
+    Nat.cast_pos.mpr (Nat.doubleFactorial_pos _)
+  have h0 : 0 ≤ (Nat.doubleFactorial (2 * m - 1) : ℝ) * cGen B := by
+    rw [← h]
+    exact sum_nonneg fun _ _ ↦ sq_nonneg _
+  exact nonneg_of_mul_nonneg_right (by linarith) hN
+
+/-- **Theorem 1 with explicit constants** (`q-second-moment-extend.md` §6 and §8, C1, af8925f).
+Let `m ≥ 100`, `|ι| = 2m - 1`, and suppose `cGen B ≤ c/m²` for every perfect matching `B` of
+`V_m` (Lemma 2 of the extend gives this with `c ≈ 1/8`, through spherical functions that are not
+formalized). Then at most a fraction `(7c + 1/100)/m²` of the families
+`M : ι → PerfectMatching (Vertex m)` have no zero state. The constant `7` is
+`C(n, 2) a² e^(11na/16)` with `na ≤ 1.911`, and `1/100` absorbs the pairs sharing at least
+`⌊m/2⌋` edges. -/
+theorem card_emptyFamilies_le_hundred (hm : 100 ≤ m) (ι : Type*) [Fintype ι] [DecidableEq ι]
+    (hι : Fintype.card ι = 2 * m - 1) {c : ℝ}
+    (hc : ∀ B : PerfectMatching (Vertex m), cGen B ≤ c / m ^ 2) :
+    (#{M : ι → PerfectMatching (Vertex m) | zeroStates M = ∅} : ℝ) ≤
+      (Fintype.card (ι → PerfectMatching (Vertex m)) : ℝ) * ((7 * c + 1 / 100) / m ^ 2) := by
+  have hm' : (100 : ℝ) ≤ m := by exact_mod_cast hm
+  have hm0 : (0 : ℝ) < m := by linarith
+  have hc0 : 0 ≤ c / m ^ 2 := (cGen_nonneg (factor m 0)).trans (hc _)
+  refine (card_emptyFamilies_le_of_cGen (by omega) ι (by omega) hc).trans
+    (mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _))
+  rw [hι, show 2 * m - 1 - 2 = 2 * m - 3 by omega]
+  have hnr : ((2 * m - 1 : ℕ) : ℝ) = 2 * m - 1 := by
+    rw [Nat.cast_sub (by omega)]
+    push_cast
+    ring
+  rw [hnr]
+  obtain ⟨hp1, hnp⟩ := pHam_bounds_of_hundred hm
+  set p := pHam m with hpdef
+  have hp0 : 0 ≤ p := pHam_nonneg
+  have h1p : (10 / 11 : ℝ) ≤ 1 - p := by linarith
+  set q := p / (1 - p) with hqdef
+  have hq0 : 0 ≤ q := div_nonneg hp0 (by linarith)
+  have hq : q ≤ 11 / 10 * p := by
+    rw [hqdef, div_le_iff₀ (by linarith)]
+    nlinarith
+  set nr : ℝ := 2 * m - 1 with hnrdef
+  have hnr1 : (199 : ℝ) ≤ nr := by linarith
+  have hna : nr * q ^ 2 ≤ 1.911 := by
+    have : q ^ 2 ≤ (11 / 10 * p) ^ 2 := pow_le_pow_left₀ hq0 hq 2
+    have h2 : nr * q ^ 2 ≤ nr * (11 / 10 * p) ^ 2 := mul_le_mul_of_nonneg_left this (by linarith)
+    nlinarith
+  have hna0 : 0 ≤ nr * q ^ 2 := by positivity
+  have hC : nr * (nr - 1) / 2 * q ^ 4 ≤ 1.911 ^ 2 / 2 := by
+    have : nr * (nr - 1) / 2 * q ^ 4 ≤ (nr * q ^ 2) ^ 2 / 2 := by
+      have : nr * (nr - 1) ≤ nr * nr := by nlinarith
+      have hq4 : 0 ≤ q ^ 4 := by positivity
+      nlinarith
+    have h2 : (nr * q ^ 2) ^ 2 ≤ 1.911 ^ 2 := pow_le_pow_left₀ hna0 hna 2
+    linarith
+  have hW : (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) ≤ 3.8 := by
+    have hk : ((2 * m - 3 : ℕ) : ℝ) ≤ nr := by
+      rw [Nat.cast_sub (by omega)]
+      push_cast
+      linarith
+    calc (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) ≤ exp (11 / 16 * q ^ 2) ^ (2 * m - 3) :=
+          pow_le_pow_left₀ (by positivity) (by linarith [add_one_le_exp (11 / 16 * q ^ 2)]) _
+      _ = exp (((2 * m - 3 : ℕ) : ℝ) * (11 / 16 * q ^ 2)) := by rw [← exp_nat_mul]
+      _ ≤ exp (4 / 3) := by
+          refine exp_le_exp.mpr ?_
+          have : ((2 * m - 3 : ℕ) : ℝ) * q ^ 2 ≤ nr * q ^ 2 :=
+            mul_le_mul_of_nonneg_right hk (sq_nonneg q)
+          nlinarith
+      _ ≤ 3.8 := exp_four_thirds_lt.le
+  have hX : 1 / (1 - p) ≤ 11 / 10 := by
+    rw [div_le_iff₀ (by linarith)]
+    linarith
+  have hX0 : 0 ≤ 1 / (1 - p) := by positivity
+  have hXn : (1 / (1 - p)) ^ (2 * m - 1) ≤ (121 / 100 : ℝ) ^ m := by
+    calc (1 / (1 - p)) ^ (2 * m - 1) ≤ (11 / 10 : ℝ) ^ (2 * m - 1) := pow_le_pow_left₀ hX0 hX _
+      _ ≤ (11 / 10 : ℝ) ^ (2 * m) := pow_le_pow_right₀ (by norm_num) (by omega)
+      _ = (121 / 100 : ℝ) ^ m := by rw [pow_mul]; norm_num
+  have hden : (10 : ℝ) ^ (m - 1) ≤ ((m : ℝ) + 1) ^ (m / 2) := by
+    exact_mod_cast ten_pow_le_pow_half (by omega : 99 ≤ m)
+  have hden0 : (0 : ℝ) < 10 ^ (m - 1) := by positivity
+  have hkey : (2000 : ℝ) * m ^ 4 * 121 ^ m ≤ 250 ^ m := by
+    exact_mod_cast two_thousand_mul_pow_le hm
+  have hCn : nr * (nr - 1) / 2 ≤ 2 * m ^ 2 := by nlinarith
+  have hCn0 : 0 ≤ nr * (nr - 1) / 2 := by nlinarith
+  have htail : nr * (nr - 1) / 2 * ((1 / (1 - p)) ^ (2 * m - 1) * 4 ^ m / ((m : ℝ) + 1) ^ (m / 2))
+      ≤ 1 / 100 / m ^ 2 := by
+    have h10 : (10 : ℝ) ^ m = 10 * 10 ^ (m - 1) := by
+      rw [← pow_succ']
+      congr 1
+      omega
+    calc nr * (nr - 1) / 2 * ((1 / (1 - p)) ^ (2 * m - 1) * 4 ^ m / ((m : ℝ) + 1) ^ (m / 2))
+        ≤ 2 * m ^ 2 * ((121 / 100 : ℝ) ^ m * 4 ^ m / 10 ^ (m - 1)) := by
+          gcongr
+      _ = 20 * m ^ 2 * (121 ^ m / 250 ^ m) := by
+          rw [div_pow, show (250 : ℝ) ^ m = 25 ^ m * 10 ^ m by rw [← mul_pow]; norm_num,
+            show (100 : ℝ) ^ m = 10 ^ m * 10 ^ m by rw [← mul_pow]; norm_num,
+            show (4 : ℝ) ^ m = 100 ^ m / 25 ^ m by rw [← div_pow]; norm_num,
+            show (100 : ℝ) ^ m = 10 ^ m * 10 ^ m by rw [← mul_pow]; norm_num, h10]
+          field_simp
+          ring
+      _ ≤ 1 / 100 / m ^ 2 := by
+          rw [mul_div_assoc', div_le_div_iff₀ (by positivity) (by positivity)]
+          nlinarith
+  have hmain : nr * (nr - 1) / 2 * (q ^ 4 * (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) * (c / m ^ 2))
+      ≤ 7 * (c / m ^ 2) := by
+    have hW0 : 0 ≤ (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) := by positivity
+    calc nr * (nr - 1) / 2 * (q ^ 4 * (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) * (c / m ^ 2))
+        = (nr * (nr - 1) / 2 * q ^ 4) * (1 + 11 / 16 * q ^ 2) ^ (2 * m - 3) * (c / m ^ 2) := by
+          ring
+      _ ≤ (1.911 ^ 2 / 2) * 3.8 * (c / m ^ 2) := by gcongr
+      _ ≤ 7 * (c / m ^ 2) := by nlinarith
+  rw [mul_add]
+  calc _ ≤ 7 * (c / m ^ 2) + 1 / 100 / m ^ 2 := by linarith
+    _ = (7 * c + 1 / 100) / m ^ 2 := by ring
+
+/-- **C1, nonvacuity** (`q-second-moment-extend.md` §8, C1, af8925f). Under the hypotheses of
+`card_emptyFamilies_le_hundred`, at least a fraction `1 - (7c + 1/100)/m²` of the families
+`M : ι → PerfectMatching (Vertex m)` have a zero state. -/
+theorem card_nonempty_zeroStates_ge (hm : 100 ≤ m) (ι : Type*) [Fintype ι] [DecidableEq ι]
+    (hι : Fintype.card ι = 2 * m - 1) {c : ℝ}
+    (hc : ∀ B : PerfectMatching (Vertex m), cGen B ≤ c / m ^ 2) :
+    (Fintype.card (ι → PerfectMatching (Vertex m)) : ℝ) * (1 - (7 * c + 1 / 100) / m ^ 2) ≤
+      (#{M : ι → PerfectMatching (Vertex m) | zeroStates M ≠ ∅} : ℝ) := by
+  have hE := card_emptyFamilies_le_hundred hm ι hι hc
+  have hsum : (#{M : ι → PerfectMatching (Vertex m) | zeroStates M = ∅} : ℝ) +
+      #{M : ι → PerfectMatching (Vertex m) | zeroStates M ≠ ∅} =
+        Fintype.card (ι → PerfectMatching (Vertex m)) := by
+    exact_mod_cast Finset.card_filter_add_card_filter_not (s := univ)
+      fun M : ι → PerfectMatching (Vertex m) ↦ zeroStates M = ∅
+  linarith
+
+open Classical in
+/-- **C2 with Theorem A′** (`q-second-moment-extend.md` §8, C2, af8925f, with the corollary of
+Theorem A′ in `TheoremAPrime.lean`). Let `m ≥ 100`, `|ι| = 2m - 1`, `K ≤ K_m`, and suppose
+`cGen B ≤ c/m²` for every `B`. Then at least a fraction `1 - m^(-3/2) - (7c + 1/100)/m²` of the
+families `M : ι → PerfectMatching (Vertex m)` have `Z(M) ≠ ∅` and `N(M, G) ≥ K + 1`, that is
+`¬RepairBoundFor (zeroStates M) G K`, at every six-vertex gadget `G` at once. -/
+theorem nonvacuity_corollaryAPrime (hm : 100 ≤ m) (ι : Type*) [Fintype ι] [DecidableEq ι]
+    (hι : Fintype.card ι = 2 * m - 1) {c : ℝ}
+    (hc : ∀ B : PerfectMatching (Vertex m), cGen B ≤ c / m ^ 2) {K : ℕ}
+    (hK : (K : ℤ) ≤ kAPrime m) :
+    (Fintype.card (ι → PerfectMatching (Vertex m)) : ℝ) *
+        (1 - (m : ℝ) ^ (-(3 / 2 : ℝ)) - (7 * c + 1 / 100) / m ^ 2) ≤
+      (#{M : ι → PerfectMatching (Vertex m) | zeroStates M ≠ ∅ ∧
+        ∀ G : Finset (Vertex m), G.card = 6 → ¬RepairBoundFor (zeroStates M) G K} : ℝ) := by
+  have hE := card_emptyFamilies_le_hundred hm ι hι hc
+  have hB := corollaryAPrime (by omega) ι hι hK
+  set E := univ.filter fun M : ι → PerfectMatching (Vertex m) ↦ zeroStates M = ∅
+  have e : (univ.filter fun M : ι → PerfectMatching (Vertex m) ↦ zeroStates M ≠ ∅ ∧
+      ∀ G : Finset (Vertex m), G.card = 6 → ¬RepairBoundFor (zeroStates M) G K) =
+        (E ∪ badFamilies ι m K)ᶜ := by
+    ext M
+    simp [E, mem_badFamilies]
+  rw [e, card_compl, Nat.cast_sub (card_le_univ _)]
+  have hu : ((E ∪ badFamilies ι m K).card : ℝ) ≤ E.card + (badFamilies ι m K).card := by
+    exact_mod_cast card_union_le _ _
+  linarith
+
+end Numeric
 
 end RoundRobin.Canonical.RandomFamily
 

@@ -35,7 +35,8 @@ variable {m : ℕ} [NeZero m]
 /-- Inclusion–exclusion for one coordinate (`q-second-moment-extend.md` §2, Lemma 0, af8925f):
 `#{X : ¬Ham P X ∧ ¬Ham Q X} + 2D = N + J(P, Q)`. -/
 theorem card_not_ham_two_add (P Q : PerfectMatching (Vertex m)) :
-    #{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} + 2 * (2 ^ (m - 1) * (m - 1).factorial) =
+    #{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} +
+        2 * (2 ^ (m - 1) * (m - 1).factorial) =
       Nat.doubleFactorial (2 * m - 1) + jointCount P Q := by
   have h1 := Finset.card_filter_add_card_filter_not
     (s := (univ : Finset (PerfectMatching (Vertex m)))) fun X ↦ Ham P X ∨ Ham Q X
@@ -258,10 +259,12 @@ theorem card_emptyFamilies_le (hm : 2 ≤ m) (ι : Type*) [Fintype ι] [Decidabl
     simp only [S1]
     rw [sum_card_zeroStates, Nat.cast_mul, Nat.cast_pow, Nat.cast_sub ham_count_le]
   have hbase : ∀ P Q : PerfectMatching (Vertex m),
-      (#{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} : ℝ) = N - 2 * D + jointCount P Q := by
+      (#{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} : ℝ) =
+        N - 2 * D + jointCount P Q := by
     intro P Q
     have := card_not_ham_two_add P Q
-    have h' : (#{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} : ℝ) + 2 * D = N + jointCount P Q := by
+    have h' : (#{X : PerfectMatching (Vertex m) | ¬Ham P X ∧ ¬Ham Q X} : ℝ) + 2 * D =
+        N + jointCount P Q := by
       rw [hD, hN]
       exact_mod_cast this
     linarith

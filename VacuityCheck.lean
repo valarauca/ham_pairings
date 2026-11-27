@@ -399,6 +399,67 @@ example : 1 ≤ kAPrime 32768 := by
   have := corollaryAPrime_fin_good (m := 32768) (by norm_num) h0
   exact h1
 
+-- R5 the hypothesis `∀ B, cGen B ≤ c / m²` of the COD-288 endpoints holds at every `m` with
+-- `c = m² (N/D)²`, by `cGen_le`, and card_emptyFamilies_le_of_cGen applies at m = 2, n = 3
+example (m : ℕ) [NeZero m] : ∃ c : ℝ, ∀ B : PerfectMatching (Vertex m), cGen B ≤ c / m ^ 2 := by
+  refine ⟨(m : ℝ) ^ 2 * ((Nat.doubleFactorial (2 * m - 1) : ℕ) /
+    ((2 ^ (m - 1) * (m - 1).factorial : ℕ) : ℝ)) ^ 2, fun B ↦ ?_⟩
+  have hm : (0 : ℝ) < (m : ℝ) ^ 2 := by
+    have : (0 : ℝ) < m := Nat.cast_pos.mpr (NeZero.pos m)
+    positivity
+  rw [mul_div_cancel_left₀ _ hm.ne']
+  exact cGen_le B
+
+example : True := by
+  have hc : ∀ B : PerfectMatching (Vertex 2), cGen B ≤
+      ((2 : ℕ) : ℝ) ^ 2 * ((Nat.doubleFactorial (2 * 2 - 1) : ℕ) /
+        ((2 ^ (2 - 1) * (2 - 1).factorial : ℕ) : ℝ)) ^ 2 / ((2 : ℕ) : ℝ) ^ 2 := fun B ↦ by
+    rw [mul_div_cancel_left₀ _ (by norm_num)]
+    exact cGen_le B
+  have := card_emptyFamilies_le_of_cGen (m := 2) le_rfl (Fin 3) (by simp) hc
+  trivial
+
+-- R6 the hypotheses of card_emptyFamilies_le_hundred, card_nonempty_zeroStates_ge and
+-- nonvacuity_corollaryAPrime hold together at m = 2^15, K = K_m, with the `c` of R5
+example : True := by
+  have h2 := log_two_lt_d9
+  have h2' := log_two_gt_d9
+  have hl1 : log ((32768 : ℕ) : ℝ) = 15 * log 2 := by
+    rw [show ((32768 : ℕ) : ℝ) = 2 ^ 15 by norm_num, log_pow]
+    push_cast
+    ring
+  have hl2 : log (2 * ((32768 : ℕ) : ℝ)) = 16 * log 2 := by
+    rw [show (2 * ((32768 : ℕ) : ℝ)) = 2 ^ 16 by norm_num, log_pow]
+    push_cast
+    ring
+  have hs : (256 : ℝ) ≤ √(π * ((32768 : ℕ) : ℝ)) := by
+    rw [le_sqrt (by norm_num) (by positivity)]
+    have := two_le_pi
+    push_cast
+    linarith
+  have hpos : 0 < log (2 * ((32768 : ℕ) : ℝ)) := by rw [hl2]; linarith
+  have h4 : (4 : ℤ) ≤ ⌊(√(π * ((32768 : ℕ) : ℝ)) - 1 - 2 * log ((32768 : ℕ) : ℝ)) /
+      log (2 * ((32768 : ℕ) : ℝ))⌋ := by
+    rw [Int.le_floor, le_div_iff₀ hpos, hl1, hl2]
+    push_cast at hs ⊢
+    linarith
+  have h0 : 0 ≤ kAPrime 32768 := by
+    unfold kAPrime
+    omega
+  have hK : (((kAPrime 32768).toNat : ℕ) : ℤ) ≤ kAPrime 32768 := (Int.toNat_of_nonneg h0).le
+  have hc : ∀ B : PerfectMatching (Vertex 32768), cGen B ≤
+      ((32768 : ℕ) : ℝ) ^ 2 * ((Nat.doubleFactorial (2 * 32768 - 1) : ℕ) /
+        ((2 ^ (32768 - 1) * (32768 - 1).factorial : ℕ) : ℝ)) ^ 2 / ((32768 : ℕ) : ℝ) ^ 2 :=
+    fun B ↦ by
+      rw [mul_div_cancel_left₀ _ (by norm_num)]
+      exact cGen_le B
+  have := card_emptyFamilies_le_hundred (by norm_num) (Fin (2 * 32768 - 1))
+    (Fintype.card_fin _) hc
+  have := card_nonempty_zeroStates_ge (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) hc
+  have := nonvacuity_corollaryAPrime (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) hc
+    hK
+  trivial
+
 end VacuityCheck.RandomFamily
 
 namespace VacuityCheck.LowerBound
