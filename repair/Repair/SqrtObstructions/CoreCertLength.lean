@@ -25,8 +25,8 @@ holds `not_sameCycle_mate_right` and `not_sameCycle_mate_left`: no `σ`-orbit me
 Round-robin part.
 * `certLength_bound_of_hit` : the counting step of Theorem C′. If every `t ≠ s` has
   `E_t(y, i) ∈ X` for some `y ∈ X` and `i < L`, then `n - 1 ≤ |X|(|X| L + 2L - 1)`.
-* `exists_walkEnd_mem_of_agree` : the walk step of `exists_walkEnd_mem`, for any `X` on which
-  `P` agrees with `F_s` along the cycle.
+* `exists_walkEnd_mem_of_agree` (in `Repair.SqrtObstructions.CertLength`) : the walk step of
+  `exists_walkEnd_mem`, for any `X` on which `P` agrees with `F_s` along the cycle.
 * `exists_mem_coreDefect` : Theorem B(i) for cores. At prime `n` every closed alternating cycle of
   `A ∪ F_t`, `t ≠ s`, meets `X = V(A'')`.
 * `core_certLength_bound` (Theorem C′, core form) : if every `t ≠ s` has a closed alternating cycle
@@ -158,45 +158,6 @@ theorem certLength_bound_of_hit (hp : (2 * m - 1).Prime) (s : ZMod (2 * m - 1))
       generalize X.card * (X.card * L + 2 * L - 1) = q at h2 ⊢
       generalize X.card * L = q' at h1 h2
       omega
-
-/-- **The walk step of Theorem C′** (`factor-tail-L-test.md`, proof of Theorem C′; the proof of
-Theorem C in `cod-149-core-sharpening.md`). Let `σ_t^r y = y` with `r ≥ 1` and `P y ∈ X`, and
-suppose `P` agrees with `F_s` at every point `F_t(σ_t^j y)`, `j < r`, outside `X`. Then
-`E_t(y, i) ∈ X` for some `i < r`. -/
-theorem exists_walkEnd_mem_of_agree (P : PerfectMatching (Vertex m)) (s t : ZMod (2 * m - 1))
-    (X : Finset (Vertex m)) {y : Vertex m} (hyP : P.mate y ∈ X) {r : ℕ} (hr : 1 ≤ r)
-    (hcyc : (certPerm P t ^ r) y = y)
-    (hagree : ∀ j < r, (factor m t).mate ((certPerm P t ^ j) y) ∉ X →
-      P.mate ((factor m t).mate ((certPerm P t ^ j) y)) =
-        (factor m s).mate ((factor m t).mate ((certPerm P t ^ j) y))) :
-    ∃ i < r, walkEnd s t y i ∈ X := by
-  have hlast : (factor m t).mate ((certPerm P t ^ (r - 1)) y) ∈ X := by
-    have h : P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y)) = y :=
-      calc P.mate ((factor m t).mate ((certPerm P t ^ (r - 1)) y))
-          = certPerm P t ((certPerm P t ^ (r - 1)) y) := rfl
-        _ = (certPerm P t ^ r) y := by
-          rw [← Equiv.Perm.mul_apply, ← pow_succ', Nat.sub_add_cancel hr]
-        _ = y := hcyc
-    have h' : (factor m t).mate ((certPerm P t ^ (r - 1)) y) = P.mate y := by
-      have h'' := congrArg P.mate h
-      rwa [mate_mate] at h''
-    rw [h']
-    exact hyP
-  have hex : ∃ i, i < r ∧ (factor m t).mate ((certPerm P t ^ i) y) ∈ X :=
-    ⟨r - 1, by omega, hlast⟩
-  obtain ⟨hlt, hmem⟩ := Nat.find_spec hex
-  have hsame : ∀ j ≤ Nat.find hex, (certPerm P t ^ j) y = (walkPerm s t ^ j) y := by
-    intro j
-    induction j with
-    | zero => intro _; rfl
-    | succ j ih =>
-      intro hj
-      have hnot := Nat.find_min hex (show j < Nat.find hex by omega)
-      have hj' : (factor m t).mate ((certPerm P t ^ j) y) ∉ X := fun h ↦ hnot ⟨by omega, h⟩
-      have hPs := hagree j (by omega) hj'
-      rw [pow_succ', pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, ← ih (by omega)]
-      exact hPs
-  exact ⟨Nat.find hex, hlt, by rw [walkEnd, ← hsame _ le_rfl]; exact hmem⟩
 
 /-- The new edges `A'' = A ∖ F_s` of a core `A` (`cod-149-core-sharpening.md`, Setup). -/
 def coreNew (s : ZMod (2 * m - 1)) (A : Finset (Sym2 (Vertex m))) : Finset (Sym2 (Vertex m)) :=

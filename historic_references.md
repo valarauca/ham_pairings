@@ -223,9 +223,11 @@ main `77d3de5`.
 | name | old location | new location | last old form |
 |---|---|---|---|
 | `PM.mate_inv`, `PM.mate_mul_self`, `PM.not_sameCycle_mate_right`, `PM.not_sameCycle_mate_left` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | ham-spin `core/Pairing/InvolutionProduct.lean` (`fe1f6bf`) | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:45`, `:50`, `:68`, `:94` |
+| `RRC.exists_walkEnd_mem_of_agree` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:227` |
 
 ### Same statement, new proof
 
 | name | now proved from | location | last old proof |
 |---|---|---|---|
 | `PM.exists_pow_eq_of_closed` | `PM.card_reachable_eq_two_mul` | `repair/Repair/SqrtObstructions/CoreCertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CoreCertLength.lean:104` |
+| `RRC.exists_walkEnd_mem` | `RRC.exists_walkEnd_mem_of_agree` (the two proofs were the same walk) | `repair/Repair/SqrtObstructions/CertLength.lean` | `77d3de5:repair/Repair/SqrtObstructions/CertLength.lean:288` |
