@@ -321,3 +321,25 @@ Used only for the dropped conjunct of `RRC.reflection_cycle`, and cited nowhere.
 | name | location | last old form |
 |---|---|---|
 | `RRC.reachable_gapSeg`, `RRC.factor_mate_scaled`, `RRC.some_eq_of_valMinAbs` | `repair/Repair/Reflection.lean` | `4d534d1:repair/Repair/Reflection.lean:519`, `:500`, `:493` |
+
+### Closure helper moved to ham-spin (needs ham-spin `spin-shrink` 5ecf8a5)
+
+The walk induction "a set closed under the edges holds each component it meets" now comes from
+ham-spin `core/Pairing/Basic.lean` (`spin-shrink` 5ecf8a5): `mem_of_reachable_of_forall_adj`,
+`reachable_map_of_forall_adj` and `PM.mem_of_reachable_of_mate_mem`. This commit builds only once
+the ham-spin pin moves from `fe1f6bf` to a commit containing 5ecf8a5.
+
+| old name | use instead | last old form |
+|---|---|---|
+| `PM.mem_of_reachable_of_closed` (one caller, `PM.cycleOf_eq_of_block`; cited only by the plan) | `PM.mem_of_reachable_of_mate_mem` with `B = ↑S` | `4d534d1:repair/Repair/PairRecursion.lean:309` |
+| `mem_of_reachable'`, `reachable_map_of_adj'` (private) | `mem_of_reachable_of_forall_adj`, `reachable_map_of_forall_adj` | `4d534d1:repair/Repair/Insertion.lean:35`, `:43` |
+| `PM.mem_of_reachable''` (private) | `mem_of_reachable_of_forall_adj` | `4d534d1:repair/Repair/FreeDefects.lean:34` |
+
+`PM.exists_pow_eq_of_closed` (`repair/Repair/SqrtObstructions/CoreCertLength.lean`) keeps its
+statement and takes its closed component from `PM.mem_of_reachable_of_mate_mem`.
+
+### AxiomCheck
+
+No endpoint was removed or changed. After the merge of main `9e0b81a` there are 1024 endpoints,
+984 on `[propext, Classical.choice, Quot.sound]` and 40 on fewer axioms, both at the `fe1f6bf`
+pin (before this subsection's commit) and against `spin-shrink` 5ecf8a5 (after it).

@@ -228,20 +228,6 @@ theorem mem_cycleOf {w x : V} :
     x ∈ cycleOf F0 F1 w ↔ (F0.toGraph ⊔ F1.toGraph).Reachable w x := by
   simp [cycleOf]
 
-omit [Fintype V] [DecidableEq V] in
-/-- A set closed under `F₀` and `F₁` is closed under reachability
-(`results/k3-counterexample-hunt.md`, Lemma K2). -/
-theorem mem_of_reachable_of_closed {S : Finset V}
-    (hS : ∀ x ∈ S, F0.mate x ∈ S ∧ F1.mate x ∈ S) {x y : V}
-    (h : (F0.toGraph ⊔ F1.toGraph).Reachable x y) (hx : x ∈ S) : y ∈ S := by
-  obtain ⟨p⟩ := h
-  induction p with
-  | nil => exact hx
-  | cons hadj _ ih =>
-    rcases (sup_toGraph_adj _ _ _ _).mp hadj with rfl | rfl
-    · exact ih (hS _ hx).1
-    · exact ih (hS _ hx).2
-
 /-- A closed connected set is the cycle through each of its vertices
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem cycleOf_eq_of_block {S : Finset V} (hS : ∀ x ∈ S, F0.mate x ∈ S ∧ F1.mate x ∈ S)
@@ -249,7 +235,8 @@ theorem cycleOf_eq_of_block {S : Finset V} (hS : ∀ x ∈ S, F0.mate x ∈ S �
     cycleOf F0 F1 w = S := by
   ext x
   rw [mem_cycleOf]
-  exact ⟨fun h ↦ mem_of_reachable_of_closed hS h hw, fun hx ↦ hc w hw x hx⟩
+  exact ⟨fun h ↦ mem_of_reachable_of_mate_mem F0 F1 (B := (S : Set V)) (fun x hx ↦ (hS x hx).1)
+    (fun x hx ↦ (hS x hx).2) h hw, fun hx ↦ hc w hw x hx⟩
 
 /-- A family of closed connected blocks covering `V` is the set of cycles of `F₀ ∪ F₁`. -/
 theorem image_cycleOf_eq {𝓑 : Finset (Finset V)}

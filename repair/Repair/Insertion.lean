@@ -32,22 +32,6 @@ section Graph
 
 variable {W : Type*}
 
-private theorem mem_of_reachable' {G : SimpleGraph W} {D : Set W}
-    (hD : ∀ v w, G.Adj v w → v ∈ D → w ∈ D) {a b : W} (hab : G.Reachable a b) (ha : a ∈ D) :
-    b ∈ D := by
-  obtain ⟨p⟩ := hab
-  induction p with
-  | nil => exact ha
-  | cons hadj _ ih => exact ih (hD _ _ hadj ha)
-
-private theorem reachable_map_of_adj' {W' : Type*} {G : SimpleGraph W} {G' : SimpleGraph W'}
-    (f : W → W') (h : ∀ a b, G.Adj a b → G'.Reachable (f a) (f b)) {a b : W}
-    (hab : G.Reachable a b) : G'.Reachable (f a) (f b) := by
-  obtain ⟨p⟩ := hab
-  induction p with
-  | nil => exact SimpleGraph.Reachable.refl _
-  | cons hadj _ ih => exact (h _ _ hadj).trans ih
-
 /-- The ends of an added edge are joined in the enlarged graph.
 (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
 theorem reachable_sup_edge (G : SimpleGraph W) (u v : W) :
@@ -116,10 +100,10 @@ theorem card_connectedComponent_eq_of_retract {W' : Type*} {G : SimpleGraph W}
   refine Nat.card_congr
     { toFun := SimpleGraph.ConnectedComponent.lift (fun v ↦ G'.connectedComponentMk (π v))
         (fun v w p _ ↦ SimpleGraph.ConnectedComponent.sound
-          (reachable_map_of_adj' π h1 p.reachable))
+          (reachable_map_of_forall_adj π h1 p.reachable))
       invFun := SimpleGraph.ConnectedComponent.lift (fun w ↦ G.connectedComponentMk (ι w))
         (fun v w p _ ↦ SimpleGraph.ConnectedComponent.sound
-          (reachable_map_of_adj' ι h2 p.reachable))
+          (reachable_map_of_forall_adj ι h2 p.reachable))
       left_inv := fun c ↦ ?_
       right_inv := fun c ↦ ?_ }
   · induction c using SimpleGraph.ConnectedComponent.ind with
@@ -140,8 +124,8 @@ theorem reachable_iff_of_retract {W' : Type*} {G : SimpleGraph W} {G' : SimpleGr
     (h2 : ∀ v w, G'.Adj v w → G.Reachable (ι v) (ι w))
     (h3 : ∀ v, G.Reachable v (ι (π v))) (a b : W) :
     G.Reachable a b ↔ G'.Reachable (π a) (π b) :=
-  ⟨reachable_map_of_adj' π h1, fun h ↦
-    (h3 a).trans ((reachable_map_of_adj' ι h2 h).trans (h3 b).symm)⟩
+  ⟨reachable_map_of_forall_adj π h1, fun h ↦
+    (h3 a).trans ((reachable_map_of_forall_adj ι h2 h).trans (h3 b).symm)⟩
 
 /-- Adding an edge inside a component keeps the number of components.
 (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
@@ -302,7 +286,7 @@ theorem eq_or_eq_contractFun_of_reachable (a : A) {w : V} (hw : w ∈ A)
         · exact ⟨i + 1, hlt, Or.inl (by rw [← hvu, evenPt_succ])⟩
         · exact absurd (oddPt_exitIdx_mem P Q A hA a) hn
   have hwS : w ∈ S :=
-    mem_of_reachable' hS h ⟨0, Nat.zero_le _, Or.inl (evenPt_zero P Q a).symm⟩
+    mem_of_reachable_of_forall_adj hS h ⟨0, Nat.zero_le _, Or.inl (evenPt_zero P Q a).symm⟩
   obtain ⟨i, hi, rfl | rfl⟩ := hwS
   · cases i with
     | zero => exact Or.inl (evenPt_zero P Q a)

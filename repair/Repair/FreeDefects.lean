@@ -31,14 +31,6 @@ section General
 
 variable {V : Type*}
 
-private theorem mem_of_reachable'' {G : SimpleGraph V} {D : Set V}
-    (hD : ∀ v w, G.Adj v w → v ∈ D → w ∈ D) {a b : V} (hab : G.Reachable a b) (ha : a ∈ D) :
-    b ∈ D := by
-  obtain ⟨p⟩ := hab
-  induction p with
-  | nil => exact ha
-  | cons hadj _ ih => exact ih (hD _ _ hadj ha)
-
 /-- `offGraph` shrinks as `A` grows.
 (`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
 theorem offGraph_mono (P : PerfectMatching V) {A A' : Finset V} (hA : ∀ v ∈ A, P.mate v ∈ A)
@@ -351,7 +343,7 @@ theorem closedCount_step :
               rw [← hwz, h, mate_mate]
               exact SimpleGraph.Reachable.refl _
           · exact hw.trans (SimpleGraph.Adj.reachable (Or.inr ⟨hwz, hwg⟩))
-      have hvT : v ∈ T := mem_of_reachable'' hT hrv (SimpleGraph.Reachable.refl _)
+      have hvT : v ∈ T := mem_of_reachable_of_forall_adj hT hrv (SimpleGraph.Reachable.refl _)
       intro hvA
       rcases eq_or_eq_contractFun_of_reachable B R _ (grow_closed B hA) (yP B)
         (subset_grow B hvA) hvT with h | h

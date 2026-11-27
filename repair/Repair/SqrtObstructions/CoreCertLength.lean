@@ -63,14 +63,8 @@ component of `y`, which has twice as many vertices as the `σ`-cycle of `y`
 theorem exists_pow_eq_of_closed [Finite V] (a b : PerfectMatching V)
     {C : Finset V} (ha : ∀ v ∈ C, a.mate v ∈ C) (hb : ∀ v ∈ C, b.mate v ∈ C) {y : V}
     (hy : y ∈ C) : ∃ r, 1 ≤ r ∧ 2 * r ≤ C.card ∧ ((a.mate * b.mate) ^ r) y = y := by
-  have hreach : ∀ w, (a.toGraph ⊔ b.toGraph).Reachable y w → w ∈ C := by
-    rintro w ⟨p⟩
-    induction p with
-    | nil => exact hy
-    | cons hadj _ ih =>
-      rcases (sup_toGraph_adj _ _ _ _).mp hadj with rfl | rfl
-      · exact ih (ha _ hy)
-      · exact ih (hb _ hy)
+  have hreach : ∀ w, (a.toGraph ⊔ b.toGraph).Reachable y w → w ∈ C := fun _ h ↦
+    mem_of_reachable_of_mate_mem a b (B := (C : Set V)) ha hb h hy
   set σ := a.mate * b.mate with hσ
   have hper : Function.IsPeriodicPt σ (orderOf σ) y := by
     rw [Function.IsPeriodicPt, Function.IsFixedPt, Equiv.Perm.iterate_eq_pow,
