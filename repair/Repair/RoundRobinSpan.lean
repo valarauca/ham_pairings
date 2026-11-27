@@ -33,6 +33,12 @@ round-robin factors the dual families are the translates of `P*` and `Q` (`Repai
   kernel layer as `card_sub_one_le_finrank_fpSpan`, `finrank_fpSpan_eq_card_iff`,
   `finrank_fpSpan_eq_card_iff_exists_odd` and `finrank_fpSpan_eq_card_sub_one_iff`.
   `fpSum_mem_inf_orthogonal` : for odd `|ι|`, `Σ_t φ(F_t) ∈ R(F) ∩ R(F)^⊥`.
+* The radical of a Hamiltonian clique, Proposition 5 of `results/audit-manuscript-extend.md`
+  (organize-archive 313d6ea). `eq_sum_of_fpCoeff_mem_orthogonal` : `Σ_t c_t φ(F_t) ∈ R(F)^⊥`
+  forces `c_s = Σ_t c_t`, so `fpSpan_inf_orthogonal_le` : `R(F) ∩ R(F)^⊥ ≤ F₂ · Σ_t φ(F_t)`.
+  `fpSpan_inf_orthogonal_eq_of_odd` : equality for odd `|ι|`, and
+  `fpSpan_inf_orthogonal_eq_bot_of_even`, `finrank_fpSpan_of_even` : the radical is `0` and
+  `dim R(F) = |ι|` for even `|ι|`. None of these assumes independence.
 * `RoundRobin.Canonical`, `n = 2m - 1`. `ham_shift_pStar_ladder` : the translates of `P*` pair
   bidiagonally with the factors, for every `m ≥ 2`. Hence `ker_fpCoeff_factor_le` and
   `finrank_rrSpan_of_two_le` : `2m - 2 ≤ dim R_rr ≤ 2m - 1`, prime or composite `n`
@@ -50,6 +56,10 @@ round-robin factors the dual families are the translates of `P*` and `Q` (`Repai
   `dim W = 2^(m-1)` leaves no room for more. `finrank_rrSpan_four` and `finrank_rrSpan_six` :
   `dim R_rr = 2m - 1` at `m = 4, 6`. The first is witnessed by `X(Q_3) = 3`, and the second is
   now a case of `finrank_rrSpan_of_five_le` (its witness `X(Q_2) = 7` is kept).
+* Corollary 6 of `results/audit-manuscript-extend.md` (organize-archive 313d6ea).
+  `rrSpan_inf_orthogonal_eq` : at prime `n`, `R_rr ∩ R_rr^⊥ = F₂ · Σ_t φ(F_t)`.
+  `fpSum_factor_ne_zero` : `Σ_t φ(F_t) ≠ 0` for `m ≥ 4`, so `finrank_rrSpan_inf_orthogonal` : the
+  radical is a line at prime `n ≥ 7`.
 -/
 
 namespace Pairing.PerfectMatching
@@ -419,6 +429,92 @@ theorem fpSum_mem_inf_orthogonal (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t)
   obtain ⟨k, hk⟩ := hodd
   exact ⟨k, by omega⟩
 
+/-- Proposition 5(1) of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). For a
+Hamiltonian clique, `F_s ∪ F_t` one cycle iff `s ≠ t` (`Ham`, ham-spin fd082bf), every `c` with
+`Σ_t c_t φ(F_t) ∈ R(F)^⊥` is constant, `c_s = Σ_t c_t` (`fpSpan`, `fpForm`, ham-spin fd082bf).
+No independence of the `φ(F_t)` is assumed. -/
+theorem eq_sum_of_fpCoeff_mem_orthogonal (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t) {c : ι → F₂}
+    (hc : fpCoeff F c ∈ fpForm.orthogonal (fpSpan F)) (s : ι) : c s = ∑ t, c t := by
+  classical
+  have h0 : ∑ t, c t * H (F t) (F s) = 0 := by
+    rw [← coe_fpCoeff_apply]
+    exact (mem_orthogonal_fpSpan_iff F _).mp hc s
+  have h1 : ∀ t, c t * H (F t) (F s) + (if t = s then c t else 0) = c t := by
+    intro t
+    rw [H_apply]
+    by_cases hts : t = s
+    · subst hts
+      simp [hF]
+    · simp [hF, hts]
+  calc c s = ∑ t, c t * H (F t) (F s) + ∑ t, (if t = s then c t else 0) := by
+        rw [h0, zero_add, Finset.sum_ite_eq']
+        simp
+    _ = ∑ t, c t := by
+        rw [← Finset.sum_add_distrib]
+        exact Finset.sum_congr rfl fun t _ ↦ h1 t
+
+/-- Proposition 5(2) of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). For a
+Hamiltonian clique of even size (`Ham`, ham-spin fd082bf), `Σ_t c_t φ(F_t) ∈ R(F)^⊥` forces
+`c = 0` (`fpSpan`, `fpForm`, ham-spin fd082bf). -/
+theorem eq_zero_of_fpCoeff_mem_orthogonal_of_even (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t)
+    (heven : Even (Fintype.card ι)) {c : ι → F₂}
+    (hc : fpCoeff F c ∈ fpForm.orthogonal (fpSpan F)) : c = 0 := by
+  have hs := eq_sum_of_fpCoeff_mem_orthogonal hF hc
+  have hsum : ∑ t, c t = 0 := by
+    have h : ∑ t, c t = ∑ _t : ι, ∑ s, c s := Finset.sum_congr rfl fun t _ ↦ hs t
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
+      (ZMod.natCast_eq_zero_iff_even).mpr heven, zero_mul] at h
+    exact h
+  exact funext fun s ↦ by rw [hs s, hsum, Pi.zero_apply]
+
+/-- Proposition 5 of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). For a
+Hamiltonian clique (`Ham`, ham-spin fd082bf), the radical of `R(F)` lies on the line of
+`Σ_t φ(F_t)`: `R(F) ∩ R(F)^⊥ ≤ F₂ · Σ_t φ(F_t)` (`fpSpan`, `fpForm`, ham-spin fd082bf). No
+independence of the `φ(F_t)` is assumed. -/
+theorem fpSpan_inf_orthogonal_le (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t) :
+    fpSpan F ⊓ fpForm.orthogonal (fpSpan F) ≤ Submodule.span F₂ {fpSum F} := by
+  intro v hv
+  obtain ⟨hv1, hv2⟩ := Submodule.mem_inf.mp hv
+  rw [← range_fpCoeff] at hv1
+  obtain ⟨c, rfl⟩ := LinearMap.mem_range.mp hv1
+  have hc : c = (∑ t, c t) • (1 : ι → F₂) := funext fun s ↦ by
+    rw [Pi.smul_apply, Pi.one_apply, smul_eq_mul, mul_one, eq_sum_of_fpCoeff_mem_orthogonal hF hv2]
+  rw [hc, map_smul, fpCoeff_one]
+  exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
+
+/-- Proposition 5(2) of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). A
+Hamiltonian clique of even size (`Ham`, ham-spin fd082bf) has `R(F) ∩ R(F)^⊥ = 0` (`fpSpan`,
+`fpForm`, ham-spin fd082bf). -/
+theorem fpSpan_inf_orthogonal_eq_bot_of_even (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t)
+    (heven : Even (Fintype.card ι)) : fpSpan F ⊓ fpForm.orthogonal (fpSpan F) = ⊥ := by
+  refine eq_bot_iff.mpr fun v hv ↦ ?_
+  obtain ⟨hv1, hv2⟩ := Submodule.mem_inf.mp hv
+  rw [← range_fpCoeff] at hv1
+  obtain ⟨c, rfl⟩ := LinearMap.mem_range.mp hv1
+  rw [eq_zero_of_fpCoeff_mem_orthogonal_of_even hF heven hv2, map_zero]
+  exact Submodule.zero_mem _
+
+/-- Proposition 5(2) of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). A
+Hamiltonian clique of even size (`Ham`, ham-spin fd082bf) has independent fingerprints,
+`dim R(F) = |ι|` (`fpSpan`, ham-spin fd082bf). -/
+theorem finrank_fpSpan_of_even (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t)
+    (heven : Even (Fintype.card ι)) : Module.finrank F₂ (fpSpan F) = Fintype.card ι := by
+  have hinj : Function.Injective (fpCoeff F) := by
+    refine (injective_iff_map_eq_zero _).mpr fun c hc ↦ ?_
+    refine eq_zero_of_fpCoeff_mem_orthogonal_of_even hF heven ?_
+    rw [hc]
+    exact Submodule.zero_mem _
+  rw [← range_fpCoeff, LinearMap.finrank_range_of_inj hinj, Module.finrank_fintype_fun_eq_card]
+
+/-- Proposition 5(3) of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). A
+Hamiltonian clique of odd size (`Ham`, ham-spin fd082bf) has `R(F) ∩ R(F)^⊥ = F₂ · Σ_t φ(F_t)`
+(`fpSpan`, `fpForm`, ham-spin fd082bf), with no independence hypothesis. -/
+theorem fpSpan_inf_orthogonal_eq_of_odd (hF : ∀ s t, Ham (F s) (F t) ↔ s ≠ t)
+    (hodd : Odd (Fintype.card ι)) :
+    fpSpan F ⊓ fpForm.orthogonal (fpSpan F) = Submodule.span F₂ {fpSum F} :=
+  le_antisymm (fpSpan_inf_orthogonal_le hF)
+    ((Submodule.span_singleton_le_iff_mem _ _).mpr (fpSum_mem_inf_orthogonal hF hodd))
+
 end Pairing.PerfectMatching
 
 namespace Pairing.RoundRobin.Canonical
@@ -635,5 +731,27 @@ theorem hamCount_switchEleven : hamCount 6 switchEleven = 7 := by
 witness. This is the rank in `results/autgroup-side-effects.md` (d7b3fa2) [7]. -/
 theorem finrank_rrSpan_six : Module.finrank F₂ (rrSpan 6) = 11 :=
   finrank_rrSpan_of_five_le (m := 6) (by norm_num)
+
+/-- Corollary 6 of `results/audit-manuscript-extend.md` (organize-archive 313d6ea). At prime
+`n = 2m - 1`, `R_rr ∩ R_rr^⊥ = F₂ · Σ_t φ(F_t)` (`rrSpan`, `fpForm`, ham-spin fd082bf). This
+upgrades `fpSum_factor_mem_inf_orthogonal` from membership to equality. -/
+theorem rrSpan_inf_orthogonal_eq (hp : (2 * m - 1).Prime) :
+    rrSpan m ⊓ fpForm.orthogonal (rrSpan m) = Submodule.span F₂ {fpSum (factor m)} :=
+  fpSpan_inf_orthogonal_eq_of_odd (ham_factor_iff_ne hp) (by rw [ZMod.card]; exact modulus_odd m)
+
+/-- `Σ_t φ(F_t) ≠ 0` for every `m ≥ 4`, prime or composite `n = 2m - 1` (`fpSum`, `factor`,
+ham-spin fd082bf), from `finrank_rrSpan_of_four_le` and the `P*` ladder. -/
+theorem fpSum_factor_ne_zero (hm : 4 ≤ m) : fpSum (factor m) ≠ 0 :=
+  (finrank_fpSpan_eq_card_iff_of_ker_le (ker_fpCoeff_factor_le (by omega))).mp
+    (by rw [ZMod.card]; exact finrank_rrSpan_of_four_le hm)
+
+/-- Corollary 6 of `results/audit-manuscript-extend.md` (organize-archive 313d6ea), prime case.
+At prime `n = 2m - 1 ≥ 7` the radical `R_rr ∩ R_rr^⊥` is the line `F₂ · Σ_t φ(F_t)`, of dimension
+`1` (`rrSpan`, `fpForm`, ham-spin fd082bf). -/
+theorem finrank_rrSpan_inf_orthogonal (hp : (2 * m - 1).Prime) (hm : 4 ≤ m) :
+    Module.finrank F₂ (rrSpan m ⊓ fpForm.orthogonal (rrSpan m) : Submodule F₂ (W (Vertex m))) =
+      1 := by
+  rw [rrSpan_inf_orthogonal_eq hp]
+  exact finrank_span_singleton (fpSum_factor_ne_zero hm)
 
 end Pairing.RoundRobin.Canonical

@@ -1167,3 +1167,12 @@ open Pairing PerfectMatching
 #print axioms finrank_fpSpan_of_clique
 #print axioms finrank_fpSpan_of_p1f
 #print axioms RoundRobin.Canonical.finrank_rrSpan_of_prime_of_even
+#print axioms eq_sum_of_fpCoeff_mem_orthogonal
+#print axioms eq_zero_of_fpCoeff_mem_orthogonal_of_even
+#print axioms fpSpan_inf_orthogonal_le
+#print axioms fpSpan_inf_orthogonal_eq_bot_of_even
+#print axioms finrank_fpSpan_of_even
+#print axioms fpSpan_inf_orthogonal_eq_of_odd
+#print axioms RoundRobin.Canonical.rrSpan_inf_orthogonal_eq
+#print axioms RoundRobin.Canonical.fpSum_factor_ne_zero
+#print axioms RoundRobin.Canonical.finrank_rrSpan_inf_orthogonal
