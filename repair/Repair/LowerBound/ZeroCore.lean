@@ -29,8 +29,9 @@ the source, a four-element subfamily of the six units `±1, ±4⁻¹, ±8⁻¹` 
 `n = 8b + c`, and the residue `c` fixes the cyclic order (`ordFour`, `ordEight`).
 `coverGoal_table` checks that the four orders cover all fifteen `R`, in each residue class.
 The contra's remark that a `K = 1` proof must use the `1/8`-cells is wrong
-(`struct-lb-factcheck-contra.md` §4, item 8). The `D = 8` factor is used here only because it
-closes the cover without a residue split of the cover itself.
+(`struct-lb-factcheck-contra.md` §4, item 8). The corrected statement there is that among the
+multipliers `±(2^k)⁻¹` only `±8⁻¹` closes the cover with no residue split, and that is why
+`D = 8` is used here.
 
 * `ham_of_chart` : the walk, for one factor and one cyclic order of the gadget.
 * `exists_ham_of_agree` : for every odd `n ≥ 11` and every `P` that agrees with `F_{s0}` off
