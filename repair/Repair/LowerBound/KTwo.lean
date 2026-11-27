@@ -264,7 +264,8 @@ theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h1177 : 1177 ≤ n) {s0 :
     · convert hcell using 2 <;> push_cast <;> ring
   by_cases h2137 : 2137 ≤ n
   · rcases shortVector_or_forall_disk hp h2137 X with ⟨c, a, hlat, -, hle, hgcd, hnc⟩ | hdisk
-    · exact hline 900 696 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_900) c a hlat hle hgcd hnc
+    · exact hline 900 696 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_900) c a hlat hle
+        hgcd hnc
     · obtain ⟨o, oi, k, u, w, hoi, hcov, hcellD⟩ := exists_cert8 hr1 hr2
       obtain ⟨c', a', hlat, hd⟩ := hdisk u w
       exact ham_of_realCell8 hn hp hs0 hP8 hr' hX hoi hlat (hcellD _ _ hd) hcov
@@ -275,7 +276,8 @@ theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h1177 : 1177 ≤ n) {s0 :
       have h1 : (2469 : ℤ) ^ 2 ≤ (c ^ 2 + a ^ 2) ^ 2 := pow_le_pow_left₀ (by norm_num) h 2
       have h2 : (n : ℤ) ^ 2 ≤ 2136 ^ 2 := pow_le_pow_left₀ (by positivity) (by omega) 2
       linarith
-    exact hline 2468 1176 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_2468) c a hlat hle hgcd hnc
+    exact hline 2468 1176 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_2468) c a hlat hle
+      hgcd hnc
 
 /-- **The core `{e_∞}` is bad** (`results/struct-lb-extend.md` §3.3, Theorem B case 1, and
 `results/struct-lb-contra.md` §3.1, Lemma 2a, organize-archive b5cb45e). For a prime `n ≥ 25`,
