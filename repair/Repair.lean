@@ -72,3 +72,9 @@ import Repair.LowerBound.LineTable
 import Repair.LowerBound.LineTableBig
 import Repair.LowerBound.Seven
 import Repair.LowerBound.KTwo
+import Repair.LowerBound.TailAgree
+import Repair.LowerBound.LineSmall
+import Repair.LowerBound.LineSmallTable
+import Repair.LowerBound.SevenSmall
+import Repair.LowerBound.Thirteen
+import Repair.LowerBound.KTwoAll

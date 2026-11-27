@@ -509,4 +509,44 @@ example : ¬RepairBound 591 (FactorCap.gadget 591) 1 :=
 example : LowerBound.LineGood 47 (-13) 1176 :=
   LowerBound.lineGood_of_le_2468 (by decide) (by norm_num)
 
+-- B20 lineGoodAt_of_lt_1177 at n = 17 for the direction (c, a) = (1, 2), a pair of the small
+-- table, and at n = 1171 for (c, a) = (29, 16), above its own bound
+example : LowerBound.LineGoodAt 1 2 17 :=
+  LowerBound.lineGoodAt_of_lt_1177 (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (by decide) (by norm_num) (by decide)
+example : LowerBound.LineGoodAt 29 16 1171 :=
+  LowerBound.lineGoodAt_of_lt_1177 (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (by decide) (by norm_num) (by decide)
+
+-- B21 exists_ham_of_agree_one_of_ne at n = 11 (s0 = 9) and n = 17 (s0 = 12) with the tail edge
+-- e_∞, and at n = 19 (s0 = 13) with a finite tail edge, each with P = F_{s0}
+example : ∃ t, Ham (RoundRobin.factor (n := 11) ⟨5, rfl⟩ 9) (RoundRobin.factor ⟨5, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree_one_of_ne ⟨5, rfl⟩ (by norm_num) (by norm_num) (by norm_num)
+    (by decide) (u := none) (fun _ h ↦ by simp at h) fun _ _ _ _ ↦ rfl
+example : ∃ t, Ham (RoundRobin.factor (n := 17) ⟨8, rfl⟩ 12) (RoundRobin.factor ⟨8, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree_one_of_ne ⟨8, rfl⟩ (by norm_num) (by norm_num) (by norm_num)
+    (by decide) (u := none) (fun _ h ↦ by simp at h) fun _ _ _ _ ↦ rfl
+example : ∃ t, Ham (RoundRobin.factor (n := 19) ⟨9, rfl⟩ 13) (RoundRobin.factor ⟨9, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree_one_of_ne ⟨9, rfl⟩ (by norm_num) (by norm_num) (by norm_num)
+    (by decide) (u := some 0) (by decide) fun _ _ _ _ ↦ rfl
+
+-- B22 two_le_tailDist_tail7 at m = 7, where a zero state exists, and
+-- two_le_tailDist_factorTail_of_ne at m = 6, n = 11
+example : ∃ P : ZeroState 7, 2 ≤ tailDist P.1 tail7 :=
+  let ⟨P⟩ := nonempty_zeroState (m := 7) (by norm_num)
+  ⟨P, two_le_tailDist_tail7 P⟩
+example : ∃ P : ZeroState 6, 2 ≤ tailDist P.1 (FactorCap.factorTail 6 (by norm_num)) :=
+  let ⟨P⟩ := nonempty_zeroState (m := 6) (by norm_num)
+  ⟨P, two_le_tailDist_factorTail_of_ne (by norm_num) (by norm_num) (by norm_num) P⟩
+
+-- B23 not_repairBound_one_of_prime at m = 6, 7, 9 and 516, that is n = 11, 13, 17 and 1031
+example : ¬RepairBound 6 (FactorCap.gadget 6) 1 :=
+  not_repairBound_one_of_prime (by norm_num) (by norm_num)
+example : ¬RepairBound 7 (FactorCap.gadget 7) 1 :=
+  not_repairBound_one_of_prime (by norm_num) (by norm_num)
+example : ¬RepairBound 9 (FactorCap.gadget 9) 1 :=
+  not_repairBound_one_of_prime (by norm_num) (by norm_num)
+example : ¬RepairBound 516 (FactorCap.gadget 516) 1 :=
+  not_repairBound_one_of_prime (by norm_num) (by norm_num)
+
 end VacuityCheck.LowerBound
