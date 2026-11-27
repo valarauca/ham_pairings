@@ -320,12 +320,6 @@ noncomputable def autEquiv (hm : 4 ≤ m) : (ZMod (2 * m - 1))ˣ × ZMod (2 * m 
         obtain ⟨a, b, h⟩ := (isAut_iff hm).1 σ.2
         exact ⟨(a, b), Subtype.ext h.symm⟩⟩
 
-/-- `autEquiv` sends `(a, b)` to `v ↦ a v + b` (`results/autgroup-spike.md` §5.1). -/
-@[simp]
-theorem coe_autEquiv (hm : 4 ≤ m) (p : (ZMod (2 * m - 1))ˣ × ZMod (2 * m - 1)) :
-    (autEquiv hm p : Equiv.Perm (Vertex m)) = shift m p.2 * scale m p.1 :=
-  rfl
-
 /-- `|Aut(𝓕)| = n φ(n)` for odd `n = 2m - 1 ≥ 7` (`results/autgroup-spike.md` §3 and §5.1). -/
 theorem card_autGroup (hm : 4 ≤ m) :
     Nat.card (autGroup m) = (2 * m - 1) * (2 * m - 1).totient := by
@@ -399,13 +393,6 @@ for prime `n`). -/
 noncomputable def autGroupMulEquiv (hm : 4 ≤ m) :
     (ZMod (2 * m - 1) ≃ᵃ[ZMod (2 * m - 1)] ZMod (2 * m - 1)) ≃* autGroup m :=
   (MonoidHom.ofInjective affinePerm_injective).trans (MulEquiv.subgroupCongr (range_affinePerm hm))
-
-/-- `autGroupMulEquiv` acts as `affinePerm` (`results/autgroup-spike.md` §5.1). -/
-@[simp]
-theorem coe_autGroupMulEquiv (hm : 4 ≤ m)
-    (f : ZMod (2 * m - 1) ≃ᵃ[ZMod (2 * m - 1)] ZMod (2 * m - 1)) :
-    (autGroupMulEquiv hm f : Equiv.Perm (Vertex m)) = affinePerm m f :=
-  rfl
 
 /-- The reflection `x ↦ 7 - x` of `V_m`, fixing `∞`, which reverses the gadget `G0 = {1, …, 6}`
 (`results/autgroup-spike.md` §3). -/

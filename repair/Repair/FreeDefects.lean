@@ -665,13 +665,6 @@ def liftEquiv : A ≃ lowerSet (yP B) (yM B : grow B A yp) where
   right_inv _ := rfl
 
 omit [Fintype V] in
-/-- `liftEquiv` keeps the underlying vertex.
-(`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/
-theorem coe_liftEquiv (a : A) : (((liftEquiv B hA hyp a : lowerSet (yP B) (yM B)) :
-    grow B A yp) : V) = a :=
-  rfl
-
-omit [Fintype V] in
 include hent in
 /-- The inserted context satisfies the hypotheses of `insertion_cycleCount`.
 (`results/hybrid-joint-incoherence.md`, Corollary 5.1). -/

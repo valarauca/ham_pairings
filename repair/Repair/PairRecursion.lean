@@ -643,11 +643,6 @@ theorem exists_lt_of_mem_cycleOf {v x : V} (hx : x ∈ cycleOf F0 F1 v) :
   obtain ⟨k, hk, rfl⟩ := hx
   exact ⟨k, mem_range.mp hk, rfl⟩
 
-/-- Two cycles agree iff one vertex lies on the other (`results/k3-counterexample-hunt.md`, Lemma
-K2). -/
-theorem cycleOf_eq_iff_mem {v w : V} : cycleOf F0 F1 w = cycleOf F0 F1 v ↔ w ∈ cycleOf F0 F1 v :=
-  ⟨fun h ↦ h ▸ mem_cycleOf_self w, cycleOf_eq_of_mem⟩
-
 /-- `c_j` survives the reduction by `v c_d` for `0 < j < 2a`, `j ≠ d`
 (`results/k3-counterexample-hunt.md`, Lemma K2). -/
 theorem alt_mem_redSet {v : V} {d j : ℕ} (hd : d < cycLen F0 F1 v) (hj0 : 0 < j)

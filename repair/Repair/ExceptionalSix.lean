@@ -319,11 +319,6 @@ def symZero : Subgroup (Equiv.Perm (Vertex 6)) where
   one_mem' P := by rw [one_smul]
   inv_mem' {σ} hσ P := by rw [← hσ (σ⁻¹ • P), smul_inv_smul]
 
-/-- Membership in `Sym(Z_6)` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
-theorem mem_symZero {σ : Equiv.Perm (Vertex 6)} :
-    σ ∈ symZero ↔ ∀ P, IsZeroState (factor 6) (σ • P) ↔ IsZeroState (factor 6) P :=
-  Iff.rfl
-
 /-- A permutation that maps the listed zero states, and whose inverse maps them, to listed zero
 states lies in `Sym(Z_6)` (`results/autgroup-spike.md` §4; Cameron and Korchmáros 1993). -/
 theorem mem_symZero_of_forall {σ : Equiv.Perm (Vertex 6)}

@@ -115,11 +115,6 @@ omit [DecidableEq V] in
 theorem IsFourCycle.rotate {a b c d : V} (h : IsFourCycle G a b c d) : IsFourCycle G b c d a :=
   ⟨h.2.1, h.2.2.1, h.2.2.2.1, h.1, h.2.2.2.2.2, h.2.2.2.2.1.symm⟩
 
-omit [DecidableEq V] in
-/-- Reversal preserves 4-cycles (`results/k3-workaround-spike.md`, Lemma M). -/
-theorem IsFourCycle.reverse {a b c d : V} (h : IsFourCycle G a b c d) : IsFourCycle G a d c b :=
-  ⟨h.2.2.2.1.symm, h.2.2.1.symm, h.2.1.symm, h.1.symm, h.2.2.2.2.1, h.2.2.2.2.2.symm⟩
-
 /-- A 4-cycle through `v` can be written to start at `v` (`results/k3-workaround-spike.md`,
 Lemma M). -/
 theorem IsFourCycle.exists_start {a b c d v : V} (h : IsFourCycle G a b c d)

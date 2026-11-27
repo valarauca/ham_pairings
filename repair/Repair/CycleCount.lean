@@ -57,10 +57,6 @@ theorem ham_iff_cycleCount_eq_one (P Q : PerfectMatching V) :
     exact ⟨fun u v ↦ SimpleGraph.ConnectedComponent.eq.mp (Subsingleton.elim _ _),
       SimpleGraph.ConnectedComponent.ind (β := fun _ ↦ Nonempty V) (fun v ↦ ⟨v⟩) c⟩
 
-/-- `κ(P ∪ Q) = κ(Q ∪ P)` (`results/hybrid-joint-incoherence.md`, Lemma 5). -/
-theorem cycleCount_comm (P Q : PerfectMatching V) : cycleCount P Q = cycleCount Q P := by
-  rw [cycleCount, cycleCount, sup_comm]
-
 /-- `κ(P ∪ Q) = 0` on the empty vertex set (`results/switching-j0-spike.md`, Identity D). -/
 theorem cycleCount_of_isEmpty [IsEmpty V] (P Q : PerfectMatching V) : cycleCount P Q = 0 := by
   have : IsEmpty (P.toGraph ⊔ Q.toGraph).ConnectedComponent :=
