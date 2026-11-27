@@ -296,3 +296,128 @@ example : Module.finrank F₂ (fpSpan fun t : Fin 15 ↦ factor 8 ((t : ℕ) : Z
 example : hamCount 5 (oneQ 5 le_rfl) = 1 := hamCount_oneQ le_rfl
 
 end VacuityCheck.Ladder
+
+namespace VacuityCheck.RandomFamily
+
+open Pairing PerfectMatching RoundRobin.Canonical RoundRobin.Canonical.RandomFamily Real
+
+-- R0 pHam is the p_e of HybridPair.CommonEdge
+example (m : ℕ) : pHam m = Pairing.hamProb m := rfl
+
+-- R1 the counting lemma and Theorem A have a bad family at m = 3, K = 0: the constant family has
+-- the zero state F_0, and the only tail of V_3 ∖ V_3 is empty
+example : ∃ M : Fin 5 → PerfectMatching (Vertex 3), M ∈ badFamilies (Fin 5) 3 0 := by
+  refine ⟨fun _ ↦ factor 3 0, ?_⟩
+  rw [mem_badFamilies]
+  refine ⟨Finset.univ, ?_, fun T ↦ ⟨factor 3 0, ?_, ?_⟩⟩
+  · rw [Finset.card_univ, card_vertex]
+  · rw [mem_zeroStates]
+    intro _
+    exact not_ham_of_mate_eq_of_two_lt (v := none) (by rw [card_vertex]; norm_num) rfl
+  · have : IsEmpty (↥(Finset.univ : Finset (Vertex 3))ᶜ) := ⟨fun u ↦ by simpa using u.2⟩
+    simp [tailDist, tailEdges, Finset.univ_eq_empty]
+
+-- R2 the counting identity and Theorem A at m = 3, n = 5
+example : True := by
+  have := sum_card_zeroStates (m := 3) (Fin 5)
+  have := card_badFamilies_le_beta (m := 3) le_rfl (Fin 5) 0
+  trivial
+
+-- R3 the hypotheses of corollaryA1, corollaryA1_floor and corollaryA1_sqrt hold at m = 2^15,
+-- θ = 1/2 and K = 4
+example : True := by
+  have hlog : log (2 * 32768 : ℝ) < 16 * 0.6931471808 := by
+    rw [show (2 * 32768 : ℝ) = 2 ^ 16 by norm_num, log_pow]
+    have := log_two_lt_d9
+    push_cast
+    linarith
+  have hlog0 : 0 < log (2 * 32768 : ℝ) := log_pos (by norm_num)
+  have hs1 : (256 : ℝ) ≤ √(π * 32768) := by
+    rw [le_sqrt (by norm_num) (by positivity)]
+    have := two_le_pi
+    linarith
+  have hs2 : √π / (2 * √32768) ≤ 1 := by
+    have h1 : √π ≤ 2 := (sqrt_le_left (by norm_num)).mpr (by have := pi_le_four; linarith)
+    have h2 : 1 ≤ √(32768 : ℝ) := by rw [le_sqrt (by norm_num) (by positivity)]; norm_num
+    rw [div_le_one (by positivity)]
+    linarith
+  have hμ := (sub_le_mul_pHam (m := 32768)).1
+  push_cast at hμ
+  have hL : (((4 : ℕ) : ℝ) + 4) * log (2 * ((32768 : ℕ) : ℝ)) ≤
+      (1 - 1 / 2) * (√(π * ((32768 : ℕ) : ℝ)) - √π / (2 * √((32768 : ℕ) : ℝ))) := by
+    push_cast
+    linarith
+  have hK : (((4 : ℕ) : ℝ) + 4) * log (2 * ((32768 : ℕ) : ℝ)) ≤
+      (1 - 1 / 2) * ((2 * ((32768 : ℕ) : ℝ) - 1) * pHam 32768) := by
+    push_cast
+    linarith
+  have h4 : 4 ≤ ⌊(1 - 1 / 2) * ((2 * ((32768 : ℕ) : ℝ) - 1) * pHam 32768) /
+      log (2 * ((32768 : ℕ) : ℝ))⌋₊ := by
+    refine Nat.le_floor ?_
+    push_cast
+    rw [le_div_iff₀ hlog0]
+    linarith
+  have := corollaryA1_sqrt (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _)
+    (by norm_num) (by norm_num) hL
+  have := corollaryA1 (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) (by norm_num) hK
+  have := corollaryA1_floor (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _)
+    (by norm_num) h4
+  trivial
+
+end VacuityCheck.RandomFamily
+
+namespace VacuityCheck.LowerBound
+
+open Pairing PerfectMatching RoundRobin.Canonical
+
+-- B1 sameCycle_of_arcs for the translation `y ↦ y + 1` of ℤ/5 with one jump point
+example : (Equiv.addRight (1 : ZMod 5)).SameCycle 0 3 :=
+  LowerBound.sameCycle_of_arcs (n := 5) (r := 0) _ (fun v ↦ (v : ZMod 5))
+    (fun v k ↦ by simp [show (5 : ZMod 5) = 0 from rfl]) (fun y ↦ ⟨y.val, by simp⟩)
+    (fun v w h ↦ (ZMod.intCast_eq_intCast_iff_dvd_sub w v 5).mp h.symm) ![0]
+    (fun a b h ↦ absurd h (by rw [Fin.lt_def]; omega)) (by simp) id (fun v _ ↦ by simp)
+    (fun i ↦ by simp) (fun j ↦ ⟨0, Fin.ext (by omega)⟩) 0 3
+
+-- B2 coverGoal_of_involution for the gadget matching {1, 2}, {3, 4}, {5, 6}
+example : LowerBound.CoverGoal 0 ![1, 0, 3, 2, 5, 4] :=
+  LowerBound.coverGoal_of_involution 0 (by decide) (by decide)
+
+-- B3 exists_ham_of_agree at n = 11 with P = F_{s0}, s0 = 9
+example : ∃ t, Ham (RoundRobin.factor (n := 11) ⟨5, rfl⟩ 9) (RoundRobin.factor ⟨5, rfl⟩ t) :=
+  LowerBound.exists_ham_of_agree ⟨5, rfl⟩ le_rfl (by decide) fun _ _ ↦ rfl
+
+-- B4 one_le_tailDist_factorTail at m = 6, where a zero state exists
+example : ∃ P : ZeroState 6, 1 ≤ tailDist P.1 (FactorCap.factorTail 6 (by norm_num)) :=
+  let ⟨P⟩ := nonempty_zeroState (m := 6) le_rfl
+  ⟨P, one_le_tailDist_factorTail le_rfl P⟩
+
+-- B5 not_repairBound_zero at m = 6 and at the composite n = 15
+example : ¬RepairBound 6 (FactorCap.gadget 6) 0 := not_repairBound_zero le_rfl
+example : ¬RepairBound 8 (FactorCap.gadget 8) 0 := not_repairBound_zero (by norm_num)
+
+-- B6 exists_shortVector at n = 11, X = 4
+example : ∃ c a : ℤ, LowerBound.InLattice 11 4 c a ∧ 3 * (c ^ 2 + a ^ 2) ^ 2 ≤ 4 * 11 ^ 2 := by
+  obtain ⟨c, a, h, -, -, hH, -⟩ := LowerBound.exists_shortVector (n := 11) (by norm_num) 4
+  exact ⟨c, a, h, by exact_mod_cast hH⟩
+
+-- B7 exists_eq_smul_add_of_inLattice at n = 11, X = 4, (c, a) = (1, 4), (c', a') = (3, 1)
+example : ∃ ν u v : ℤ, 3 = ν * 1 + 11 * u ∧ 1 = ν * 4 + 11 * v :=
+  LowerBound.exists_eq_smul_add_of_inLattice (n := 11) (X := 4) (by norm_num) ⟨0, by norm_num⟩
+    (by norm_num) ⟨-1, by norm_num⟩
+
+-- B8 exists_inLattice_dist_lt at n = 11, X = 4, (c, a) = (1, 4), r = 1
+example : ∃ c' a' : ℤ, LowerBound.InLattice 11 4 c' a' ∧
+    ((c' : ℝ) / (11 : ℕ) - 1 / 3) ^ 2 + ((a' : ℝ) / (11 : ℕ) - 1 / 5) ^ 2 < 1 ^ 2 :=
+  LowerBound.exists_inLattice_dist_lt (n := 11) (X := 4) (c := 1) (a := 4) (by norm_num)
+    ⟨0, by norm_num⟩ (by decide) _ _ _ (by norm_num)
+
+-- B9 threshold_two_one_three_seven at n = 2137, L² = 901
+example : 1 / (4 * (901 : ℝ)) + 901 / (4 * 2137 ^ 2) < (13 / 640) ^ 2 :=
+  LowerBound.threshold_two_one_three_seven le_rfl le_rfl (by norm_num)
+
+-- B10 shortVector_or_forall_disk at the threshold prime n = 2137
+example : True := by
+  have := LowerBound.shortVector_or_forall_disk (n := 2137) (by norm_num) le_rfl 5
+  trivial
+
+end VacuityCheck.LowerBound
