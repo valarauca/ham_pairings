@@ -295,6 +295,13 @@ example : Module.finrank F₂ (fpSpan fun t : Fin 15 ↦ factor 8 ((t : ℕ) : Z
 -- L6 the P* and Q Hamiltonian sets at m = 5, the smallest m covered by Proposition Q
 example : hamCount 5 (oneQ 5 le_rfl) = 1 := hamCount_oneQ le_rfl
 
+-- L7 finrank_fpSpan_of_p1f on the clique GK_8, m = 4, n = 7, and on GK_24, m = 12, n = 23
+example : Module.finrank F₂ (fpSpan (factor 4)) = 7 :=
+  finrank_fpSpan_of_p1f (card_vertex 4) le_rfl (by decide) (ham_factor_iff_ne (by norm_num))
+    (ZMod.card _)
+example : Module.finrank F₂ (rrSpan 12) = 23 :=
+  finrank_rrSpan_of_prime_of_even (m := 12) (by norm_num) (by norm_num) (by decide)
+
 end VacuityCheck.Ladder
 
 namespace VacuityCheck.RandomFamily

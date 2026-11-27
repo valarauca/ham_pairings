@@ -1162,3 +1162,8 @@ open Pairing PerfectMatching
 #print axioms LowerBound.exists_ham_of_agree_one_of_ne
 #print axioms RoundRobin.Canonical.two_le_tailDist_factorTail_of_ne
 #print axioms RoundRobin.Canonical.not_repairBound_one_of_prime
+#print axioms card_hamPairs_of_clique
+#print axioms fpSum_ne_zero_of_clique
+#print axioms finrank_fpSpan_of_clique
+#print axioms finrank_fpSpan_of_p1f
+#print axioms RoundRobin.Canonical.finrank_rrSpan_of_prime_of_even
