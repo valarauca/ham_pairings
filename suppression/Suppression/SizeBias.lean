@@ -22,11 +22,11 @@ forms `μ F(j) ≤ G(j + 1)` and `G(j + 1) ≤ K μ F(j)`.
   `L(x) = ∑ p k x^k` and `c = μ (m + 1) / (m + 1 - μ)`.
 * `upper_reduction_of_lt` : for `0 < δ < ε` and `(1 + ε) μ ≤ J + 2` the same hypothesis gives
   `p 0 ≤ exp(-μ + (1 + δ) / (δ (ε - δ)))`.
-* `upper_reduction` (A) : for `ε > 0` and `(1 + ε) μ ≤ J`, `p 0 ≤ exp(-μ + 2 (2 + ε) / ε²)`.
-  `upper_reduction_of_le_add_two` needs only `(1 + ε) μ ≤ J + 2`.
-* `upper_reduction_sqrt` : under the same hypotheses `p 0 ≤ exp(-μ + (1 + √(1 + ε))² / ε²)`,
-  the constant of `upper_reduction_of_lt` at the optimal `δ = √(1 + ε) - 1`.
-  `upper_reduction_sqrt_of_le_add_two` needs only `(1 + ε) μ ≤ J + 2`.
+* `upper_reduction_of_le_add_two` (A) : for `ε > 0` and `(1 + ε) μ ≤ J + 2`,
+  `p 0 ≤ exp(-μ + 2 (2 + ε) / ε²)`. The paper assumes `(1 + ε) μ ≤ J`.
+* `upper_reduction_sqrt_of_le_add_two` : under the same hypotheses
+  `p 0 ≤ exp(-μ + (1 + √(1 + ε))² / ε²)`, the constant of `upper_reduction_of_lt` at the optimal
+  `δ = √(1 + ε) - 1`.
 * `lower_reduction` (B) : for `K ≥ 0`, if `G(j + 1) ≤ K μ F(j)` for every `j < J = ⌈2μ⌉`, then
   `p 0 ≥ ½ (e (1 + K / 2))^(-J)`.
 -/
@@ -274,8 +274,9 @@ theorem upper_reduction_of_lt (hp : IsLaw p N) {μ ε δ : ℝ} (hμ : partialMe
     (mul_pos hδ (by linarith))]
   nlinarith
 
-/-- The upper reduction of (A) under the weaker hypothesis `(1 + ε) μ ≤ J + 2`. If `ε > 0` and
-`μ F(j) ≤ G(j + 1)` for every `j ≤ J`, then `p 0 ≤ exp(-μ + 2 (2 + ε) / ε²)`. -/
+/-- (A) Upper reduction, under the hypothesis `(1 + ε) μ ≤ J + 2`, weaker than the paper's
+`(1 + ε) μ ≤ J`. If `ε > 0` and `μ F(j) ≤ G(j + 1)` for every `j ≤ J`, then
+`p 0 ≤ exp(-μ + 2 (2 + ε) / ε²)`. -/
 theorem upper_reduction_of_le_add_two (hp : IsLaw p N) {μ ε : ℝ} (hμ : partialMean p N = μ)
     {J : ℕ} (hε : 0 < ε) (hJ : (1 + ε) * μ ≤ J + 2)
     (hρ : ∀ j ≤ J, μ * cdf p j ≤ partialMean p (j + 1)) :
@@ -286,14 +287,8 @@ theorem upper_reduction_of_le_add_two (hp : IsLaw p N) {μ ε : ℝ} (hμ : part
   field_simp
   ring
 
-/-- (A) Upper reduction. If `ε > 0`, `(1 + ε) μ ≤ J` and `μ F(j) ≤ G(j + 1)` for every
-`j ≤ J`, then `p 0 ≤ exp(-μ + 2 (2 + ε) / ε²)`. `upper_reduction_of_le_add_two` needs only
-`(1 + ε) μ ≤ J + 2`. -/
-theorem upper_reduction (hp : IsLaw p N) {μ ε : ℝ} (hμ : partialMean p N = μ) {J : ℕ}
-    (hε : 0 < ε) (hJ : (1 + ε) * μ ≤ J)
-    (hρ : ∀ j ≤ J, μ * cdf p j ≤ partialMean p (j + 1)) :
-    p 0 ≤ Real.exp (-μ + 2 * (2 + ε) / ε ^ 2) :=
-  upper_reduction_of_le_add_two hp hμ hε (by linarith) hρ
+@[deprecated upper_reduction_of_le_add_two (since := "2026-11-26")]
+alias upper_reduction := upper_reduction_of_le_add_two
 
 /-- The upper reduction with the best constant of the method, `δ = √(1 + ε) - 1`, for
 `(1 + ε) μ ≤ J + 2`. If `ε > 0` and `μ F(j) ≤ G(j + 1)` for every `j ≤ J`, then
@@ -314,15 +309,8 @@ theorem upper_reduction_sqrt_of_le_add_two (hp : IsLaw p N) {μ ε : ℝ}
     show ε = s ^ 2 - 1 by linarith]
   ring
 
-/-- The upper reduction with the best constant of the method, `δ = √(1 + ε) - 1`. If `ε > 0`,
-`(1 + ε) μ ≤ J` and `μ F(j) ≤ G(j + 1)` for every `j ≤ J`, then
-`p 0 ≤ exp(-μ + (1 + √(1 + ε))² / ε²)`. `upper_reduction_sqrt_of_le_add_two` needs only
-`(1 + ε) μ ≤ J + 2`. -/
-theorem upper_reduction_sqrt (hp : IsLaw p N) {μ ε : ℝ} (hμ : partialMean p N = μ) {J : ℕ}
-    (hε : 0 < ε) (hJ : (1 + ε) * μ ≤ J)
-    (hρ : ∀ j ≤ J, μ * cdf p j ≤ partialMean p (j + 1)) :
-    p 0 ≤ Real.exp (-μ + (1 + √(1 + ε)) ^ 2 / ε ^ 2) :=
-  upper_reduction_sqrt_of_le_add_two hp hμ hε (by linarith) hρ
+@[deprecated upper_reduction_sqrt_of_le_add_two (since := "2026-11-26")]
+alias upper_reduction_sqrt := upper_reduction_sqrt_of_le_add_two
 
 /-- (B) Lower reduction. For `K ≥ 0` and `J = ⌈2μ⌉`, if `G(j + 1) ≤ K μ F(j)` for every
 `j < J`, then `p 0 ≥ ½ (e (1 + K / 2))^(-J)`. -/

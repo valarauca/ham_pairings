@@ -30,21 +30,19 @@ Write `E_w X`, `Var_w X` and `E_w[X(X - 1)]` for its mean, variance and second f
 * `eq_one_and_partialMean_eq_zero` : without the standing assumption, `p` is the point mass at
   `0`. The Proposition 4 and 5(1), 5(3) bounds below that are named by their conclusion hold for
   every law on `[0, N]` and treat that case directly.
-* `fano_criterion` (Proposition 4) : if `δ < 1` and `Δ(w) ≤ δ` wherever `E_w X ≥ δ`, then
-  `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0` is not needed. `exp_neg_div_le_of_fano_le`
-  drops `p 0 > 0` and the standing assumption as well.
+* `exp_neg_div_le_of_fano_le` (Proposition 4, the Fano criterion) : if `δ < 1` and `Δ(w) ≤ δ`
+  wherever `E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. The paper's `δ ≥ 0`, `p 0 > 0` and the
+  standing assumption are not needed.
 * `le_exp_neg_div_of_le_fano` : if `δ < 1` and `Δ ≥ δ` on `(0, 1]`, then
   `p 0 ≤ exp(-μ / (1 - δ))`. At `δ = 0` it is `le_exp_neg_of_fano_nonneg` (Section 4),
   `p 0 ≤ exp(-μ)`.
 * `fano_le_mul_tiltMean`, `fano_le_of_pairDeficit_le` (Proposition 5(2)) : if `D ≤ c` on
   `(0, 1]`, then `Δ(w) ≤ c E_w X / μ`, and `Δ(w) ≤ c` when `c ≥ 0`.
-* `sbRatio_le`, `partialMean_one_le` (Proposition 5(1)) : if also `c < 1`, then
+* `sbRatio_le_of_pairDeficit_le`, `partialMean_one_le` (Proposition 5(1)) : if also `c < 1`, then
   `R(z) ≤ 1 / (1 - c (1 - z))` on `[0, 1]` and `ρ_0 ≤ 1 / (1 - c)`.
-  `sbRatio_le_of_pairDeficit_le` drops `p 0 > 0` and the standing assumption.
-* `pair_criterion`, `pair_criterion_weak` (Proposition 5(3)) : for `0 < c < 1`,
+* `exp_neg_mul_log_le_of_pairDeficit_le`, `exp_neg_div_le_of_pairDeficit_le` (Proposition 5(3),
+  the pair criterion) : for `0 < c < 1`,
   `p 0 ≥ exp(-(μ / c) log(1 / (1 - c))) ≥ exp(-μ / (1 - c))`.
-  `exp_neg_mul_log_le_of_pairDeficit_le` and `exp_neg_div_le_of_pairDeficit_le` drop `p 0 > 0`
-  and the standing assumption.
 
 For the round-robin count `X = hamCount m` and its law `hamLaw m`:
 
@@ -52,9 +50,8 @@ For the round-robin count `X = hamCount m` and its law `hamLaw m`:
 * `sum_pow_mul_hamCount_pair` (Lemma 2) :
   `∑_P w^X(P) X(P) (X(P) - 1) = n ∑_{P | A_0} w^X(P) (X(P) - 1)`.
 * `tiltMean_hamLaw` (Lemma 2(2)) : `E_w X = n U_w(A_0)`.
-* `fano_hamLaw'` (Lemma 2(2)) : `Δ(w) = E_w X - E_w[X' | A_0]` with `X' = X - 1`, for every
-  `m ≥ 1`. `fano_hamLaw` is the earlier form with the hypothesis that `A_0` is nonempty, which
-  always holds (`exists_ham_factor_zero`).
+* `fano_hamLaw` (Lemma 2(2)) : `Δ(w) = E_w X - E_w[X' | A_0]` with `X' = X - 1`, for every
+  `m ≥ 1`.
 -/
 
 namespace Pairing
@@ -464,13 +461,8 @@ theorem exp_neg_div_le_of_fano_le (hp : IsLaw p N) {δ : ℝ}
       exact div_le_div_of_nonneg_right h hx.1.le
   simpa only [Real.zero_rpow hpos.ne', Real.one_rpow, mul_zero, mul_one, zero_sub] using h
 
-/-- Proposition 4, the Fano criterion. If `δ < 1` and `Δ(w) ≤ δ` for every `w ∈ (0, 1]` with
-`E_w X ≥ δ`, then `p 0 ≥ exp(-μ / (1 - δ))`. The hypotheses `p 0 > 0` and `p k > 0` for some
-`k ≥ 1` are not needed (`exp_neg_div_le_of_fano_le`). -/
-theorem fano_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {δ : ℝ}
-    (hδ : δ < 1) (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, δ ≤ tiltMean p N w → fano p N w ≤ δ) :
-    Real.exp (-(partialMean p N / (1 - δ))) ≤ p 0 :=
-  exp_neg_div_le_of_fano_le hp hδ hΔ
+@[deprecated exp_neg_div_le_of_fano_le (since := "2026-11-26")]
+alias fano_criterion := exp_neg_div_le_of_fano_le
 
 /-- If `Δ ≥ 0` on `(0, 1]`, then `E_w X ≥ μ w` on `(0, 1]`. -/
 theorem mul_le_tiltMean (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k)
@@ -500,9 +492,8 @@ theorem le_exp_neg_div_of_le_fano (hp : IsLaw p N) {δ : ℝ}
   simpa only [Real.zero_rpow hpos.ne', Real.one_rpow, mul_zero, mul_one, zero_sub] using h
 
 /-- The Section 4 mirror. If `Δ(w) ≥ 0` for every `w ∈ (0, 1]`, then `p 0 ≤ exp(-μ)`. It is
-`le_exp_neg_div_of_le_fano` at `δ = 0`, which needs neither `p 0 > 0` nor `p k > 0` for some
-`k ≥ 1`. -/
-theorem le_exp_neg_of_fano_nonneg (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k)
+`le_exp_neg_div_of_le_fano` at `δ = 0`, for every law on `[0, N]`. -/
+theorem le_exp_neg_of_fano_nonneg (hp : IsLaw p N)
     (hΔ : ∀ w ∈ Set.Ioc (0 : ℝ) 1, 0 ≤ fano p N w) : p 0 ≤ Real.exp (-partialMean p N) := by
   simpa only [sub_zero, div_one] using le_exp_neg_div_of_le_fano hp zero_lt_one hΔ
 
@@ -623,14 +614,6 @@ theorem sbRatio_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
     (one_sub_mul_pos hc1 hz), one_mul]
   exact genDeriv_mul_le hp hk hc hz
 
-/-- Proposition 5(1). If `c < 1` and `D(w) ≤ c` on `(0, 1]`, then `R(z) ≤ 1 / (1 - c (1 - z))`
-on `[0, 1]`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not needed
-(`sbRatio_le_of_pairDeficit_le`). -/
-theorem sbRatio_le (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
-    (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) {z : ℝ}
-    (hz : z ∈ Set.Icc (0 : ℝ) 1) : sbRatio p N z ≤ 1 / (1 - c * (1 - z)) :=
-  sbRatio_le_of_pairDeficit_le hp hc1 hc hz
-
 /-- Proposition 5(1) at `z = 0`, `ρ_0 ≤ 1 / (1 - c)`, in the multiplied-out form
 `G(1) ≤ (1 - c)⁻¹ μ F(0)` used by `SizeBias.lower_reduction`. -/
 theorem partialMean_one_le (hp : IsLaw p N) (hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ} (hc1 : c < 1)
@@ -672,13 +655,8 @@ theorem exp_neg_mul_log_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
   rw [one_div, Real.log_inv]
   simpa only [sub_zero, mul_one, sub_self, mul_zero, Real.log_one, mul_neg, neg_neg] using h
 
-/-- Proposition 5(3). If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
-`p 0 ≥ exp(-(μ / c) log(1 / (1 - c)))`. The hypotheses `p 0 > 0` and `p k > 0` for some
-`k ≥ 1` are not needed (`exp_neg_mul_log_le_of_pairDeficit_le`). -/
-theorem pair_criterion (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k) {c : ℝ}
-    (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
-    Real.exp (-(partialMean p N / c * Real.log (1 / (1 - c)))) ≤ p 0 :=
-  exp_neg_mul_log_le_of_pairDeficit_le hp hc0 hc1 hc
+@[deprecated exp_neg_mul_log_le_of_pairDeficit_le (since := "2026-11-26")]
+alias pair_criterion := exp_neg_mul_log_le_of_pairDeficit_le
 
 /-- Proposition 5(3), weak form, for every law on `[0, N]`. If `0 < c < 1` and `D(w) ≤ c` on
 `(0, 1]`, then `p 0 ≥ exp(-μ / (1 - c))`. -/
@@ -694,14 +672,6 @@ theorem exp_neg_div_le_of_pairDeficit_le (hp : IsLaw p N) {c : ℝ}
   have e : partialMean p N / c * (c / (1 - c)) = partialMean p N / (1 - c) := by
     field_simp
   linarith
-
-/-- Proposition 5(3), weak form. If `0 < c < 1` and `D(w) ≤ c` on `(0, 1]`, then
-`p 0 ≥ exp(-μ / (1 - c))`. The hypotheses `p 0 > 0` and `p k > 0` for some `k ≥ 1` are not
-needed (`exp_neg_div_le_of_pairDeficit_le`). -/
-theorem pair_criterion_weak (hp : IsLaw p N) (_hp0 : 0 < p 0) (_hk : ∃ k, 0 < k ∧ 0 < p k)
-    {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) (hc : ∀ w ∈ Set.Ioc (0 : ℝ) 1, pairDeficit p N w ≤ c) :
-    Real.exp (-(partialMean p N / (1 - c))) ≤ p 0 :=
-  exp_neg_div_le_of_pairDeficit_le hp hc0 hc1 hc
 
 end Tilt
 
@@ -774,7 +744,7 @@ theorem tiltMean_hamLaw (m : ℕ) [NeZero m] (w : ℝ) :
 /-- Lemma 2(2), `Δ(w) = E_w X - E_w[X' | A_0]` for `w > 0`, where `X' = X - 1` and
 `E_w[X' | A_0] = ∑_{P | A_0} X'(P) w^X'(P) / ∑_{P | A_0} w^X'(P)` is the mean of `X'` under the
 `w^X'`-tilt of the uniform law on `A_0`. It holds for every `m ≥ 1`. -/
-theorem fano_hamLaw' (m : ℕ) [NeZero m] {w : ℝ} (hw : 0 < w) :
+theorem fano_hamLaw (m : ℕ) [NeZero m] {w : ℝ} (hw : 0 < w) :
     fano (hamLaw m) (2 * m - 1) w = tiltMean (hamLaw m) (2 * m - 1) w -
       (∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0),
           ((hamCount m P - 1 : ℕ) : ℝ) * w ^ (hamCount m P - 1)) /
@@ -813,15 +783,6 @@ theorem fano_hamLaw' (m : ℕ) [NeZero m] {w : ℝ} (hw : 0 < w) :
         w ^ hamCount m P * (hamCount m P : ℝ) by ring,
     sum_pow_mul_hamCount_pair, sum_pow_mul_hamCount, hS1, hS0, mul_div_mul_left _ _ hn,
     mul_div_mul_left _ _ hw.ne']
-
-/-- Lemma 2(2), the same identity under the hypothesis that `A_0` is nonempty, which always holds
-(`exists_ham_factor_zero`, `fano_hamLaw'`). -/
-theorem fano_hamLaw (m : ℕ) [NeZero m] (_hA : ∃ P, Ham P (factor m 0)) {w : ℝ} (hw : 0 < w) :
-    fano (hamLaw m) (2 * m - 1) w = tiltMean (hamLaw m) (2 * m - 1) w -
-      (∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0),
-          ((hamCount m P - 1 : ℕ) : ℝ) * w ^ (hamCount m P - 1)) /
-        ∑ P ∈ univ.filter fun P ↦ Ham P (factor m 0), w ^ (hamCount m P - 1) :=
-  fano_hamLaw' m hw
 
 end RoundRobin.Canonical
 

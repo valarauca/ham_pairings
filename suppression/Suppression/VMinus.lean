@@ -26,9 +26,8 @@ From `cod-198-attempt.md` (COD-198):
 * `sum_corrLevel_le_harmonic`, `div_le_neg_log_prob_avoid_of_reweight_harmonic`,
   `neg_log_prob_avoid_le_div_of_reweight_harmonic` and their `pairInfo` forms (Corollary 5) :
   Theorem 7 of COD-196 through Theorem 3 with `η = (4 J H_n + K (K + 1) φ / 2) / (1 - φ)`,
-  `H_n = ∑_{N=2}^n 1 / N`. `harmonic_le_log` is `H_n ≤ log n`, and
-  `div_le_neg_log_prob_avoid_of_reweight'`, `neg_log_prob_avoid_le_div_of_reweight'` recover the
-  `log n` forms of `Reweighted.lean` from the `H_n` forms.
+  `H_n = ∑_{N=2}^n 1 / N`. `harmonic_le_log` is `H_n ≤ log n`, so these forms imply the `log n`
+  forms `div_le_neg_log_prob_avoid` and `neg_log_prob_avoid_le_div` of `ChainRule.lean`.
 
 From `two-sided-corner-spike.md` (Proposition 4) and `soft-floor-spike.md` (§7 step 2), the
 lower-side twin of Lemma A of the (V+) survey (`v-plus-strategy-survey.md`), with `f_k` and
@@ -630,44 +629,6 @@ theorem neg_log_prob_avoid_le_div_of_pairInfo_of_reweight_harmonic (hP : IsProb 
       (∑ t, prob P (A t) + (4 * J * ∑ N ∈ Icc 2 (Fintype.card ι), (1 : ℝ) / N +
         K * (K + 1) * φ / 2) / (1 - φ)) / ((1 - φ) * (1 - 2 * √J / (1 - φ))) :=
   neg_log_prob_avoid_le_div_of_reweight_harmonic hP hφ0 hφ1 hJ hA (hB'_of_pairInfo hP hB) hθ1
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`), the `log n` form of
-`div_le_neg_log_prob_avoid_of_reweight`, derived from the `H_n` form through `H_n ≤ log n`. -/
-theorem div_le_neg_log_prob_avoid_of_reweight' (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤ φ)
-    (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card →
-      ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, |condCov P A T s t| ≤ 2 * √J * condMean P A T + 4 * J) :
-    (∑ t, prob P (A t) - (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) / (1 - φ)) /
-        (1 + 2 * √J / (1 - φ)) ≤ -Real.log (prob P (avoid A univ)) := by
-  refine le_trans ?_ (div_le_neg_log_prob_avoid_of_reweight_harmonic hP hφ0 hφ1 hJ hA hB)
-  have h1φ : 0 < 1 - φ := by linarith
-  refine div_le_div_of_nonneg_right ?_ (add_nonneg zero_le_one (div_nonneg (by positivity) h1φ.le))
-  have h1 := mul_le_mul_of_nonneg_left (harmonic_le_log (Fintype.card ι))
-    (by positivity : (0 : ℝ) ≤ 4 * J)
-  have h2 : (4 * J * ∑ N ∈ Icc 2 (Fintype.card ι), (1 : ℝ) / N + K * (K + 1) * φ / 2) /
-      (1 - φ) ≤ (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) / (1 - φ) :=
-    div_le_div_of_nonneg_right (by linarith) h1φ.le
-  linarith
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`), the `log n` form of
-`neg_log_prob_avoid_le_div_of_reweight`, derived from the `H_n` form through `H_n ≤ log n`. -/
-theorem neg_log_prob_avoid_le_div_of_reweight' (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤ φ)
-    (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card →
-      ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, |condCov P A T s t| ≤ 2 * √J * condMean P A T + 4 * J)
-    (hθ1 : 2 * √J / (1 - φ) < 1) :
-    -Real.log (prob P (avoid A univ)) ≤
-      (∑ t, prob P (A t) + (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) /
-        (1 - φ)) / ((1 - φ) * (1 - 2 * √J / (1 - φ))) := by
-  refine (neg_log_prob_avoid_le_div_of_reweight_harmonic hP hφ0 hφ1 hJ hA hB hθ1).trans ?_
-  have h1φ : 0 < 1 - φ := by linarith
-  refine div_le_div_of_nonneg_right ?_ (mul_pos h1φ (by linarith)).le
-  have h1 := mul_le_mul_of_nonneg_left (harmonic_le_log (Fintype.card ι))
-    (by positivity : (0 : ℝ) ≤ 4 * J)
-  have h2 : (4 * J * ∑ N ∈ Icc 2 (Fintype.card ι), (1 : ℝ) / N + K * (K + 1) * φ / 2) /
-      (1 - φ) ≤ (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) / (1 - φ) :=
-    div_le_div_of_nonneg_right (by linarith) h1φ.le
-  linarith
 
 end Corollary5
 

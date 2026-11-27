@@ -35,9 +35,10 @@ From `cod-198-attempt.md` (COD-198):
   on `⌊δ / p⌋ ≤ |T|`, `N_T ≥ K + 1` gives `-log q ≥ (μ - C_δ - K (K + 1) / 2) / κ` with an explicit
   `C_δ`. The Kim–Wormald pair-ratio bound `U(A_s A_t) ≤ R p²` is the named hypothesis `hR`.
 * `condVar_le_of_sum_abs_condCov_le`, `le_condVar_of_sum_abs_condCov_le`,
-  `div_le_neg_log_prob_avoid_of_reweight`, `neg_log_prob_avoid_le_div_of_reweight` and their
-  `pairInfo` forms (Corollary 5) : Theorem 7 of COD-196, with the statements of
-  `div_le_neg_log_prob_avoid` and `neg_log_prob_avoid_le_div`, through Theorem 3.
+  `abs_condVar_sub_le_and_div_le` (Corollary 5) : the variance comparison that gives Theorem 7 of
+  COD-196 through Theorem 3. The theorem through Theorem 3 is
+  `div_le_neg_log_prob_avoid_of_reweight_harmonic` in `VMinus.lean`. Its `log n` form is
+  `div_le_neg_log_prob_avoid` in `ChainRule.lean`, proved through Proposition 6.
 
 From `v-plus-strategy-survey.md`:
 
@@ -1304,131 +1305,6 @@ theorem abs_condVar_sub_le_and_div_le (hP : IsProb P) {φ J : ℝ} {K : ℕ} (h�
       have h1 : (Tᶜ.card : ℝ) = 1 := by exact_mod_cast (by omega : Tᶜ.card = 1)
       rw [h1]
       simp
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`): Theorem 7(i) of COD-196 through Theorem 3. Under
-(A) `f_t(T) ≤ φ < 1` and (B′) `∑_{s ≠ t ∉ T} |Cov_T(s, t)| ≤ 2 √J M_T + 4 J` for `N_T ≥ K + 2`,
-`-log q ≥ (μ - η) / (1 + θ)` with `θ = 2 √J / (1 - φ)` and
-`η = (4 J log n + K (K + 1) φ / 2) / (1 - φ)`. The statement is that of
-`div_le_neg_log_prob_avoid`, which proves it through Proposition 6 of COD-196. -/
-theorem div_le_neg_log_prob_avoid_of_reweight (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤ φ)
-    (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card →
-      ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, |condCov P A T s t| ≤ 2 * √J * condMean P A T + 4 * J) :
-    (∑ t, prob P (A t) - (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) / (1 - φ)) /
-        (1 + 2 * √J / (1 - φ)) ≤ -Real.log (prob P (avoid A univ)) := by
-  have hq := prob_avoid_pos hP hφ1 hA
-  have h1φ : 0 < 1 - φ := by linarith
-  have hθ : 0 ≤ 2 * √J / (1 - φ) := div_nonneg (by positivity) h1φ.le
-  have hw := fun T (hT : T ≠ univ) ↦ sum_reweight hP hq (A := A) hT
-  have hpt : ∀ T : Finset ι, ∀ s, s ∉ T → condVar P A T / condSlack P A T ≤
-      (1 + 2 * √J / (1 - φ)) * (bernVarSum P A T / condSlack P A T) +
-        corrLevel (Fintype.card ι) K J φ T.card := by
-    intro T s hs
-    have hT : T ≠ univ := fun e ↦ hs (e ▸ mem_univ s)
-    have hDpos := condSlack_pos hP hq (A := A) hT
-    obtain ⟨h1, h2⟩ := abs_condVar_sub_le_and_div_le hP hφ0 hφ1 hJ hA hB hT
-    have h3 := mul_condMean_le_bernVarSum hP hA T
-    have hM : 2 * √J * condMean P A T ≤ 2 * √J / (1 - φ) * bernVarSum P A T := by
-      rw [div_mul_eq_mul_div, le_div_iff₀ h1φ]
-      nlinarith [mul_le_mul_of_nonneg_left h3 (by positivity : (0 : ℝ) ≤ 2 * √J)]
-    have hV : condVar P A T ≤ (1 + 2 * √J / (1 - φ)) * bernVarSum P A T +
-        (if K + 2 ≤ Tᶜ.card then 4 * J else Tᶜ.card * ((Tᶜ.card : ℝ) - 1) * φ) := by
-      linarith [(abs_le.mp h1).2]
-    calc condVar P A T / condSlack P A T ≤ ((1 + 2 * √J / (1 - φ)) * bernVarSum P A T +
-          (if K + 2 ≤ Tᶜ.card then 4 * J else Tᶜ.card * ((Tᶜ.card : ℝ) - 1) * φ)) /
-            condSlack P A T := div_le_div_of_nonneg_right hV hDpos.le
-      _ = (1 + 2 * √J / (1 - φ)) * (bernVarSum P A T / condSlack P A T) +
-          (if K + 2 ≤ Tᶜ.card then 4 * J else Tᶜ.card * ((Tᶜ.card : ℝ) - 1) * φ) /
-            condSlack P A T := by ring
-      _ ≤ _ := by linarith
-  have hmono := kerExp_mono (w := reweight P A) (fun T s _ ↦ reweight_nonneg hP T s) hpt
-    (Fintype.card ι) ∅
-  rw [kerExp_reweight_condVar hP hq, kerExp_add, kerExp_const_mul,
-    kerExp_card hw (corrLevel (Fintype.card ι) K J φ) _ ∅ (by rw [compl_empty, card_univ]),
-    card_empty] at hmono
-  simp only [zero_add] at hmono
-  have hS := kerExp_bernVarSum_le_neg_log hP hq
-  have hη := sum_corrLevel_le (Fintype.card ι) K hJ hφ0 hφ1
-  rw [div_le_iff₀ (by linarith)]
-  nlinarith [mul_le_mul_of_nonneg_left hS (by linarith : (0 : ℝ) ≤ 1 + 2 * √J / (1 - φ))]
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`): Theorem 7(ii) of COD-196 through Theorem 3.
-Under the hypotheses of `div_le_neg_log_prob_avoid_of_reweight`, if `θ < 1`, then
-`-log q ≤ (μ + η) / ((1 - φ)(1 - θ))`. The statement is that of `neg_log_prob_avoid_le_div`. -/
-theorem neg_log_prob_avoid_le_div_of_reweight (hP : IsProb P) {φ J : ℝ} {K : ℕ} (hφ0 : 0 ≤ φ)
-    (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card →
-      ∑ s ∈ Tᶜ, ∑ t ∈ Tᶜ.erase s, |condCov P A T s t| ≤ 2 * √J * condMean P A T + 4 * J)
-    (hθ1 : 2 * √J / (1 - φ) < 1) :
-    -Real.log (prob P (avoid A univ)) ≤
-      (∑ t, prob P (A t) + (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) /
-        (1 - φ)) / ((1 - φ) * (1 - 2 * √J / (1 - φ))) := by
-  have hq := prob_avoid_pos hP hφ1 hA
-  have h1φ : 0 < 1 - φ := by linarith
-  have hθ : 0 ≤ 2 * √J / (1 - φ) := div_nonneg (by positivity) h1φ.le
-  have hc : 0 < (1 - φ) * (1 - 2 * √J / (1 - φ)) := mul_pos h1φ (by linarith)
-  have hw := fun T (hT : T ≠ univ) ↦ sum_reweight hP hq (A := A) hT
-  have hpt : ∀ T : Finset ι, ∀ s, s ∉ T → condMean P A T / condSlack P A T ≤
-      (1 / ((1 - φ) * (1 - 2 * √J / (1 - φ)))) * (condVar P A T / condSlack P A T) +
-        (1 / ((1 - φ) * (1 - 2 * √J / (1 - φ)))) * corrLevel (Fintype.card ι) K J φ T.card := by
-    intro T s hs
-    have hT : T ≠ univ := fun e ↦ hs (e ▸ mem_univ s)
-    have hDpos := condSlack_pos hP hq (A := A) hT
-    obtain ⟨h1, h2⟩ := abs_condVar_sub_le_and_div_le hP hφ0 hφ1 hJ hA hB hT
-    have h3 := mul_condMean_le_bernVarSum hP hA T
-    have hM0 := condMean_nonneg hP (A := A) T
-    have e : (1 - φ) * (1 - 2 * √J / (1 - φ)) = 1 - φ - 2 * √J := by
-      rw [mul_sub, mul_one, mul_div_cancel₀ _ h1φ.ne']
-    have hV : (1 - φ) * (1 - 2 * √J / (1 - φ)) * condMean P A T ≤ condVar P A T +
-        (if K + 2 ≤ Tᶜ.card then 4 * J else Tᶜ.card * ((Tᶜ.card : ℝ) - 1) * φ) := by
-      rw [e]
-      linarith [(abs_le.mp h1).1]
-    rw [← mul_add, div_mul_eq_mul_div, one_mul, le_div_iff₀ hc, div_mul_eq_mul_div,
-      div_le_iff₀ hDpos]
-    have h4 : condVar P A T + (if K + 2 ≤ Tᶜ.card then 4 * J else
-        Tᶜ.card * ((Tᶜ.card : ℝ) - 1) * φ) ≤ (condVar P A T / condSlack P A T +
-          corrLevel (Fintype.card ι) K J φ T.card) * condSlack P A T := by
-      rw [add_mul, div_mul_cancel₀ _ hDpos.ne']
-      have := (div_le_iff₀ hDpos).mp h2
-      linarith
-    nlinarith
-  have hmono := kerExp_mono (w := reweight P A) (fun T s _ ↦ reweight_nonneg hP T s) hpt
-    (Fintype.card ι) ∅
-  rw [kerExp_add, kerExp_const_mul, kerExp_const_mul (G := fun T _ ↦
-    corrLevel (Fintype.card ι) K J φ T.card), kerExp_reweight_condVar hP hq,
-    kerExp_card hw (corrLevel (Fintype.card ι) K J φ) _ ∅ (by rw [compl_empty, card_univ]),
-    card_empty] at hmono
-  simp only [zero_add] at hmono
-  have hS := neg_log_le_kerExp_condMean hP hq
-  have hη := sum_corrLevel_le (Fintype.card ι) K hJ hφ0 hφ1
-  rw [le_div_iff₀ hc]
-  have h5 : -Real.log (prob P (avoid A univ)) ≤ 1 / ((1 - φ) * (1 - 2 * √J / (1 - φ))) *
-      (∑ t, prob P (A t) + (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) /
-        (1 - φ)) := by
-    have := mul_le_mul_of_nonneg_left hη (one_div_nonneg.mpr hc.le)
-    linarith
-  rw [one_div, ← div_eq_inv_mul, le_div_iff₀ hc] at h5
-  exact h5
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`) with hypothesis (B) `J_T ≤ J` of Theorem 7 of
-COD-196: the statement of `div_le_neg_log_prob_avoid_of_pairInfo`, proved through Theorem 3. -/
-theorem div_le_neg_log_prob_avoid_of_pairInfo_of_reweight (hP : IsProb P) {φ J : ℝ} {K : ℕ}
-    (hφ0 : 0 ≤ φ) (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card → pairInfo P A T ≤ J) :
-    (∑ t, prob P (A t) - (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) / (1 - φ)) /
-        (1 + 2 * √J / (1 - φ)) ≤ -Real.log (prob P (avoid A univ)) :=
-  div_le_neg_log_prob_avoid_of_reweight hP hφ0 hφ1 hJ hA (hB'_of_pairInfo hP hB)
-
-/-- Corollary 5 of COD-198 (`cod-198-attempt.md`) with hypothesis (B) `J_T ≤ J` of Theorem 7 of
-COD-196: the statement of `neg_log_prob_avoid_le_div_of_pairInfo`, proved through Theorem 3. -/
-theorem neg_log_prob_avoid_le_div_of_pairInfo_of_reweight (hP : IsProb P) {φ J : ℝ} {K : ℕ}
-    (hφ0 : 0 ≤ φ) (hφ1 : φ < 1) (hJ : 0 ≤ J) (hA : ∀ T t, t ∉ T → condProb P A T t ≤ φ)
-    (hB : ∀ T : Finset ι, K + 2 ≤ Tᶜ.card → pairInfo P A T ≤ J)
-    (hθ1 : 2 * √J / (1 - φ) < 1) :
-    -Real.log (prob P (avoid A univ)) ≤
-      (∑ t, prob P (A t) + (4 * J * Real.log (Fintype.card ι) + K * (K + 1) * φ / 2) /
-        (1 - φ)) / ((1 - φ) * (1 - 2 * √J / (1 - φ))) :=
-  neg_log_prob_avoid_le_div_of_reweight hP hφ0 hφ1 hJ hA (hB'_of_pairInfo hP hB) hθ1
 
 end Corollary5
 

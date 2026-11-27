@@ -81,8 +81,6 @@ open Pairing PerfectMatching
 #print axioms SizeBias.IsLaw.deriv_ge
 #print axioms SizeBias.upper_reduction_floor
 #print axioms SizeBias.upper_reduction_of_lt
-#print axioms SizeBias.upper_reduction
-#print axioms SizeBias.upper_reduction_sqrt
 #print axioms SizeBias.upper_reduction_of_le_add_two
 #print axioms SizeBias.upper_reduction_sqrt_of_le_add_two
 #print axioms SizeBias.lower_reduction
@@ -113,7 +111,6 @@ open Pairing PerfectMatching
 #print axioms Tilt.tiltVar_nonneg
 #print axioms Tilt.tiltMean_le
 #print axioms Tilt.tiltMean_le_rpow
-#print axioms Tilt.fano_criterion
 #print axioms Tilt.mul_le_tiltMean
 #print axioms Tilt.le_exp_neg_of_fano_nonneg
 #print axioms Tilt.hasDerivAt_inv_sbRatio
@@ -121,10 +118,7 @@ open Pairing PerfectMatching
 #print axioms Tilt.fano_le_mul_tiltMean
 #print axioms Tilt.fano_le_of_pairDeficit_le
 #print axioms Tilt.genDeriv_mul_le
-#print axioms Tilt.sbRatio_le
 #print axioms Tilt.partialMean_one_le
-#print axioms Tilt.pair_criterion
-#print axioms Tilt.pair_criterion_weak
 #print axioms Tilt.eq_one_and_partialMean_eq_zero
 #print axioms Tilt.monotoneOn_Ioc_of_hasDerivAt
 #print axioms Tilt.antitoneOn_Ioc_of_hasDerivAt
@@ -141,7 +135,6 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.sum_pow_mul_hamCount_pair
 #print axioms RoundRobin.Canonical.tiltMean_hamLaw
 #print axioms RoundRobin.Canonical.fano_hamLaw
-#print axioms RoundRobin.Canonical.fano_hamLaw'
 #print axioms ChainRule.condProb_insert_mul
 #print axioms ChainRule.condProb_insert
 #print axioms ChainRule.prob_avoid_insert
@@ -289,10 +282,6 @@ open Pairing PerfectMatching
 #print axioms ChainRule.le_condVar_of_sum_abs_condCov_le
 #print axioms ChainRule.sum_corrLevel_le
 #print axioms ChainRule.abs_condVar_sub_le_and_div_le
-#print axioms ChainRule.div_le_neg_log_prob_avoid_of_reweight
-#print axioms ChainRule.neg_log_prob_avoid_le_div_of_reweight
-#print axioms ChainRule.div_le_neg_log_prob_avoid_of_pairInfo_of_reweight
-#print axioms ChainRule.neg_log_prob_avoid_le_div_of_pairInfo_of_reweight
 #print axioms RoundRobin.Canonical.isProb_unifWeight
 #print axioms RoundRobin.Canonical.prob_hamEvent
 #print axioms RoundRobin.Canonical.prob_avoid_hamEvent
@@ -334,8 +323,6 @@ open Pairing PerfectMatching
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_reweight_harmonic
 #print axioms ChainRule.div_le_neg_log_prob_avoid_of_pairInfo_of_reweight_harmonic
 #print axioms ChainRule.neg_log_prob_avoid_le_div_of_pairInfo_of_reweight_harmonic
-#print axioms ChainRule.div_le_neg_log_prob_avoid_of_reweight'
-#print axioms ChainRule.neg_log_prob_avoid_le_div_of_reweight'
 #print axioms ChainRule.lt_one_of_le_mul_one_sub
 #print axioms ChainRule.mul_neg_log_one_sub_le
 #print axioms ChainRule.mul_neg_log_le_condMean_sub
