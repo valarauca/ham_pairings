@@ -297,6 +297,75 @@ example : hamCount 5 (oneQ 5 le_rfl) = 1 := hamCount_oneQ le_rfl
 
 end VacuityCheck.Ladder
 
+namespace VacuityCheck.RandomFamily
+
+open Pairing PerfectMatching RoundRobin.Canonical RoundRobin.Canonical.RandomFamily Real
+
+-- R0 pHam is the p_e of HybridPair.CommonEdge
+example (m : ℕ) : pHam m = Pairing.hamProb m := rfl
+
+-- R1 the counting lemma and Theorem A have a bad family at m = 3, K = 0: the constant family has
+-- the zero state F_0, and the only tail of V_3 ∖ V_3 is empty
+example : ∃ M : Fin 5 → PerfectMatching (Vertex 3), M ∈ badFamilies (Fin 5) 3 0 := by
+  refine ⟨fun _ ↦ factor 3 0, ?_⟩
+  rw [mem_badFamilies]
+  refine ⟨Finset.univ, ?_, fun T ↦ ⟨factor 3 0, ?_, ?_⟩⟩
+  · rw [Finset.card_univ, card_vertex]
+  · rw [mem_zeroStates]
+    intro _
+    exact not_ham_of_mate_eq_of_two_lt (v := none) (by rw [card_vertex]; norm_num) rfl
+  · have : IsEmpty (↥(Finset.univ : Finset (Vertex 3))ᶜ) := ⟨fun u ↦ by simpa using u.2⟩
+    simp [tailDist, tailEdges, Finset.univ_eq_empty]
+
+-- R2 the counting identity and Theorem A at m = 3, n = 5
+example : True := by
+  have := sum_card_zeroStates (m := 3) (Fin 5)
+  have := card_badFamilies_le_beta (m := 3) le_rfl (Fin 5) 0
+  trivial
+
+-- R3 the hypotheses of corollaryA1, corollaryA1_floor and corollaryA1_sqrt hold at m = 2^15,
+-- θ = 1/2 and K = 4
+example : True := by
+  have hlog : log (2 * 32768 : ℝ) < 16 * 0.6931471808 := by
+    rw [show (2 * 32768 : ℝ) = 2 ^ 16 by norm_num, log_pow]
+    have := log_two_lt_d9
+    push_cast
+    linarith
+  have hlog0 : 0 < log (2 * 32768 : ℝ) := log_pos (by norm_num)
+  have hs1 : (256 : ℝ) ≤ √(π * 32768) := by
+    rw [le_sqrt (by norm_num) (by positivity)]
+    have := two_le_pi
+    linarith
+  have hs2 : √π / (2 * √32768) ≤ 1 := by
+    have h1 : √π ≤ 2 := (sqrt_le_left (by norm_num)).mpr (by have := pi_le_four; linarith)
+    have h2 : 1 ≤ √(32768 : ℝ) := by rw [le_sqrt (by norm_num) (by positivity)]; norm_num
+    rw [div_le_one (by positivity)]
+    linarith
+  have hμ := (sub_le_mul_pHam (m := 32768)).1
+  push_cast at hμ
+  have hL : (((4 : ℕ) : ℝ) + 4) * log (2 * ((32768 : ℕ) : ℝ)) ≤
+      (1 - 1 / 2) * (√(π * ((32768 : ℕ) : ℝ)) - √π / (2 * √((32768 : ℕ) : ℝ))) := by
+    push_cast
+    linarith
+  have hK : (((4 : ℕ) : ℝ) + 4) * log (2 * ((32768 : ℕ) : ℝ)) ≤
+      (1 - 1 / 2) * ((2 * ((32768 : ℕ) : ℝ) - 1) * pHam 32768) := by
+    push_cast
+    linarith
+  have h4 : 4 ≤ ⌊(1 - 1 / 2) * ((2 * ((32768 : ℕ) : ℝ) - 1) * pHam 32768) /
+      log (2 * ((32768 : ℕ) : ℝ))⌋₊ := by
+    refine Nat.le_floor ?_
+    push_cast
+    rw [le_div_iff₀ hlog0]
+    linarith
+  have := corollaryA1_sqrt (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _)
+    (by norm_num) (by norm_num) hL
+  have := corollaryA1 (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _) (by norm_num) hK
+  have := corollaryA1_floor (by norm_num) (Fin (2 * 32768 - 1)) (Fintype.card_fin _)
+    (by norm_num) h4
+  trivial
+
+end VacuityCheck.RandomFamily
+
 namespace VacuityCheck.LowerBound
 
 open Pairing PerfectMatching RoundRobin.Canonical
