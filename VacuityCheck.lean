@@ -436,10 +436,15 @@ example : True := by
     (by decide)
   trivial
 
--- B14 exists_ham_finite at n = 2137, s0 = 1072, x = 100, with P = F_{s0}
+-- B14 exists_ham_finite at n = 2137, s0 = 1072, and at n = 1181, s0 = 594, with x = 100 and
+-- P = F_{s0}
 example : ∃ t, Ham (RoundRobin.factor (n := 2137) ⟨1068, rfl⟩ 1072)
     (RoundRobin.factor ⟨1068, rfl⟩ t) :=
-  LowerBound.exists_ham_finite ⟨1068, rfl⟩ (by norm_num) le_rfl (by decide) (x := 100)
+  LowerBound.exists_ham_finite ⟨1068, rfl⟩ (by norm_num) (by norm_num) (by decide) (x := 100)
+    (by decide) (by decide) (by decide) fun _ _ _ _ ↦ rfl
+example : ∃ t, Ham (RoundRobin.factor (n := 1181) ⟨590, rfl⟩ 594)
+    (RoundRobin.factor ⟨590, rfl⟩ t) :=
+  LowerBound.exists_ham_finite ⟨590, rfl⟩ (by norm_num) (by norm_num) (by decide) (x := 100)
     (by decide) (by decide) (by decide) fun _ _ _ _ ↦ rfl
 
 -- B15 exists_ham_inf at n = 29, s0 = 18, with P = F_{s0}
@@ -450,16 +455,23 @@ example : ∃ t, Ham (RoundRobin.factor (n := 29) ⟨14, rfl⟩ 18) (RoundRobin.
 -- B16 exists_ham_of_agree_one at n = 2137 with the tail edge e_∞ and P = F_{s0}
 example : ∃ t, Ham (RoundRobin.factor (n := 2137) ⟨1068, rfl⟩ 1072)
     (RoundRobin.factor ⟨1068, rfl⟩ t) :=
-  LowerBound.exists_ham_of_agree_one ⟨1068, rfl⟩ (by norm_num) le_rfl (by decide) (u := none)
+  LowerBound.exists_ham_of_agree_one ⟨1068, rfl⟩ (by norm_num) (by norm_num) (by decide)
+    (u := none)
     (fun _ h ↦ by simp at h) fun _ _ _ _ ↦ rfl
 
--- B17 two_le_tailDist_factorTail at m = 1069, n = 2137, where a zero state exists
-example : ∃ P : ZeroState 1069, 2 ≤ tailDist P.1 (FactorCap.factorTail 1069 (by norm_num)) :=
-  let ⟨P⟩ := nonempty_zeroState (m := 1069) (by norm_num)
+-- B17 two_le_tailDist_factorTail at m = 591, n = 1181, where a zero state exists
+example : ∃ P : ZeroState 591, 2 ≤ tailDist P.1 (FactorCap.factorTail 591 (by norm_num)) :=
+  let ⟨P⟩ := nonempty_zeroState (m := 591) (by norm_num)
   ⟨P, two_le_tailDist_factorTail (by norm_num) (by norm_num) (by norm_num) P⟩
 
--- B18 not_repairBound_one_of_two_one_three_seven_le at m = 1069, n = 2137
+-- B18 not_repairBound_one at m = 1069, n = 2137, and at m = 591, n = 1181, the least prime case
 example : ¬RepairBound 1069 (FactorCap.gadget 1069) 1 :=
-  not_repairBound_one_of_two_one_three_seven_le le_rfl (by norm_num)
+  not_repairBound_one (by norm_num) (by norm_num)
+example : ¬RepairBound 591 (FactorCap.gadget 591) 1 :=
+  not_repairBound_one (by norm_num) (by norm_num)
+
+-- B19 lineGood_of_le_2468 at the direction (c, a) = (47, -13), with c² + a² = 2378
+example : LowerBound.LineGood 47 (-13) 1176 :=
+  LowerBound.lineGood_of_le_2468 (by decide) (by norm_num)
 
 end VacuityCheck.LowerBound

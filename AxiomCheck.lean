@@ -1057,4 +1057,7 @@ open Pairing PerfectMatching
 #print axioms LowerBound.exists_ham_inf
 #print axioms LowerBound.exists_ham_of_agree_one
 #print axioms RoundRobin.Canonical.two_le_tailDist_factorTail
-#print axioms RoundRobin.Canonical.not_repairBound_one_of_two_one_three_seven_le
+#print axioms RoundRobin.Canonical.not_repairBound_one
+#print axioms LowerBound.lineGood_of_le_2468
+#print axioms LowerBound.ctxT8b_ok
+#print axioms LowerBound.lineRowB_ok

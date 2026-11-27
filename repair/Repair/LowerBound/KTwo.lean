@@ -1,10 +1,11 @@
 import Repair.LowerBound.Cert
 import Repair.LowerBound.Lattice
 import Repair.LowerBound.LineTable
+import Repair.LowerBound.LineTableBig
 import Repair.LowerBound.Seven
 
 /-!
-# `N_m ≥ 2` for every `m ≥ 1069` with `2m - 1` prime
+# `N_m ≥ 2` for every `m ≥ 589` with `2m - 1` prime
 
 Source: `results/struct-lb-extend.md` §3.3, Theorem B, cases 1 and 2, with
 `results/struct-lb-factcheck-extend.md` §1 and §3, claims 1 and 7 (organize-archive b5cb45e).
@@ -17,16 +18,17 @@ There are two cases.
 * **`e = e_∞`.** `P̃` is an involution of the seven points `G0 ∪ {s0}` with one fixed point, and
   the circle cells of `(1, 3, 5, ∞)` cover it once `n > 24` (`exists_ham_inf`).
 * **`e = e_x`, `x ≠ 0`.** `P̃` is a fixed-point-free involution of the eight ends. With `X = 2x`,
-  the dichotomy `shortVector_or_forall_disk` gives either a short line `(c, a)`, covered by the
-  844-line table, or a sample in every certificate disk (`exists_ham_finite`).
+  the dichotomy `shortVector_or_forall_disk` gives, at `n ≥ 2137`, either a short line `(c, a)`,
+  covered by the 844-line table, or a sample in every certificate disk. At `1177 ≤ n < 2137`,
+  Hermite's bound puts the shortest vector in the long line table (`exists_ham_finite`).
 
-* `exists_ham_of_agree_one` : for a prime `n ≥ 2137`, every `P` that agrees with `F_{s0}` off
+* `exists_ham_of_agree_one` : for a prime `n ≥ 1177`, every `P` that agrees with `F_{s0}` off
   `G0 ∪ {u, F_{s0} u}` has some `P ∪ F_t` one cycle.
-* `two_le_tailDist_factorTail` : `ρ(T(n)) ≥ 2` at every prime `n = 2m - 1 ≥ 2137`.
-* `not_repairBound_one_of_two_one_three_seven_le` : `N_m ≥ 2`, as `¬ RepairBound m G0 1`, for
-  every `m ≥ 1069` with `2m - 1` prime.
+* `two_le_tailDist_factorTail` : `ρ(T(n)) ≥ 2` at every prime `n = 2m - 1 ≥ 1177`.
+* `not_repairBound_one` : `N_m ≥ 2`, as `¬ RepairBound m G0 1`, for every `m ≥ 589` with
+  `2m - 1` prime.
 
-The primes `17 ≤ n < 2137` and `n = 11` are not formalized here.
+The primes `17 ≤ n < 1177`, `n = 11` and the second tail at `n = 13` are not formalized here.
 -/
 
 namespace Pairing
@@ -125,9 +127,9 @@ theorem two_mul_ne_of_ne_gadgetPt (hn : Odd n) {s0 x : ZMod n} (hs0 : 2 * s0 = 7
   linear_combination h + hs0
 
 /-- **A finite 1-core is bad** (`results/struct-lb-extend.md` §3.3, Theorem B case 2,
-organize-archive b5cb45e). Let `n ≥ 2137` be prime, `x ≠ 0`, and `s0 ± x` not gadget points.
+organize-archive b5cb45e). Let `n ≥ 1177` be prime, `x ≠ 0`, and `s0 ± x` not gadget points.
 Every `P` that agrees with `F_{s0}` off `G0 ∪ {s0 + x, s0 - x}` has some `P ∪ F_t` one cycle. -/
-theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h2137 : 2137 ≤ n) {s0 : ZMod n}
+theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h1177 : 1177 ≤ n) {s0 : ZMod n}
     (hs0 : 2 * s0 = 7) {P : PerfectMatching (Option (ZMod n))} {x : ZMod n} (hx : x ≠ 0)
     (hxg : ∀ j, s0 + x ≠ gadgetPt n j) (hxg' : ∀ j, s0 - x ≠ gadgetPt n j)
     (hP : ∀ v, (∀ j, v ≠ some (gadgetPt n j)) → v ≠ some (s0 + x) → v ≠ some (s0 - x) →
@@ -201,9 +203,13 @@ theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h2137 : 2137 ≤ n) {s0 :
     exact h1 rfl
   set X : ℤ := ((2 * x : ZMod n).val : ℤ) with hXdef
   have hX : (X : ZMod n) = 2 * x := by simp [X]
-  rcases shortVector_or_forall_disk hp h2137 X with ⟨c, a, hlat, hne, hle, hgcd, hnc⟩ | hdisk
-  · obtain ⟨c, a, hlat, hle, hgcd, hnc, hc1⟩ : ∃ c a : ℤ, InLattice n X c a ∧
-        c ^ 2 + a ^ 2 ≤ 900 ∧ Int.gcd c a = 1 ∧ ¬(n : ℤ) ∣ c ∧ 1 ≤ c := by
+  have hline : ∀ H L : ℤ, 0 < L → L < n →
+      (∀ c a, admB c a = true → c ^ 2 + a ^ 2 ≤ H → LineGood c a L) →
+      ∀ c a : ℤ, InLattice n X c a → c ^ 2 + a ^ 2 ≤ H → Int.gcd c a = 1 → ¬(n : ℤ) ∣ c →
+        ∃ t, Ham P (factor hn t) := by
+    intro H L hL0 hLn hgood c a hlat hle hgcd hnc
+    obtain ⟨c, a, hlat, hle, hgcd, hnc, hc1⟩ : ∃ c a : ℤ, InLattice n X c a ∧
+        c ^ 2 + a ^ 2 ≤ H ∧ Int.gcd c a = 1 ∧ ¬(n : ℤ) ∣ c ∧ 1 ≤ c := by
       have hc0 : c ≠ 0 := fun h ↦ hnc (h ▸ dvd_zero _)
       rcases lt_or_gt_of_ne hc0 with hc | hc
       · refine ⟨-c, -a, ?_, by nlinarith, by rw [Int.gcd_neg, Int.neg_gcd]; exact hgcd,
@@ -245,20 +251,31 @@ theorem exists_ham_finite (hn : Odd n) (hp : n.Prime) (h2137 : 2137 ≤ n) {s0 :
       · exact fun h ↦ e4 (by rw [h]; ring)
       · exact e5
       · exact fun h ↦ e6 (by rw [h]; ring)
-    obtain ⟨o, oi, k, lo, hi, den, hoi, hcov, hwit, hlen⟩ := lineGood_of_le_900 hadm hle r hr1 hr2
+    obtain ⟨o, oi, k, lo, hi, den, hoi, hcov, hwit, hlen⟩ := hgood c a hadm hle r hr1 hr2
     have hden : 0 < den := by
       simp only [lineWitOK, Bool.and_eq_true, decide_eq_true_eq] at hwit
       exact hwit.1.1
-    obtain ⟨ν, hν1, hν2⟩ := exists_int_div_between (n := n) hden (by norm_num) hlen (by omega)
+    obtain ⟨ν, hν1, hν2⟩ := exists_int_div_between (n := n) hden hL0 hlen hLn
     have hcell := lineWitOK_spec hwit hν1 hν2
     refine ham_of_realCell8 hn hp hs0 hP8 hr' hX hoi (k := k) (μ' := c * ν) (a' := a * ν) ?_ ?_
       hcov
     · obtain ⟨w, hw⟩ := hlat
       exact ⟨w * ν, by linear_combination ν * hw⟩
     · convert hcell using 2 <;> push_cast <;> ring
-  · obtain ⟨o, oi, k, u, w, hoi, hcov, hcellD⟩ := exists_cert8 hr1 hr2
-    obtain ⟨c', a', hlat, hd⟩ := hdisk u w
-    exact ham_of_realCell8 hn hp hs0 hP8 hr' hX hoi hlat (hcellD _ _ hd) hcov
+  by_cases h2137 : 2137 ≤ n
+  · rcases shortVector_or_forall_disk hp h2137 X with ⟨c, a, hlat, -, hle, hgcd, hnc⟩ | hdisk
+    · exact hline 900 696 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_900) c a hlat hle hgcd hnc
+    · obtain ⟨o, oi, k, u, w, hoi, hcov, hcellD⟩ := exists_cert8 hr1 hr2
+      obtain ⟨c', a', hlat, hd⟩ := hdisk u w
+      exact ham_of_realCell8 hn hp hs0 hP8 hr' hX hoi hlat (hcellD _ _ hd) hcov
+  · obtain ⟨c, a, hlat, -, -, hH, hgcd, hnc⟩ := exists_shortVector hp X
+    have hle : c ^ 2 + a ^ 2 ≤ 2468 := by
+      by_contra h
+      push Not at h
+      have h1 : (2469 : ℤ) ^ 2 ≤ (c ^ 2 + a ^ 2) ^ 2 := pow_le_pow_left₀ (by norm_num) h 2
+      have h2 : (n : ℤ) ^ 2 ≤ 2136 ^ 2 := pow_le_pow_left₀ (by positivity) (by omega) 2
+      linarith
+    exact hline 2468 1176 (by norm_num) (by omega) (fun _ _ ↦ lineGood_of_le_2468) c a hlat hle hgcd hnc
 
 /-- **The core `{e_∞}` is bad** (`results/struct-lb-extend.md` §3.3, Theorem B case 1, and
 `results/struct-lb-contra.md` §3.1, Lemma 2a, organize-archive b5cb45e). For a prime `n ≥ 25`,
@@ -328,11 +345,11 @@ theorem exists_ham_inf (hn : Odd n) (hp : n.Prime) (h25 : 25 ≤ n) {s0 : ZMod n
   obtain ⟨ν, hν1, hν2⟩ := exists_int_div_between (n := n) hden (by norm_num) hlen (by omega)
   exact ham_of_realCell7 hn hp hs0 hP7 hr hoi (cellWitOK7_spec hwit hν1 hν2) hcov
 
-/-- **Theorem B of `results/struct-lb-extend.md`, in walk form, for `n ≥ 2137`**
-(organize-archive b5cb45e). For a prime `n ≥ 2137`, with `2 s0 = 7`, let `u` be a vertex off the
+/-- **Theorem B of `results/struct-lb-extend.md`, in walk form, for `n ≥ 1177`**
+(organize-archive b5cb45e). For a prime `n ≥ 1177`, with `2 s0 = 7`, let `u` be a vertex off the
 gadget `G0`. Every perfect matching `P` that agrees with `F_{s0}` off `G0 ∪ {u, F_{s0} u}` has
 some round-robin factor `F_t` with `P ∪ F_t` one cycle. -/
-theorem exists_ham_of_agree_one (hn : Odd n) (hp : n.Prime) (h2137 : 2137 ≤ n) {s0 : ZMod n}
+theorem exists_ham_of_agree_one (hn : Odd n) (hp : n.Prime) (h1177 : 1177 ≤ n) {s0 : ZMod n}
     (hs0 : 2 * s0 = 7) {P : PerfectMatching (Option (ZMod n))} {u : Option (ZMod n)}
     (hu : ∀ j, u ≠ some (gadgetPt n j))
     (hP : ∀ v, (∀ j, v ≠ some (gadgetPt n j)) → v ≠ u → v ≠ (factor hn s0).mate u →
@@ -345,7 +362,7 @@ theorem exists_ham_of_agree_one (hn : Odd n) (hp : n.Prime) (h2137 : 2137 ≤ n)
       rw [factor_mate, mateFn_self] at hP
       exact exists_ham_inf hn hp (by omega) hs0 fun v hv h1 h2 ↦ hP v hv h2 h1
     · rw [factor_mate, mateFn_of_ne _ _ hys] at hP
-      refine exists_ham_finite hn hp h2137 hs0 (x := y - s0) (fun h ↦ hys (by
+      refine exists_ham_finite hn hp h1177 hs0 (x := y - s0) (fun h ↦ hys (by
         linear_combination h)) (fun j h ↦ hu j (by rw [← h]; ring_nf)) (fun j h ↦ ?_)
         (fun v hv h1 h2 ↦ hP v hv (by rw [show s0 + (y - s0) = y by ring] at h1; exact h1)
           (by rw [show s0 - (y - s0) = 2 * s0 - y by ring] at h2; exact h2))
@@ -361,11 +378,11 @@ open PerfectMatching LowerBound
 
 variable {m : ℕ} [NeZero m]
 
-/-- **`ρ(T(n)) ≥ 2` at every prime `n = 2m - 1 ≥ 2137`** (`results/struct-lb-extend.md`
+/-- **`ρ(T(n)) ≥ 2` at every prime `n = 2m - 1 ≥ 1177`** (`results/struct-lb-extend.md`
 Theorem B, organize-archive b5cb45e). Every zero state differs from the factor tail `T(n)` in at
 least two edges. -/
 theorem two_le_tailDist_factorTail (hm : 6 ≤ m) (hp : (2 * m - 1).Prime)
-    (h2137 : 2137 ≤ 2 * m - 1) (P : ZeroState m) :
+    (h1177 : 1177 ≤ 2 * m - 1) (P : ZeroState m) :
     2 ≤ tailDist P.1 (FactorCap.factorTail m (by omega)) := by
   by_contra h0
   set T := FactorCap.factorTail m (by omega)
@@ -414,15 +431,16 @@ theorem two_le_tailDist_factorTail (hm : 6 ≤ m) (hp : (2 * m - 1).Prime)
     fun v hv h ↦ by
       obtain ⟨j, hj⟩ := (mem_gadget_iff v).mp h
       exact hv j hj
-  obtain ⟨t, ht⟩ := exists_ham_of_agree_one (modulus_odd m) hp h2137
+  obtain ⟨t, ht⟩ := exists_ham_of_agree_one (modulus_odd m) hp h1177
     FactorCap.two_mul_capCenter (u := u) (fun j h ↦ hu ((mem_gadget_iff u).mpr ⟨j, h⟩))
     (fun v hv h1 h2 ↦ hagree v (hng v hv) h1 h2)
   exact P.2 t ht
 
-/-- **`N_m ≥ 2` for every `m ≥ 1069` with `2m - 1` prime** (`results/struct-lb-extend.md`
-Theorem B, the `n`-uniform range `n ≥ 2137`, organize-archive b5cb45e). No zero state lies within
-distance `1` of the factor tail `T(n)`, so `RepairBound m G0 1` fails. -/
-theorem not_repairBound_one_of_two_one_three_seven_le (hm : 1069 ≤ m) (hp : (2 * m - 1).Prime) :
+/-- **`N_m ≥ 2` for every `m ≥ 589` with `2m - 1` prime** (`results/struct-lb-extend.md`
+Theorem B, organize-archive b5cb45e: the `n`-uniform range `n ≥ 2137`, and the long line table
+for `1177 ≤ n < 2137`). No zero state lies within distance `1` of the factor tail `T(n)`, so
+`RepairBound m G0 1` fails. -/
+theorem not_repairBound_one (hm : 589 ≤ m) (hp : (2 * m - 1).Prime) :
     ¬RepairBound m (FactorCap.gadget m) 1 := by
   intro h
   obtain ⟨P, hP⟩ := h (FactorCap.factorTail m (by omega))
