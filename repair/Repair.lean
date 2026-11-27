@@ -64,6 +64,7 @@ import Repair.RandomFamily.TheoremAPrime
 import Repair.RandomFamily.PairRatio
 import Repair.RandomFamily.SecondMoment
 import Repair.RandomFamily.Nonvacuity
+import Repair.RandomFamily.Spectral
 import Repair.LowerBound.Arc
 import Repair.LowerBound.ZeroCore
 import Repair.LowerBound.Lattice
