@@ -1176,3 +1176,14 @@ open Pairing PerfectMatching
 #print axioms RoundRobin.Canonical.rrSpan_inf_orthogonal_eq
 #print axioms RoundRobin.Canonical.fpSum_factor_ne_zero
 #print axioms RoundRobin.Canonical.finrank_rrSpan_inf_orthogonal
+#print axioms comp_glue_mem_W
+#print axioms card_filter_mate_eq
+#print axioms card_eq_sum_card_mate
+#print axioms card_apply_eq_one_of_card_eq_six
+#print axioms eight_dvd_card_apply_eq_one
+#print axioms eight_dvd_card_fpForm_eq_one
+#print axioms four_dvd_card_apply_and
+#print axioms even_card_apply_and_and
+#print axioms eight_dvd_card_ham
+#print axioms four_dvd_card_ham_and_ham
+#print axioms even_card_ham_and_ham_and_ham

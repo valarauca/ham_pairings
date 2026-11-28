@@ -83,3 +83,4 @@ import Repair.LowerBound.SevenSmall
 import Repair.LowerBound.Thirteen
 import Repair.LowerBound.KTwoAll
 import Repair.P1FSpan
+import Repair.TriplyEven
